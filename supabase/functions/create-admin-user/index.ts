@@ -14,13 +14,18 @@ serve(async (req) => {
   }
 
   try {
-    // Criar cliente Supabase com chave de serviço
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://sykjzikcaclutfpuwuri.supabase.co'
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    // Create Supabase client with service key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-    if (!supabaseServiceKey) {
+    if (!supabaseServiceKey || !supabaseUrl) {
+      console.error("Missing environment variables:", { 
+        url: !!supabaseUrl, 
+        key: !!supabaseServiceKey 
+      })
+      
       return new Response(
-        JSON.stringify({ error: 'Service role key is required' }),
+        JSON.stringify({ error: 'Service role key or URL is missing' }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -30,22 +35,22 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    console.log("Tentando criar usuário admin: agenda@gmail.com")
+    console.log("Attempting to create admin user: agenda@gmail.com")
     
-    // Criar o usuário administrativo
+    // Create the admin user
     const { data, error } = await supabase.auth.admin.createUser({
       email: 'agenda@gmail.com',
       password: 'agenda123',
-      email_confirm: true, // Confirmar email automaticamente
+      email_confirm: true, // Auto-confirm email
     })
 
     if (error) {
-      console.error("Erro ao criar usuário:", error.message)
+      console.error("Error creating user:", error.message)
       
-      // Verificar se é erro de usuário já existente
+      // Check if user already exists
       if (error.message.includes('already exists')) {
         return new Response(
-          JSON.stringify({ message: 'Usuário já existe, tente fazer login' }),
+          JSON.stringify({ message: 'User already exists, try logging in' }),
           { 
             status: 409, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -56,11 +61,11 @@ serve(async (req) => {
       throw error
     }
 
-    console.log("Usuário criado com sucesso:", data.user.id)
+    console.log("User created successfully:", data.user.id)
     
     return new Response(
       JSON.stringify({ 
-        message: 'Usuário administrativo criado com sucesso',
+        message: 'Admin user created successfully',
         userId: data.user.id 
       }),
       { 
@@ -69,7 +74,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error("Erro:", error.message)
+    console.error("Error:", error.message)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

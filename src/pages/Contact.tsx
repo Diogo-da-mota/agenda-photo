@@ -17,55 +17,55 @@ const Contact = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Verificar se o usuário admin já existe ao carregar a página
+  // Check if admin user already exists when page loads
   useEffect(() => {
     checkAdminExists();
   }, []);
 
   const checkAdminExists = async () => {
     try {
-      // Tentar fazer login com as credenciais admin para ver se existem
+      // Try to sign in with admin credentials to see if they exist
       const { data, error } = await supabase.auth.signInWithPassword({
         email: 'agenda@gmail.com',
         password: 'agenda123'
       });
       
       if (!error) {
-        // Se não houver erro, o usuário existe
-        console.log("Usuário administrador já existe");
+        // If no error, user exists
+        console.log("Admin user already exists");
         setAdminCreated(true);
         
-        // Fazer logout imediatamente
+        // Sign out immediately
         await supabase.auth.signOut();
       }
     } catch (error) {
-      console.log("Verificando se o admin existe:", error);
+      console.log("Checking if admin exists:", error);
     }
   };
 
   const createAdminUser = async () => {
     setIsCreatingAdmin(true);
     try {
-      // Chamar a função Edge para criar o usuário admin
-      const response = await supabase.functions.invoke('create-admin-user');
+      // Call Edge function to create admin user
+      const { data, error } = await supabase.functions.invoke('create-admin-user');
       
-      console.log("Resposta da criação de usuário:", response);
+      console.log("User creation response:", data, error);
       
-      if (response.error) {
-        throw new Error(response.error);
+      if (error) {
+        throw new Error(error.message || "Failed to create admin user");
       }
       
       setAdminCreated(true);
       toast({
-        title: "Usuário Criado",
-        description: "Usuário administrativo criado com sucesso. Agora você pode fazer login.",
+        title: "User Created",
+        description: "Admin user created successfully. You can now log in.",
         duration: 5000,
       });
     } catch (error) {
-      console.error("Erro ao criar usuário:", error);
+      console.error("Error creating user:", error);
       toast({
-        title: "Erro ao Criar Usuário",
-        description: error.message || "Ocorreu um erro ao criar o usuário administrativo.",
+        title: "Error Creating User",
+        description: error.message || "An error occurred while creating the admin user.",
         variant: "destructive",
         duration: 5000,
       });
@@ -81,11 +81,11 @@ const Contact = () => {
     try {
       console.log("Attempting login with password:", password);
       
-      // Check if the password is correct (hardcoded for simplicity)
+      // Check if the password is correct
       if (password === 'agenda123') {
         console.log("Password is correct, attempting Supabase sign in");
         
-        // If password is correct, sign in with Supabase using predefined credentials
+        // If password is correct, sign in with Supabase
         const { data, error } = await supabase.auth.signInWithPassword({
           email: 'agenda@gmail.com',
           password: 'agenda123'
@@ -99,8 +99,8 @@ const Contact = () => {
         }
         
         toast({
-          title: "Login bem-sucedido",
-          description: "Bem-vindo ao painel administrativo",
+          title: "Login successful",
+          description: "Welcome to the admin panel",
           duration: 3000,
         });
         
@@ -108,13 +108,13 @@ const Contact = () => {
         navigate('/admin');
       } else {
         console.log("Incorrect password entered");
-        throw new Error('Senha incorreta');
+        throw new Error('Incorrect password');
       }
     } catch (error) {
       console.error('Error logging in:', error);
       toast({
-        title: "Erro no login",
-        description: "Senha incorreta ou erro na autenticação. Por favor, tente novamente.",
+        title: "Login Error",
+        description: "Incorrect password or authentication error. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
@@ -129,7 +129,7 @@ const Contact = () => {
       <div className="absolute inset-0 z-0">
         <img 
           src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
-          alt="Fotógrafo profissional" 
+          alt="Professional photographer" 
           className="w-full h-full object-cover"
         />
         {/* Overlay to make text more visible */}
@@ -151,32 +151,32 @@ const Contact = () => {
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-[425px] mx-4">
           <DialogHeader>
-            <DialogTitle>Acesso Administrativo</DialogTitle>
+            <DialogTitle>Administrative Access</DialogTitle>
           </DialogHeader>
           
           {!adminCreated ? (
             <div className="space-y-4 pt-4">
               <p className="text-sm text-muted-foreground">
-                O usuário administrativo ainda não foi criado. Clique no botão abaixo para criar.
+                The admin user has not been created yet. Click the button below to create it.
               </p>
               <Button 
                 onClick={createAdminUser} 
                 className="w-full"
                 disabled={isCreatingAdmin}
               >
-                {isCreatingAdmin ? "Criando..." : "Criar Usuário Admin"}
+                {isCreatingAdmin ? "Creating..." : "Create Admin User"}
               </Button>
             </div>
           ) : (
             <form onSubmit={handleLogin} className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="login-password">Senha</Label>
+                <Label htmlFor="login-password">Password</Label>
                 <Input 
                   id="login-password" 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite sua senha" 
+                  placeholder="Enter your password" 
                   required
                 />
               </div>
@@ -185,7 +185,7 @@ const Contact = () => {
                 className="w-full"
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? "Entrando..." : "Entrar"}
+                {isLoggingIn ? "Logging in..." : "Login"}
               </Button>
             </form>
           )}
@@ -196,17 +196,17 @@ const Contact = () => {
       <div className="relative z-10 text-white text-center px-4 max-w-4xl">
         <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
-          A solução completa para fotógrafos profissionais
+          The complete solution for professional photographers
         </h1>
         <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
-          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
+          Manage your schedule, clients, finances and online presence in one place
         </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
         >
-          INICIAR
+          GET STARTED
         </Button>
       </div>
     </div>
