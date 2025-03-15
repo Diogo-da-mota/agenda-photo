@@ -124,15 +124,6 @@ const Contact = () => {
           INICIAR
         </Button>
       </div>
-
-      {/* Add CSS using className instead of inline style with jsx */}
-      <style>
-        {`
-          body {
-            overflow-x: hidden;
-          }
-        `}
-      </style>
     </div>
   );
 };

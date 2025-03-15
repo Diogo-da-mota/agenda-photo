@@ -47,6 +47,8 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  max-height: 100vh;
+  overflow-y: hidden; /* Prevent vertical overflow */
 }
 
 /* Fix for mobile display */
