@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -377,10 +377,61 @@ const Survey = () => {
                   />
                   
                   <FeatureCard 
-                    icon={<Headphones className="h-6 w-6 text-white" />}
+                    icon={<Camera className="h-6 w-6 text-white" />}
                     color="bg-indigo-500"
-                    title="Suporte Exclusivo"
-                    description="Acesso a suporte prioritário e treinamentos para maximizar resultados"
+                    title="Gestão de Equipamentos"
+                    description="Controle seu inventário de equipamentos e programe manutenções periódicas"
+                  />
+                </div>
+              </div>
+              
+              {/* Nova seção de recursos adicionais */}
+              <div className="mt-10 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+                <h3 className="text-xl font-semibold text-center mb-6 bg-gradient-to-r from-purple-700 to-pink-700 bg-clip-text text-transparent">
+                  Funcionalidades Exclusivas
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <FeatureCard 
+                    icon={<Shield className="h-6 w-6 text-white" />}
+                    color="bg-cyan-500"
+                    title="Backup Automático"
+                    description="Armazene suas imagens com segurança na nuvem e garanta que seus trabalhos estejam sempre protegidos"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<MessageSquare className="h-6 w-6 text-white" />}
+                    color="bg-green-500"
+                    title="Chatbot para Clientes"
+                    description="Responda perguntas frequentes automaticamente e agende sessões mesmo enquanto você dorme"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Calendar className="h-6 w-6 text-white" />}
+                    color="bg-orange-500"
+                    title="Calendário Inteligente"
+                    description="Sistema de agendamento que se adapta ao seu horário preferido de trabalho"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<DollarSign className="h-6 w-6 text-white" />}
+                    color="bg-yellow-500"
+                    title="Cálculo de Preços"
+                    description="Assistente de precificação que ajuda você a calcular o valor justo para suas sessões"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Globe className="h-6 w-6 text-white" />}
+                    color="bg-pink-500"
+                    title="SEO para Fotógrafos"
+                    description="Otimização para mecanismos de busca específica para atrair mais clientes através do Google"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Award className="h-6 w-6 text-white" />}
+                    color="bg-violet-500"
+                    title="Clube de Benefícios"
+                    description="Acesso a descontos exclusivos em cursos, equipamentos e softwares para fotógrafos"
                   />
                 </div>
               </div>
