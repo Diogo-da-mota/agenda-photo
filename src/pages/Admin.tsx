@@ -80,7 +80,7 @@ const Admin = () => {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'mensagens'
+            table: 'messages'  // Use the TypeScript-defined table name
           },
           (payload) => {
             console.log('Nova mensagem recebida:', payload);
@@ -104,7 +104,7 @@ const Admin = () => {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'mensagens_do_cliente'
+            table: 'customer_messages'  // Use the TypeScript-defined table name
           },
           (payload) => {
             console.log('Nova mensagem de cliente recebida:', payload);
@@ -135,7 +135,7 @@ const Admin = () => {
       
       // Verificar tabela mensagens_do_cliente tentando buscar dados diretamente
       const { data: customerData, error: customerError } = await supabase
-        .from('mensagens_do_cliente')
+        .from('customer_messages')  // Use the TypeScript-defined table name
         .select('*')
         .limit(1);
       
@@ -152,7 +152,7 @@ const Admin = () => {
 
       // Verificar tabela mensagens tentando buscar dados diretamente
       const { data: messagesData, error: messagesError } = await supabase
-        .from('mensagens')
+        .from('messages')  // Use the TypeScript-defined table name
         .select('*')
         .limit(1);
       
@@ -198,7 +198,7 @@ const Admin = () => {
     try {
       console.log('Buscando mensagens de clientes...');
       const { data, error } = await supabase
-        .from('mensagens_do_cliente')
+        .from('customer_messages')  // Use the TypeScript-defined table name
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -222,7 +222,7 @@ const Admin = () => {
     try {
       console.log('Buscando mensagens...');
       const { data, error } = await supabase
-        .from('mensagens')
+        .from('messages')  // Use the TypeScript-defined table name
         .select('*')
         .order('created_at', { ascending: false });
         
