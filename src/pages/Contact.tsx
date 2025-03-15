@@ -125,12 +125,14 @@ const Contact = () => {
         </Button>
       </div>
 
-      {/* Remove any overflow content */}
-      <style jsx>{`
-        body {
-          overflow-x: hidden;
-        }
-      `}</style>
+      {/* Add CSS using className instead of inline style with jsx */}
+      <style>
+        {`
+          body {
+            overflow-x: hidden;
+          }
+        `}
+      </style>
     </div>
   );
 };
