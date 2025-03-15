@@ -134,7 +134,7 @@ const Login = () => {
                 className="h-12 button-hover flex items-center justify-center gap-2"
                 onClick={() => {
                   toast({
-                    title: "Google Sign In",
+                    title: "Login com Google",
                     description: "Esta funcionalidade estará disponível em breve.",
                     duration: 3000,
                   });
@@ -154,7 +154,7 @@ const Login = () => {
                 className="h-12 button-hover flex items-center justify-center gap-2"
                 onClick={() => {
                   toast({
-                    title: "Facebook Sign In",
+                    title: "Login com Facebook",
                     description: "Esta funcionalidade estará disponível em breve.",
                     duration: 3000,
                   });

@@ -65,32 +65,32 @@ const Contact = () => {
       
       if (response.error) {
         console.error("Edge function error:", response.error);
-        setError(`Failed to create admin user: ${response.error.message || response.error}`);
+        setError(`Falha ao criar usuário administrador: ${response.error.message || response.error}`);
         
         toast({
-          title: "Error Creating User",
-          description: response.error.message || "Failed to connect to server",
+          title: "Erro ao criar usuário",
+          description: response.error.message || "Falha ao conectar ao servidor",
           variant: "destructive",
           duration: 5000,
         });
         
-        throw new Error(response.error.message || "Failed to create admin user");
+        throw new Error(response.error.message || "Falha ao criar usuário administrador");
       }
       
       setAdminCreated(true);
       toast({
-        title: "User Created",
-        description: "Admin user created successfully. You can now log in.",
+        title: "Usuário Criado",
+        description: "Usuário administrador criado com sucesso. Você pode fazer login agora.",
         duration: 5000,
       });
     } catch (error) {
       console.error("Error creating user:", error);
-      setError(`Failed to create admin user: ${error.message || "Unknown error"}`);
+      setError(`Falha ao criar usuário administrador: ${error.message || "Erro desconhecido"}`);
       
       // Display the error on the page
       toast({
-        title: "Error Creating User",
-        description: error.message || "An error occurred while creating the admin user.",
+        title: "Erro ao Criar Usuário",
+        description: error.message || "Ocorreu um erro ao criar o usuário administrador.",
         variant: "destructive",
         duration: 5000,
       });
@@ -121,13 +121,13 @@ const Contact = () => {
         
         if (error) {
           console.error("Supabase authentication error:", error);
-          setError(`Login failed: ${error.message}`);
+          setError(`Falha no login: ${error.message}`);
           throw error;
         }
         
         toast({
-          title: "Login successful",
-          description: "Welcome to the admin panel",
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao painel administrativo",
           duration: 3000,
         });
         
@@ -135,14 +135,14 @@ const Contact = () => {
         navigate('/admin');
       } else {
         console.log("Incorrect password entered");
-        setError("Incorrect password");
-        throw new Error('Incorrect password');
+        setError("Senha incorreta");
+        throw new Error('Senha incorreta');
       }
     } catch (error) {
       console.error('Error logging in:', error);
       toast({
-        title: "Login Error",
-        description: "Incorrect password or authentication error. Please try again.",
+        title: "Erro de Login",
+        description: "Senha incorreta ou erro de autenticação. Por favor, tente novamente.",
         variant: "destructive",
         duration: 3000,
       });
@@ -157,7 +157,7 @@ const Contact = () => {
       <div className="absolute inset-0 z-0">
         <img 
           src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
-          alt="Professional photographer" 
+          alt="Fotógrafo profissional" 
           className="w-full h-full object-cover"
         />
         {/* Overlay to make text more visible */}
@@ -179,7 +179,7 @@ const Contact = () => {
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-[425px] mx-4">
           <DialogHeader>
-            <DialogTitle>Administrative Access</DialogTitle>
+            <DialogTitle>Acesso Administrativo</DialogTitle>
           </DialogHeader>
           
           {error && (
@@ -192,26 +192,26 @@ const Contact = () => {
           {!adminCreated ? (
             <div className="space-y-4 pt-4">
               <p className="text-sm text-muted-foreground">
-                The admin user has not been created yet. Click the button below to create it.
+                O usuário administrador ainda não foi criado. Clique no botão abaixo para criá-lo.
               </p>
               <Button 
                 onClick={createAdminUser} 
                 className="w-full"
                 disabled={isCreatingAdmin}
               >
-                {isCreatingAdmin ? "Creating..." : "Create Admin User"}
+                {isCreatingAdmin ? "Criando..." : "Criar Usuário Administrador"}
               </Button>
             </div>
           ) : (
             <form onSubmit={handleLogin} className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="login-password">Password</Label>
+                <Label htmlFor="login-password">Senha</Label>
                 <Input 
                   id="login-password" 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password" 
+                  placeholder="Digite sua senha" 
                   required
                 />
               </div>
@@ -220,7 +220,7 @@ const Contact = () => {
                 className="w-full"
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? "Logging in..." : "Login"}
+                {isLoggingIn ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           )}
@@ -231,17 +231,17 @@ const Contact = () => {
       <div className="relative z-10 text-white text-center px-4 max-w-4xl">
         <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
-          The complete solution for professional photographers
+          A solução completa para fotógrafos profissionais
         </h1>
         <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
-          Manage your schedule, clients, finances and online presence in one place
+          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
         </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
         >
-          GET STARTED
+          COMEÇAR AGORA
         </Button>
       </div>
     </div>
