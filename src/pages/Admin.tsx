@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CustomerMessage {
   id: string;
@@ -15,14 +19,42 @@ interface CustomerMessage {
   message: string;
 }
 
+const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
+
 const Admin = () => {
   const [messages, setMessages] = useState<CustomerMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchMessages();
+    // Check if user is already authenticated from previous session
+    const storedAuth = localStorage.getItem("adminAuthenticated");
+    if (storedAuth === "true") {
+      setIsAuthenticated(true);
+      fetchMessages();
+    } else {
+      setIsLoading(false);
+    }
   }, []);
+
+  const handleLogin = () => {
+    setError(null);
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      localStorage.setItem("adminAuthenticated", "true");
+      fetchMessages();
+    } else {
+      setError("Senha incorreta. Tente novamente.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("adminAuthenticated");
+  };
 
   const fetchMessages = async () => {
     setIsLoading(true);
@@ -66,12 +98,45 @@ const Admin = () => {
             <h1 className="text-2xl sm:text-3xl font-bold">Painel Administrativo</h1>
             <p className="text-muted-foreground">Mensagens dos clientes</p>
           </div>
-          <Button variant="outline" onClick={() => window.location.href = '/'}>
-            Voltar
+          <Button variant="outline" onClick={isAuthenticated ? handleLogout : () => window.location.href = '/'}>
+            {isAuthenticated ? "Sair" : "Voltar"}
           </Button>
         </div>
         
-        {isLoading ? (
+        {!isAuthenticated ? (
+          <Card className="max-w-md mx-auto my-8">
+            <CardHeader>
+              <CardTitle>Acesso Restrito</CardTitle>
+              <CardDescription>
+                Digite a senha para acessar as mensagens dos clientes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Digite a senha de administrador"
+                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  />
+                </div>
+                <Button onClick={handleLogin} className="w-full">
+                  Acessar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : isLoading ? (
           <div className="text-center py-12">
             <p>Carregando mensagens...</p>
           </div>
