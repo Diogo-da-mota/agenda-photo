@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,51 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      const { error } = await supabase
-        .from('customer_messages')
-        .insert([{ name, email, phone, message }]);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Mensagem enviada",
-        description: "Agradecemos seu contato, retornaremos em breve!",
-        duration: 5000,
-      });
-      
-      // Reset form
-      setName('');
-      setEmail('');
-      setPhone('');
-      setMessage('');
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível enviar sua mensagem. Por favor, tente novamente.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,13 +50,24 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
+          alt="Fotógrafo profissional" 
+          className="w-full h-full object-cover"
+        />
+        {/* Overlay to make text more visible */}
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+      </div>
+      
       {/* Login button in top-right corner */}
       <div className="absolute top-4 right-4 z-10">
         <Button 
           onClick={() => setIsLoginOpen(true)}
           variant="outline" 
-          className="bg-white/80 backdrop-blur-sm"
+          className="bg-white/80 backdrop-blur-sm hover:bg-white/90"
         >
           Admin
         </Button>
@@ -133,77 +103,22 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="text-center mb-10">
-          <img 
-            src="https://storage.alboom.ninja/sites/82835/albuns/1409267/logo-vertical-cores-e-preto.png?t=1741391284" 
-            alt="Logo Agenda PRO" 
-            className="h-20 mx-auto mb-6"
-          />
-          <h1 className="text-3xl font-bold mb-2">Entre em Contato</h1>
-          <p className="text-muted-foreground">Estamos aqui para ajudar. Preencha o formulário abaixo.</p>
-        </div>
-
-        <div className="bg-white shadow-lg rounded-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input 
-                  id="name" 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Seu nome completo" 
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com" 
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              <Input 
-                id="phone" 
-                type="tel" 
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(00) 00000-0000" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="message">Mensagem</Label>
-              <Textarea 
-                id="message" 
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Digite sua mensagem aqui..." 
-                rows={5}
-                required
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full md:w-auto"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
-            </Button>
-          </form>
-        </div>
+      {/* Content overlaid on the image */}
+      <div className="relative z-10 text-white text-center px-4 max-w-4xl">
+        <h2 className="text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          A solução completa para fotógrafos profissionais
+        </h1>
+        <p className="text-lg md:text-xl opacity-90 mb-10">
+          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
+        </p>
+        <Button 
+          onClick={() => navigate('/survey')}
+          size="lg"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-xl py-6 px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
+        >
+          INICIAR
+        </Button>
       </div>
     </div>
   );
