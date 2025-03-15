@@ -72,15 +72,15 @@ const Admin = () => {
   useEffect(() => {
     // Only set up realtime subscription if authenticated
     if (isAuthenticated) {
-      // Set up realtime subscription to messages table
+      // Set up realtime subscription to mensagens table
       const channel = supabase
-        .channel('messages-changes')
+        .channel('mensagens-changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'messages'
+            table: 'mensagens'
           },
           (payload) => {
             console.log('Nova mensagem recebida:', payload);
@@ -93,18 +93,18 @@ const Admin = () => {
           }
         )
         .subscribe((status) => {
-          console.log('Status da inscrição em messages:', status);
+          console.log('Status da inscrição em mensagens:', status);
         });
 
-      // Set up realtime subscription to customer_messages table
+      // Set up realtime subscription to mensagens_do_cliente table
       const customerChannel = supabase
-        .channel('customer-messages-changes')
+        .channel('mensagens-do-cliente-changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'customer_messages'
+            table: 'mensagens_do_cliente'
           },
           (payload) => {
             console.log('Nova mensagem de cliente recebida:', payload);
@@ -117,7 +117,7 @@ const Admin = () => {
           }
         )
         .subscribe((status) => {
-          console.log('Status da inscrição em customer_messages:', status);
+          console.log('Status da inscrição em mensagens_do_cliente:', status);
         });
 
       // Cleanup function
@@ -133,37 +133,37 @@ const Admin = () => {
     try {
       console.log('Verificando tabelas...');
       
-      // Verificar tabela customer_messages tentando buscar dados diretamente
+      // Verificar tabela mensagens_do_cliente tentando buscar dados diretamente
       const { data: customerData, error: customerError } = await supabase
-        .from('customer_messages')
+        .from('mensagens_do_cliente')
         .select('*')
         .limit(1);
       
-      console.log('Verificação de customer_messages:', { customerData, customerError });
+      console.log('Verificação de mensagens_do_cliente:', { customerData, customerError });
       
       if (!customerError) {
-        console.log('Tabela customer_messages existe e está acessível');
+        console.log('Tabela mensagens_do_cliente existe e está acessível');
         setTablesExist(prev => ({ ...prev, customerMessages: true }));
         fetchCustomerMessages();
       } else {
-        console.error('Erro ao acessar customer_messages:', customerError);
+        console.error('Erro ao acessar mensagens_do_cliente:', customerError);
         setTablesExist(prev => ({ ...prev, customerMessages: false }));
       }
 
-      // Verificar tabela messages tentando buscar dados diretamente
+      // Verificar tabela mensagens tentando buscar dados diretamente
       const { data: messagesData, error: messagesError } = await supabase
-        .from('messages')
+        .from('mensagens')
         .select('*')
         .limit(1);
       
-      console.log('Verificação de messages:', { messagesData, messagesError });
+      console.log('Verificação de mensagens:', { messagesData, messagesError });
       
       if (!messagesError) {
-        console.log('Tabela messages existe e está acessível');
+        console.log('Tabela mensagens existe e está acessível');
         setTablesExist(prev => ({ ...prev, messages: true }));
         fetchMessages();
       } else {
-        console.error('Erro ao acessar messages:', messagesError);
+        console.error('Erro ao acessar mensagens:', messagesError);
         setTablesExist(prev => ({ ...prev, messages: false }));
       }
     } catch (error) {
@@ -198,7 +198,7 @@ const Admin = () => {
     try {
       console.log('Buscando mensagens de clientes...');
       const { data, error } = await supabase
-        .from('customer_messages')
+        .from('mensagens_do_cliente')
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -222,7 +222,7 @@ const Admin = () => {
     try {
       console.log('Buscando mensagens...');
       const { data, error } = await supabase
-        .from('messages')
+        .from('mensagens')
         .select('*')
         .order('created_at', { ascending: false });
         
