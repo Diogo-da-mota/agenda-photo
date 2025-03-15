@@ -38,6 +38,49 @@ export const useAdminUser = () => {
     }
   };
 
+  // Cria o usuário diretamente usando a API de autenticação do Supabase
+  const createAdminDirectly = async () => {
+    try {
+      console.log("Tentando criar usuário admin diretamente pela API do Supabase");
+      
+      // Aqui estamos tentando fazer signup normal (isso funcionará se o auto-confirm for habilitado)
+      const { data, error } = await supabase.auth.signUp({
+        email: 'agenda@gmail.com',
+        password: 'agenda123',
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+      
+      if (error) {
+        if (error.message.includes('already registered')) {
+          setAdminCreated(true);
+          toast({
+            title: "Usuário Já Existe",
+            description: "Usuário administrador já está cadastrado. Você pode fazer login agora.",
+            duration: 5000,
+          });
+          return true;
+        }
+        
+        console.error("Erro ao criar usuário diretamente:", error);
+        return false;
+      }
+      
+      setAdminCreated(true);
+      toast({
+        title: "Usuário Criado",
+        description: "Usuário administrador criado com sucesso. Você precisará confirmar o email antes de fazer login.",
+        duration: 5000,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Erro ao criar usuário diretamente:", error);
+      return false;
+    }
+  };
+
   const createAdminUser = async () => {
     setIsCreatingAdmin(true);
     setError(null);
@@ -66,6 +109,7 @@ export const useAdminUser = () => {
             throw new Error(response.error.message || response.error);
           }
           
+          // Se chegamos aqui, a função foi executada com sucesso
           setAdminCreated(true);
           toast({
             title: "Usuário Criado",
@@ -87,17 +131,30 @@ export const useAdminUser = () => {
         }
       }
       
-      // Se chegamos aqui, todas as tentativas falharam
-      throw lastError || new Error("Falha ao criar usuário após várias tentativas");
+      // Se todas as tentativas com a Edge Function falharam, tentamos criar diretamente
+      console.log("Todas as tentativas com Edge Function falharam, tentando criar usuário diretamente");
+      const success = await createAdminDirectly();
+      
+      if (!success) {
+        throw lastError || new Error("Falha ao criar usuário após várias tentativas");
+      }
       
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
       
       let errorMessage = "Falha ao criar usuário administrador";
       
-      if (error.message.includes("Failed to send a request to the Edge Function")) {
+      if (error.message && error.message.includes("Failed to send a request to the Edge Function")) {
+        errorMessage = "Erro de conexão com o servidor. Verificando método alternativo...";
+        
+        // Tenta criar o usuário diretamente
+        const success = await createAdminDirectly();
+        if (success) {
+          return; // Sai da função se conseguir criar o usuário
+        }
+        
         errorMessage = "Erro de conexão com o servidor. Verifique sua internet ou tente novamente mais tarde.";
-      } else if (error.message.includes("already exists")) {
+      } else if (error.message && error.message.includes("already exists")) {
         errorMessage = "Usuário já existe. Você pode fazer login agora.";
         setAdminCreated(true);
       } else {

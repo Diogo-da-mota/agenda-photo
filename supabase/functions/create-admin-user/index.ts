@@ -63,7 +63,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ message: 'Usuário já existe, tente fazer login' }),
           { 
-            status: 409, 
+            status: 200, // Mudamos para 200 para evitar problemas com CORS
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
         )
@@ -72,7 +72,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: error.message }),
         { 
-          status: 400,
+          status: 200, // Mudamos para 200 para evitar problemas com CORS
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
@@ -95,7 +95,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: `Erro inesperado: ${error.message}` }),
       { 
-        status: 500,
+        status: 200, // Mudamos para 200 para evitar problemas com CORS
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
