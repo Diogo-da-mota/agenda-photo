@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -94,6 +94,17 @@ const FeatureSection = ({ icon, title, features }) => (
         </li>
       ))}
     </ul>
+  </div>
+);
+
+// Componente para o novo formato de card de recursos
+const FeatureCard = ({ icon, color, title, description }) => (
+  <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col items-center text-center">
+    <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center mb-4`}>
+      {icon}
+    </div>
+    <h3 className="font-semibold text-lg mb-2">{title}</h3>
+    <p className="text-gray-600 text-sm">{description}</p>
   </div>
 );
 
@@ -308,6 +319,57 @@ const Survey = () => {
                   "Design responsivo para celulares, tablets e computadores"
                 ]}
               />
+
+              {/* Novo card de recursos em estilo diferente */}
+              <div className="mt-10 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                <h3 className="text-xl font-semibold text-center mb-6 bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">
+                  Mais recursos para impulsionar seu trabalho
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <FeatureCard 
+                    icon={<Heart className="h-6 w-6 text-white" />}
+                    color="bg-red-500"
+                    title="Experiência do Cliente"
+                    description="Portais exclusivos para seus clientes visualizarem e baixarem fotos com facilidade"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Zap className="h-6 w-6 text-white" />}
+                    color="bg-amber-500"
+                    title="Automação Inteligente"
+                    description="Automatize tarefas repetitivas como envio de e-mails, lembretes e follow-ups"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<BarChart className="h-6 w-6 text-white" />}
+                    color="bg-emerald-500"
+                    title="Análise de Desempenho"
+                    description="Relatórios e métricas para acompanhar seu crescimento e identificar oportunidades"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Clock className="h-6 w-6 text-white" />}
+                    color="bg-blue-500"
+                    title="Gestão de Tempo"
+                    description="Otimize sua agenda e elimine sobreposições com alertas inteligentes"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Users className="h-6 w-6 text-white" />}
+                    color="bg-purple-500"
+                    title="Multi-colaboradores"
+                    description="Ideal para estúdios com vários fotógrafos, com permissões personalizadas"
+                  />
+                  
+                  <FeatureCard 
+                    icon={<Headphones className="h-6 w-6 text-white" />}
+                    color="bg-indigo-500"
+                    title="Suporte Exclusivo"
+                    description="Acesso a suporte prioritário e treinamentos para maximizar resultados"
+                  />
+                </div>
+              </div>
 
               <div className="mt-10 bg-gradient-to-r from-purple-50 to-blue-50 p-8 rounded-2xl border border-purple-100 shadow-sm">
                 <h3 className="text-xl font-medium mb-4 text-center">💡 Quer ser um dos primeiros a testar essa solução?</h3>
