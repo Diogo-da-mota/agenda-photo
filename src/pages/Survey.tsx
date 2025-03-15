@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -90,6 +89,11 @@ const questions: Question[] = [
   {
     question: "Se você pudesse ter um único site que integrasse todas as ferramentas que usa hoje para trabalhar, como ele seria? O que você mais usa no dia a dia e gostaria de ver nesse site?",
     type: "textarea",
+  },
+  {
+    question: "Quanto você estaria disposto a pagar mensalmente por uma plataforma que reunisse todas as ferramentas necessárias para seu trabalho como fotógrafo?",
+    options: ["Até R$ 50", "De R$ 51 a R$ 100", "De R$ 101 a R$ 200", "Acima de R$ 200", "Não pagaria por isso"],
+    type: "radio",
   },
 ];
 
@@ -377,10 +381,10 @@ const Survey = () => {
                   />
                   
                   <FeatureCard 
-                    icon={<Camera className="h-6 w-6 text-white" />}
-                    color="bg-indigo-500"
-                    title="Gestão de Equipamentos"
-                    description="Controle seu inventário de equipamentos e programe manutenções periódicas"
+                    icon={<Headphones className="h-6 w-6 text-white" />}
+                    color="bg-teal-500"
+                    title="Suporte Especializado"
+                    description="Atendimento técnico dedicado para fotógrafos, com conhecimento do mercado"
                   />
                 </div>
               </div>
