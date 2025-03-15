@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,69 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  const [adminCreated, setAdminCreated] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Verificar se o usuário admin já existe ao carregar a página
+  useEffect(() => {
+    checkAdminExists();
+  }, []);
+
+  const checkAdminExists = async () => {
+    try {
+      // Tentar fazer login com as credenciais admin para ver se existem
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'agenda@gmail.com',
+        password: 'agenda123'
+      });
+      
+      if (!error) {
+        // Se não houver erro, o usuário existe
+        console.log("Usuário administrador já existe");
+        setAdminCreated(true);
+        
+        // Fazer logout imediatamente
+        await supabase.auth.signOut();
+      }
+    } catch (error) {
+      console.log("Verificando se o admin existe:", error);
+    }
+  };
+
+  const createAdminUser = async () => {
+    setIsCreatingAdmin(true);
+    try {
+      // Chamar a função Edge para criar o usuário admin
+      const response = await supabase.functions.invoke('create-admin-user');
+      
+      console.log("Resposta da criação de usuário:", response);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      setAdminCreated(true);
+      toast({
+        title: "Usuário Criado",
+        description: "Usuário administrativo criado com sucesso. Agora você pode fazer login.",
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+      toast({
+        title: "Erro ao Criar Usuário",
+        description: error.message || "Ocorreu um erro ao criar o usuário administrativo.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsCreatingAdmin(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,26 +153,42 @@ const Contact = () => {
           <DialogHeader>
             <DialogTitle>Acesso Administrativo</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleLogin} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="login-password">Senha</Label>
-              <Input 
-                id="login-password" 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Digite sua senha" 
-                required
-              />
+          
+          {!adminCreated ? (
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                O usuário administrativo ainda não foi criado. Clique no botão abaixo para criar.
+              </p>
+              <Button 
+                onClick={createAdminUser} 
+                className="w-full"
+                disabled={isCreatingAdmin}
+              >
+                {isCreatingAdmin ? "Criando..." : "Criar Usuário Admin"}
+              </Button>
             </div>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="login-password">Senha</Label>
+                <Input 
+                  id="login-password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Digite sua senha" 
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 
