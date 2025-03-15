@@ -23,12 +23,17 @@ const Contact = () => {
       // Check if the password is correct (hardcoded for simplicity)
       if (password === 'agenda123') {
         // If password is correct, sign in with Supabase using predefined credentials
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: 'agenda@gmail.com',
           password: 'agenda123'
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase login error:', error);
+          throw error;
+        }
+        
+        console.log('Login successful:', data);
         
         toast({
           title: "Login bem-sucedido",
