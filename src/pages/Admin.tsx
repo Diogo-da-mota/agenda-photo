@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 
 interface CustomerMessage {
   id: string;
@@ -19,10 +20,18 @@ interface CustomerMessage {
   message: string;
 }
 
+interface Message {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
+
 const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
 const Admin = () => {
-  const [messages, setMessages] = useState<CustomerMessage[]>([]);
+  const [customerMessages, setCustomerMessages] = useState<CustomerMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -34,17 +43,58 @@ const Admin = () => {
     const storedAuth = localStorage.getItem("adminAuthenticated");
     if (storedAuth === "true") {
       setIsAuthenticated(true);
+      fetchCustomerMessages();
       fetchMessages();
     } else {
       setIsLoading(false);
     }
+
+    return () => {
+      // Cleanup function to remove subscription when component unmounts
+      if (isAuthenticated) {
+        const subscription = supabase.channel('messages-changes').unsubscribe();
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    // Only set up realtime subscription if authenticated
+    if (isAuthenticated) {
+      // Set up realtime subscription to messages table
+      const channel = supabase
+        .channel('messages-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          (payload) => {
+            console.log('New message received:', payload);
+            const newMessage = payload.new as Message;
+            setMessages(prevMessages => [...prevMessages, newMessage]);
+            toast({
+              title: "Nova mensagem recebida",
+              description: "Uma nova mensagem foi adicionada",
+            });
+          }
+        )
+        .subscribe();
+
+      // Cleanup function
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [isAuthenticated, toast]);
 
   const handleLogin = () => {
     setError(null);
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       localStorage.setItem("adminAuthenticated", "true");
+      fetchCustomerMessages();
       fetchMessages();
     } else {
       setError("Senha incorreta. Tente novamente.");
@@ -56,11 +106,33 @@ const Admin = () => {
     localStorage.removeItem("adminAuthenticated");
   };
 
-  const fetchMessages = async () => {
+  const fetchCustomerMessages = async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('customer_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setCustomerMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching customer messages:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as mensagens dos clientes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -74,8 +146,6 @@ const Admin = () => {
         description: "Não foi possível carregar as mensagens",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -140,44 +210,87 @@ const Admin = () => {
           <div className="text-center py-12">
             <p>Carregando mensagens...</p>
           </div>
-        ) : messages.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <p>Nenhuma mensagem encontrada</p>
-            </CardContent>
-          </Card>
         ) : (
-          <div className="grid gap-6">
-            {messages.map((message) => (
-              <Card key={message.id}>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
-                    <div>
-                      <CardTitle>{message.name}</CardTitle>
-                      <CardDescription>{message.email}</CardDescription>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
-                      {formatDate(message.created_at)}
-                    </div>
-                  </div>
-                </CardHeader>
-                <Separator />
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {message.phone && (
-                      <div>
-                        <h4 className="font-medium">Telefone:</h4>
-                        <p>{message.phone}</p>
-                      </div>
-                    )}
-                    <div>
-                      <h4 className="font-medium">Mensagem:</h4>
-                      <p className="whitespace-pre-line">{message.message}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-8">
+            {/* Customer Messages Section */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Mensagens dos Clientes</h2>
+              {customerMessages.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <p>Nenhuma mensagem de cliente encontrada</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-6">
+                  {customerMessages.map((message) => (
+                    <Card key={message.id}>
+                      <CardHeader>
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                          <div>
+                            <CardTitle>{message.name}</CardTitle>
+                            <CardDescription>{message.email}</CardDescription>
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
+                            {formatDate(message.created_at)}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <Separator />
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          {message.phone && (
+                            <div>
+                              <h4 className="font-medium">Telefone:</h4>
+                              <p>{message.phone}</p>
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-medium">Mensagem:</h4>
+                            <p className="whitespace-pre-line">{message.message}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* New Messages Section */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Mensagens em Tempo Real</h2>
+              {messages.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <p>Nenhuma mensagem em tempo real encontrada</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Usuário ID</TableHead>
+                          <TableHead>Conteúdo</TableHead>
+                          <TableHead>Data</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {messages.map((message) => (
+                          <TableRow key={message.id}>
+                            <TableCell className="font-medium">{message.user_id}</TableCell>
+                            <TableCell>{message.content}</TableCell>
+                            <TableCell>{formatDate(message.created_at)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         )}
       </div>
