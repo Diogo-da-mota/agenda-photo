@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('agenda@gmail.com');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -56,6 +56,9 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Login Administrativo</CardTitle>
+          <p className="text-center text-sm text-gray-500">
+            Use o email: agenda@gmail.com e senha: agenda123
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -66,7 +69,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder="agenda@gmail.com"
                 required
               />
             </div>
@@ -77,6 +80,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite sua senha"
                 required
               />
             </div>
