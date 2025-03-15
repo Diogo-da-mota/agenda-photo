@@ -52,15 +52,29 @@ const Contact = () => {
     
     try {
       console.log("Invoking Edge Function: create-admin-user");
-      // Call Edge function to create admin user
-      const { data, error } = await supabase.functions.invoke('create-admin-user');
       
-      console.log("Edge function response:", data, error);
+      // Call Edge function to create admin user with better error handling
+      const response = await supabase.functions.invoke('create-admin-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      if (error) {
-        console.error("Edge function error:", error);
-        setError(`Failed to create admin user: ${error.message}`);
-        throw error;
+      console.log("Edge function complete response:", response);
+      
+      if (response.error) {
+        console.error("Edge function error:", response.error);
+        setError(`Failed to create admin user: ${response.error.message || response.error}`);
+        
+        toast({
+          title: "Error Creating User",
+          description: response.error.message || "Failed to connect to server",
+          variant: "destructive",
+          duration: 5000,
+        });
+        
+        throw new Error(response.error.message || "Failed to create admin user");
       }
       
       setAdminCreated(true);
@@ -72,6 +86,8 @@ const Contact = () => {
     } catch (error) {
       console.error("Error creating user:", error);
       setError(`Failed to create admin user: ${error.message || "Unknown error"}`);
+      
+      // Display the error on the page
       toast({
         title: "Error Creating User",
         description: error.message || "An error occurred while creating the admin user.",

@@ -11,6 +11,7 @@ const corsHeaders = {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request")
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders 
@@ -18,20 +19,19 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Request received to create admin user")
+    
     // Create Supabase client with service key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-    console.log("Environment variables:", { 
+    console.log("Environment variables status:", { 
       urlExists: !!supabaseUrl, 
       keyExists: !!supabaseServiceKey 
     })
 
     if (!supabaseServiceKey || !supabaseUrl) {
-      console.error("Missing environment variables:", { 
-        url: !!supabaseUrl, 
-        key: !!supabaseServiceKey 
-      })
+      console.error("Missing environment variables")
       
       return new Response(
         JSON.stringify({ error: 'Service role key or URL is missing' }),
@@ -67,7 +67,13 @@ serve(async (req) => {
         )
       }
       
-      throw error
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
     console.log("User created successfully:", data.user.id)
@@ -83,9 +89,9 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error("Error:", error.message)
+    console.error("Unexpected error:", error.message, error.stack)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: `Unexpected error: ${error.message}` }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
