@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Facebook, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowRight, Facebook } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,20 +20,26 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes only
-      if (email && password) {
-        toast({
-          title: "Login bem-sucedido",
-          description: "Bem-vindo de volta!",
-          duration: 3000,
-        });
-        navigate('/survey');
-      } else {
+      if (!email || !password) {
         throw new Error("Por favor, preencha todos os campos");
       }
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      toast({
+        title: "Login bem-sucedido",
+        description: "Bem-vindo de volta!",
+        duration: 3000,
+      });
+      
+      navigate('/survey');
     } catch (error) {
       toast({
         title: "Erro no login",

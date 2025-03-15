@@ -38,7 +38,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Chave de serviço ou URL não configurados' }),
         { 
-          status: 500,
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
@@ -63,7 +63,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ message: 'Usuário já existe, tente fazer login' }),
           { 
-            status: 200, // Mudamos para 200 para evitar problemas com CORS
+            status: 200, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
         )
@@ -72,7 +72,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: error.message }),
         { 
-          status: 200, // Mudamos para 200 para evitar problemas com CORS
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
@@ -95,7 +95,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: `Erro inesperado: ${error.message}` }),
       { 
-        status: 200, // Mudamos para 200 para evitar problemas com CORS
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
