@@ -97,9 +97,9 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Painel Administrativo</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Painel Administrativo</h1>
             <p className="text-muted-foreground">Gerencie as mensagens dos seus clientes</p>
           </div>
           <Button variant="outline" onClick={handleLogout}>
@@ -122,12 +122,12 @@ const Admin = () => {
             {messages.map((message) => (
               <Card key={message.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                     <div>
                       <CardTitle>{message.name}</CardTitle>
                       <CardDescription>{message.email}</CardDescription>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
                       {formatDate(message.created_at)}
                     </div>
                   </div>

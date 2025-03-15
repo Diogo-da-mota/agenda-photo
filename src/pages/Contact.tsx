@@ -20,22 +20,27 @@ const Contact = () => {
     setIsLoggingIn(true);
     
     try {
-      // Using a fixed admin email for simplicity
-      const { error } = await supabase.auth.signInWithPassword({
-        email: 'agenda@gmail.com',
-        password: password
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Login bem-sucedido",
-        description: "Bem-vindo ao painel administrativo",
-        duration: 3000,
-      });
-      
-      setIsLoginOpen(false);
-      navigate('/admin');
+      // Check if the password is correct (hardcoded for simplicity)
+      if (password === 'agenda123') {
+        // If password is correct, sign in with Supabase using predefined credentials
+        const { error } = await supabase.auth.signInWithPassword({
+          email: 'agenda@gmail.com',
+          password: 'agenda123'
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Login bem-sucedido",
+          description: "Bem-vindo ao painel administrativo",
+          duration: 3000,
+        });
+        
+        setIsLoginOpen(false);
+        navigate('/admin');
+      } else {
+        throw new Error('Senha incorreta');
+      }
     } catch (error) {
       console.error('Error logging in:', error);
       toast({
@@ -75,7 +80,7 @@ const Contact = () => {
       
       {/* Login Dialog */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] mx-4">
           <DialogHeader>
             <DialogTitle>Acesso Administrativo</DialogTitle>
           </DialogHeader>
@@ -90,7 +95,6 @@ const Contact = () => {
                 placeholder="Digite sua senha" 
                 required
               />
-              <p className="text-xs text-muted-foreground">Email: agenda@gmail.com</p>
             </div>
             <Button 
               type="submit" 
@@ -103,19 +107,19 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Content overlaid on the image */}
+      {/* Content overlaid on the image - made more responsive */}
       <div className="relative z-10 text-white text-center px-4 max-w-4xl">
-        <h2 className="text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
           A solução completa para fotógrafos profissionais
         </h1>
-        <p className="text-lg md:text-xl opacity-90 mb-10">
+        <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
           Gerencie sua agenda, clientes, finanças e presença online em um único lugar
         </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-xl py-6 px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
         >
           INICIAR
         </Button>
