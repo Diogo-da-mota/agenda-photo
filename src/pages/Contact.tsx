@@ -1,22 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import LoginDialog from "@/components/admin/LoginDialog";
 import HeroSection from "@/components/hero/HeroSection";
-import { useAdminUser } from "@/hooks/useAdminUser";
 import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { isAuthenticated, logoutAdmin } = useAdminUser();
   const navigate = useNavigate();
 
   const handleAdminClick = () => {
-    if (isAuthenticated) {
-      navigate('/admin');
-    } else {
-      setIsLoginOpen(true);
-    }
+    navigate('/admin');
   };
 
   return (
@@ -32,23 +24,17 @@ const Contact = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
       
-      {/* Botão de login/admin no canto superior direito */}
+      {/* Botão de admin no canto superior direito */}
       <div className="absolute top-4 right-4 z-10">
         <Button 
           onClick={handleAdminClick}
           variant="outline" 
           className="bg-white/80 backdrop-blur-sm hover:bg-white/90"
         >
-          {isAuthenticated ? "Painel Admin" : "Admin"}
+          Admin
         </Button>
       </div>
       
-      {/* Diálogo de Login */}
-      <LoginDialog 
-        isOpen={isLoginOpen} 
-        onOpenChange={setIsLoginOpen}
-      />
-
       {/* Conteúdo sobreposto na imagem */}
       <HeroSection />
     </div>

@@ -1,12 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdminUser } from "@/hooks/useAdminUser";
 
 interface CustomerMessage {
   id: string;
@@ -21,26 +19,10 @@ const Admin = () => {
   const [messages, setMessages] = useState<CustomerMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const { isAuthenticated, logoutAdmin } = useAdminUser();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!isAuthenticated) {
-        toast({
-          title: "Acesso negado",
-          description: "Você precisa estar logado para acessar esta página",
-          variant: "destructive",
-        });
-        navigate('/');
-        return;
-      }
-      
-      fetchMessages();
-    };
-    
-    checkAuth();
-  }, [isAuthenticated, navigate, toast]);
+    fetchMessages();
+  }, []);
 
   const fetchMessages = async () => {
     setIsLoading(true);
@@ -65,11 +47,6 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logoutAdmin();
-    navigate('/');
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', {
@@ -87,10 +64,10 @@ const Admin = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Painel Administrativo</h1>
-            <p className="text-muted-foreground">Gerencie as mensagens dos seus clientes</p>
+            <p className="text-muted-foreground">Mensagens dos clientes</p>
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            Sair
+          <Button variant="outline" onClick={() => window.location.href = '/'}>
+            Voltar
           </Button>
         </div>
         
