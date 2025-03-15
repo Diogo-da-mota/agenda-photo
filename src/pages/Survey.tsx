@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -79,6 +79,24 @@ const questions: Question[] = [
   },
 ];
 
+// Componente para a seção de recursos
+const FeatureSection = ({ icon, title, features }) => (
+  <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+    <div className="flex items-center gap-3 mb-3">
+      {icon}
+      <h3 className="font-medium text-lg">{title}</h3>
+    </div>
+    <ul className="space-y-2">
+      {features.map((feature, index) => (
+        <li key={index} className="flex items-start gap-2 text-gray-700">
+          <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+          <span>{feature}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 const Survey = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<{[key: number]: string[]}>({});
@@ -86,6 +104,7 @@ const Survey = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showThankYou, setShowThankYou] = useState(false);
   const [animation, setAnimation] = useState('fade-in');
+  const [contactInfo, setContactInfo] = useState('');
   const { toast } = useToast();
 
   const handleNext = () => {
@@ -151,6 +170,10 @@ const Survey = () => {
     });
   };
 
+  const handleContactInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setContactInfo(e.target.value);
+  };
+
   const handleSubmit = () => {
     // In a real app, this would send the data to a server
     console.log("Respostas:", responses);
@@ -169,6 +192,16 @@ const Survey = () => {
     }, 300);
   };
 
+  const handleFinalSubmit = () => {
+    console.log("Informações de contato:", contactInfo);
+    
+    toast({
+      title: "Obrigado pelo seu interesse!",
+      description: "Entraremos em contato em breve.",
+      duration: 5000,
+    });
+  };
+
   const currentQuestionObj = questions[currentQuestion];
   const showFollowUp = currentQuestionObj.followUp && 
                         selectedOption && 
@@ -176,93 +209,127 @@ const Survey = () => {
 
   if (showThankYou) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
-        <Card className={`w-full max-w-3xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
-          <CardContent className="p-8 md:p-12">
-            <div className="text-center space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4 py-12">
+        <Card className={`w-full max-w-4xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
+          <CardContent className="p-8">
+            <div className="text-center space-y-4 mb-8">
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
                   <Check className="h-10 w-10 text-green-600" />
                 </div>
               </div>
               
-              <h1 className="text-3xl font-display font-medium">Obrigado pela sua participação!</h1>
+              <h1 className="text-3xl font-display font-medium bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">Obrigado pela sua participação!</h1>
               
-              <p className="text-muted-foreground max-w-xl mx-auto">Suas respostas são muito importantes para melhorarmos nossa plataforma.</p>
-              
-              <div className="mt-12 space-y-8 max-w-2xl mx-auto text-left">
-                <h2 className="text-xl font-display font-medium text-center mb-8">Apresentação da Nova Plataforma</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">Suas respostas são muito importantes para melhorarmos nossa plataforma.</p>
+            </div>
+
+            <div className="space-y-8 max-w-3xl mx-auto">
+              <div className="text-center">
+                <h2 className="text-2xl font-display font-medium mb-2 bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">
+                  🚀 Apresentação da Nova Plataforma
+                </h2>
+                <p className="text-gray-600 mb-8">
+                  Com base nas necessidades dos fotógrafos, estamos criando um aplicativo completo 
+                  que vai integrar tudo o que você precisa em um só lugar!
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FeatureSection
+                  icon={<Calendar className="h-6 w-6 text-purple-600" />}
+                  title="📅 Agendamento Inteligente"
+                  features={[
+                    "Agenda online personalizada e sincronizada com Google Agenda",
+                    "Marcação e gerenciamento de horários com clientes",
+                    "Lista de espera para horários lotados",
+                    "Confirmação automática de agendamentos via WhatsApp",
+                    "Lembretes automáticos para fotógrafos e clientes"
+                  ]}
+                />
+
+                <FeatureSection
+                  icon={<MessageSquare className="h-6 w-6 text-blue-600" />}
+                  title="💬 Comunicação com o Cliente"
+                  features={[
+                    "Envio de mensagens personalizadas via WhatsApp",
+                    "Lembretes automáticos de aniversários e eventos",
+                    "Área do cliente para visualização de sessões e pagamentos",
+                    "Formulário de feedback automático após o evento"
+                  ]}
+                />
+
+                <FeatureSection
+                  icon={<DollarSign className="h-6 w-6 text-green-600" />}
+                  title="💰 Gestão Financeira"
+                  features={[
+                    "Fluxo de caixa integrado para monitorar receitas e despesas",
+                    "Controle de parcelamentos e notificações de vencimento",
+                    "Sugestão de preços baseada no mercado",
+                    "Geração automática do modelo DAS-MEI para contabilidade"
+                  ]}
+                />
+
+                <FeatureSection
+                  icon={<Globe className="h-6 w-6 text-indigo-600" />}
+                  title="🌍 Portfólio Online"
+                  features={[
+                    "Criação de site profissional integrado ao sistema",
+                    "Gestão de orçamentos e propostas diretamente pelo site",
+                    "Integração com plataformas de entrega de fotos"
+                  ]}
+                />
+
+                <FeatureSection
+                  icon={<Link className="h-6 w-6 text-pink-600" />}
+                  title="🔗 Automação e Integrações"
+                  features={[
+                    "Integração com WhatsApp para notificações automáticas",
+                    "Integração com plataformas de pagamento para cobranças",
+                    "Envio de contratos digitais para assinatura online"
+                  ]}
+                />
+
+                <FeatureSection
+                  icon={<Award className="h-6 w-6 text-amber-600" />}
+                  title="📢 Programa de Indicação"
+                  features={[
+                    "Indique fotógrafos e ganhe benefícios exclusivos!"
+                  ]}
+                />
+              </div>
+
+              <FeatureSection
+                icon={<Palette className="h-6 w-6 text-rose-600" />}
+                title="🎨 Personalização e Melhorias Visuais"
+                features={[
+                  "Modo escuro para uso em ambientes com pouca luz",
+                  "Painel de controle personalizável",
+                  "Design responsivo para celulares, tablets e computadores"
+                ]}
+              />
+
+              <div className="mt-10 bg-gradient-to-r from-purple-50 to-blue-50 p-8 rounded-2xl border border-purple-100 shadow-sm">
+                <h3 className="text-xl font-medium mb-4 text-center">💡 Quer ser um dos primeiros a testar essa solução?</h3>
+                <p className="text-gray-600 text-center mb-6">
+                  Você está interessado na plataforma? Deixe seu contato abaixo e seja um dos primeiros 
+                  fotógrafos a testar nossa solução!
+                </p>
                 
-                <p className="text-muted-foreground mb-6">Com base nas necessidades dos fotógrafos, estamos criando um aplicativo completo que vai integrar tudo o que você precisa em um só lugar! Confira os principais recursos:</p>
-                
-                <div className="space-y-6">
-                  <div className="bg-white/50 p-6 rounded-xl">
-                    <h3 className="font-medium text-lg mb-2">📅 Agendamento Inteligente e Gestão de Eventos</h3>
-                    <ul className="space-y-1 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Agenda online personalizada e sincronizada com Google Agenda</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Marcação e gerenciamento de horários com clientes</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Lista de espera para horários lotados</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Confirmação automática de agendamentos via WhatsApp</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white/50 p-6 rounded-xl">
-                    <h3 className="font-medium text-lg mb-2">💬 Comunicação e Relacionamento com o Cliente</h3>
-                    <ul className="space-y-1 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Envio de mensagens personalizadas via WhatsApp</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Lembretes automáticos de aniversários e eventos</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Área do cliente para visualização de sessões e pagamentos</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white/50 p-6 rounded-xl">
-                    <h3 className="font-medium text-lg mb-2">💰 Gestão Financeira e Controle de Pagamentos</h3>
-                    <ul className="space-y-1 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Fluxo de caixa integrado para monitorar receitas e despesas</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Controle de parcelamentos e notificações de vencimento</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                        <span>Sugestão de preços baseada no mercado</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="mt-8 bg-black/5 p-6 rounded-xl">
-                  <h3 className="font-medium mb-4">Quer ser um dos primeiros a testar essa solução?</h3>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Input placeholder="Seu nome e e-mail" className="flex-1" />
-                    <Button className="bg-black hover:bg-black/90 button-hover">
-                      Quero participar
-                    </Button>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+                  <Input 
+                    placeholder="Digite seu nome e e-mail" 
+                    className="flex-1" 
+                    value={contactInfo}
+                    onChange={handleContactInfoChange}
+                  />
+                  <Button 
+                    onClick={handleFinalSubmit}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white button-hover"
+                  >
+                    Quero participar
+                    <ArrowRightIcon className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
