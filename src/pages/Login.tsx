@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, Facebook, Info } from "lucide-react";
+import { ArrowRight, Facebook, Info, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -13,26 +13,81 @@ const Login = () => {
   const [email, setEmail] = useState('agenda@gmail.com');
   const [password, setPassword] = useState('agenda123');
   const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check and create default user if needed
+  const checkAndCreateUser = async (email: string, password: string) => {
+    try {
+      // Try to sign in first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      // If user doesn't exist, create it
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        console.log('User does not exist, creating account...');
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              role: 'user'
+            }
+          }
+        });
+
+        if (signUpError) {
+          throw signUpError;
+        }
+
+        // Try signing in again after creating the account
+        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (finalSignInError) {
+          throw finalSignInError;
+        }
+
+        toast({
+          title: "Conta criada e conectada",
+          description: "Sua conta foi criada e você foi conectado automaticamente.",
+          duration: 3000,
+        });
+      } else if (signInError) {
+        // If there's a different error, throw it
+        throw signInError;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in checkAndCreateUser:', error);
+      throw error;
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
     setIsLoading(true);
     
     try {
-      if (!email || !password) {
-        throw new Error("Por favor, preencha todos os campos");
+      // Validate inputs
+      if (!email) {
+        setValidationError("O e-mail é obrigatório");
+        throw new Error("O e-mail é obrigatório");
+      }
+      if (!password) {
+        setValidationError("A senha é obrigatória");
+        throw new Error("A senha é obrigatória");
       }
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
+      // Check if user exists, create if not, and then sign in
+      await checkAndCreateUser(email, password);
       
       toast({
         title: "Login bem-sucedido",
@@ -42,6 +97,7 @@ const Login = () => {
       
       navigate('/survey');
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Erro no login",
         description: error instanceof Error ? error.message : "Ocorreu um erro durante o login",
@@ -90,6 +146,13 @@ const Login = () => {
               Utilize o email <strong>agenda@gmail.com</strong> e senha <strong>agenda123</strong> para acessar o sistema.
             </AlertDescription>
           </Alert>
+
+          {validationError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
