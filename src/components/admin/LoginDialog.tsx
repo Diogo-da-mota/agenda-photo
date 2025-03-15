@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
+import { useAdminUser } from "@/hooks/useAdminUser";
 
 interface LoginDialogProps {
   isOpen: boolean;
@@ -21,65 +20,24 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 }) => {
   const [email, setEmail] = useState('agenda@gmail.com');
   const [password, setPassword] = useState('agenda123');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { isLoading, error, loginAdmin } = useAdminUser();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggingIn(true);
-    setError(null);
     
-    try {
-      if (!email) {
-        setError("O e-mail é obrigatório");
-        return;
-      }
-      
-      if (!password) {
-        setError("A senha é obrigatória");
-        return;
-      }
-      
-      // Try to sign in with existing credentials
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      // If successful login
-      if (data?.user) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao painel administrativo",
-          duration: 3000,
-        });
-        
-        onOpenChange(false);
-        navigate('/admin');
-        return;
-      }
-      
-      // If login failed with invalid credentials, show appropriate message
-      if (signInError) {
-        if (signInError.message.includes('Invalid login credentials')) {
-          setError("Credenciais inválidas. Usuário não existe ou senha incorreta.");
-        } else {
-          setError(signInError.message);
-        }
-      }
-    } catch (err) {
-      console.error('Erro ao fazer login:', err);
-      setError(err instanceof Error ? err.message : "Ocorreu um erro durante o login");
-      toast({
-        title: "Erro de Login",
-        description: err instanceof Error ? err.message : "Erro de autenticação. Por favor, tente novamente.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsLoggingIn(false);
+    if (!email) {
+      return;
+    }
+    
+    if (!password) {
+      return;
+    }
+    
+    const success = await loginAdmin(email, password);
+    if (success) {
+      onOpenChange(false);
+      navigate('/admin');
     }
   };
 
@@ -128,9 +86,9 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
           <Button 
             type="submit" 
             className="w-full"
-            disabled={isLoggingIn}
+            disabled={isLoading}
           >
-            {isLoggingIn ? "Entrando..." : "Entrar"}
+            {isLoading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
       </DialogContent>

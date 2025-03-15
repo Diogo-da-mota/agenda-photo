@@ -4,108 +4,111 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useAdminUser = () => {
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [adminCreated, setAdminCreated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Verifica se o usuário administrador já existe quando a página carrega
+  // Verifica se o usuário já está autenticado quando a página carrega
   useEffect(() => {
-    checkAdminExists();
+    checkAuthStatus();
   }, []);
 
-  const checkAdminExists = async () => {
+  const checkAuthStatus = async () => {
     try {
-      console.log("Verificando se o usuário administrador existe...");
+      console.log("Verificando status de autenticação...");
       
       // Obter a sessão atual
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // Se já existe uma sessão, o usuário já está autenticado
         console.log("Usuário já está autenticado");
-        setAdminCreated(true);
-        return;
+        setIsAuthenticated(true);
+      } else {
+        console.log("Usuário não está autenticado");
+        setIsAuthenticated(false);
       }
-      
-      // Não tenta fazer login automaticamente, apenas verifica se o usuário existe
-      console.log("Usuário administrador não existe ou não está autenticado");
     } catch (error) {
-      console.log("Erro ao verificar se o administrador existe:", error);
+      console.error("Erro ao verificar status de autenticação:", error);
     }
   };
 
-  const createAdminUser = async () => {
-    setIsCreatingAdmin(true);
+  const loginAdmin = async (email: string, password: string) => {
+    setIsLoading(true);
     setError(null);
     
     try {
-      // Verificar se há um usuário já logado
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        console.log("Usuário já está autenticado");
-        setAdminCreated(true);
-        toast({
-          title: "Usuário Existente",
-          description: "Já existe um usuário autenticado.",
-          duration: 5000,
-        });
-        return;
-      }
-      
-      // Desabilitar a verificação automática para criação de usuário
-      const { error } = await supabase.auth.signUp({
-        email: 'agenda@gmail.com',
-        password: 'agenda123',
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            role: 'admin'
-          }
-        }
+      // Tentar fazer login com as credenciais fornecidas
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
       
       if (error) {
-        if (error.message.includes('already registered')) {
-          console.log("Usuário já está registrado");
-          setAdminCreated(true);
-          toast({
-            title: "Usuário Já Existe",
-            description: "Usuário administrador já está cadastrado. Você pode fazer login agora.",
-            duration: 5000,
-          });
-          return;
-        }
-        
-        throw error;
+        console.error("Erro ao fazer login:", error.message);
+        setError(error.message);
+        toast({
+          title: "Erro no Login",
+          description: error.message,
+          variant: "destructive",
+          duration: 5000,
+        });
+        return false;
       }
       
-      console.log("Usuário criado com sucesso");
-      setAdminCreated(true);
+      console.log("Login realizado com sucesso");
+      setIsAuthenticated(true);
       toast({
-        title: "Usuário Criado",
-        description: "Usuário administrador criado com sucesso. Você pode fazer login agora.",
+        title: "Login Bem-sucedido",
+        description: "Você foi autenticado com sucesso.",
+        duration: 3000,
+      });
+      return true;
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setError(errorMessage);
+      toast({
+        title: "Erro no Login",
+        description: errorMessage,
+        variant: "destructive",
         duration: 5000,
       });
-    } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      setError(error instanceof Error ? error.message : "Erro desconhecido");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logoutAdmin = async () => {
+    setIsLoading(true);
+    try {
+      await supabase.auth.signOut();
+      setIsAuthenticated(false);
       toast({
-        title: "Erro ao Criar Usuário",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Logout Realizado",
+        description: "Você saiu da sua conta com sucesso.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      toast({
+        title: "Erro ao Sair",
+        description: errorMessage,
         variant: "destructive",
         duration: 5000,
       });
     } finally {
-      setIsCreatingAdmin(false);
+      setIsLoading(false);
     }
   };
 
   return {
-    isCreatingAdmin,
-    adminCreated,
+    isLoading,
+    isAuthenticated,
     error,
-    createAdminUser
+    loginAdmin,
+    logoutAdmin
   };
 };

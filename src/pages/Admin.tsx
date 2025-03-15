@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminUser } from "@/hooks/useAdminUser";
 
 interface CustomerMessage {
   id: string;
@@ -21,12 +22,11 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated, logoutAdmin } = useAdminUser();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (!data.session) {
+      if (!isAuthenticated) {
         toast({
           title: "Acesso negado",
           description: "Você precisa estar logado para acessar esta página",
@@ -40,20 +40,7 @@ const Admin = () => {
     };
     
     checkAuth();
-    
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_OUT' || !session) {
-          navigate('/');
-        }
-      }
-    );
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [navigate, toast]);
+  }, [isAuthenticated, navigate, toast]);
 
   const fetchMessages = async () => {
     setIsLoading(true);
@@ -79,7 +66,7 @@ const Admin = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logoutAdmin();
     navigate('/');
   };
 

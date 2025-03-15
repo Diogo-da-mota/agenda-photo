@@ -7,7 +7,7 @@ import { useAdminUser } from "@/hooks/useAdminUser";
 
 const Contact = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { isCreatingAdmin, adminCreated, error, createAdminUser } = useAdminUser();
+  const { isAuthenticated } = useAdminUser();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">
@@ -39,7 +39,7 @@ const Contact = () => {
         onOpenChange={setIsLoginOpen}
       />
 
-      {/* Conteúdo sobreposto na imagem - contido adequadamente para evitar overflow */}
+      {/* Conteúdo sobreposto na imagem */}
       <HeroSection />
     </div>
   );
