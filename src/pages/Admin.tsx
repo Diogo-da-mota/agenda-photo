@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -125,40 +126,43 @@ const Admin = () => {
   const checkTables = async () => {
     setIsLoading(true);
     try {
-      console.log('Checking if tables exist...');
-      // Check if customer_messages table exists by querying it
+      console.log('Verificando tabelas...');
+      
+      // Verificar tabela customer_messages tentando buscar dados diretamente
       const { data: customerData, error: customerError } = await supabase
         .from('customer_messages')
-        .select('count(*)', { count: 'exact', head: true });
-
-      console.log('Customer messages table check:', { customerData, customerError });
+        .select('*')
+        .limit(1);
       
-      // If no error, table exists
+      console.log('Verificação de customer_messages:', { customerData, customerError });
+      
       if (!customerError) {
+        console.log('Tabela customer_messages existe e está acessível');
         setTablesExist(prev => ({ ...prev, customerMessages: true }));
         fetchCustomerMessages();
       } else {
-        console.log('customer_messages table error:', customerError);
+        console.error('Erro ao acessar customer_messages:', customerError);
         setTablesExist(prev => ({ ...prev, customerMessages: false }));
       }
 
-      // Check if messages table exists
+      // Verificar tabela messages tentando buscar dados diretamente
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select('count(*)', { count: 'exact', head: true });
+        .select('*')
+        .limit(1);
       
-      console.log('Messages table check:', { messagesData, messagesError });
-
-      // If no error, table exists
+      console.log('Verificação de messages:', { messagesData, messagesError });
+      
       if (!messagesError) {
+        console.log('Tabela messages existe e está acessível');
         setTablesExist(prev => ({ ...prev, messages: true }));
         fetchMessages();
       } else {
-        console.log('messages table error:', messagesError);
+        console.error('Erro ao acessar messages:', messagesError);
         setTablesExist(prev => ({ ...prev, messages: false }));
       }
     } catch (error) {
-      console.error('Error checking tables:', error);
+      console.error('Erro ao verificar tabelas:', error);
       toast({
         title: "Erro",
         description: "Erro ao verificar tabelas no Supabase",
@@ -187,7 +191,7 @@ const Admin = () => {
 
   const fetchCustomerMessages = async () => {
     try {
-      console.log('Fetching customer messages...');
+      console.log('Buscando mensagens de clientes...');
       const { data, error } = await supabase
         .from('customer_messages')
         .select('*')
@@ -197,10 +201,10 @@ const Admin = () => {
         throw error;
       }
       
-      console.log('Customer messages fetched:', data);
+      console.log('Mensagens de clientes recebidas:', data);
       setCustomerMessages(data || []);
     } catch (error) {
-      console.error('Error fetching customer messages:', error);
+      console.error('Erro ao buscar mensagens de clientes:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as mensagens dos clientes",
@@ -211,7 +215,7 @@ const Admin = () => {
 
   const fetchMessages = async () => {
     try {
-      console.log('Fetching messages...');
+      console.log('Buscando mensagens...');
       const { data, error } = await supabase
         .from('messages')
         .select('*')
@@ -221,10 +225,10 @@ const Admin = () => {
         throw error;
       }
       
-      console.log('Messages fetched:', data);
+      console.log('Mensagens recebidas:', data);
       setMessages(data || []);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error('Erro ao buscar mensagens:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as mensagens",
