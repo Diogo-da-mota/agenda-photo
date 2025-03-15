@@ -47,11 +47,13 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 /* Fix for mobile display */
-html, body {
+html, body, #root {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
+  min-height: 100vh;
 }
