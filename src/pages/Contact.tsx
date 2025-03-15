@@ -1,170 +1,28 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import LoginDialog from "@/components/admin/LoginDialog";
+import HeroSection from "@/components/hero/HeroSection";
+import { useAdminUser } from "@/hooks/useAdminUser";
 
 const Contact = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [adminCreated, setAdminCreated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  // Check if admin user already exists when page loads
-  useEffect(() => {
-    checkAdminExists();
-  }, []);
-
-  const checkAdminExists = async () => {
-    try {
-      // Try to sign in with admin credentials to see if they exist
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'agenda@gmail.com',
-        password: 'agenda123'
-      });
-      
-      if (!error) {
-        // If no error, user exists
-        console.log("Admin user already exists");
-        setAdminCreated(true);
-        
-        // Sign out immediately
-        await supabase.auth.signOut();
-      }
-    } catch (error) {
-      console.log("Checking if admin exists:", error);
-    }
-  };
-
-  const createAdminUser = async () => {
-    setIsCreatingAdmin(true);
-    setError(null);
-    
-    try {
-      console.log("Invoking Edge Function: create-admin-user");
-      
-      // Call Edge function to create admin user with better error handling
-      const response = await supabase.functions.invoke('create-admin-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      console.log("Edge function complete response:", response);
-      
-      if (response.error) {
-        console.error("Edge function error:", response.error);
-        setError(`Falha ao criar usuário administrador: ${response.error.message || response.error}`);
-        
-        toast({
-          title: "Erro ao criar usuário",
-          description: response.error.message || "Falha ao conectar ao servidor",
-          variant: "destructive",
-          duration: 5000,
-        });
-        
-        throw new Error(response.error.message || "Falha ao criar usuário administrador");
-      }
-      
-      setAdminCreated(true);
-      toast({
-        title: "Usuário Criado",
-        description: "Usuário administrador criado com sucesso. Você pode fazer login agora.",
-        duration: 5000,
-      });
-    } catch (error) {
-      console.error("Error creating user:", error);
-      setError(`Falha ao criar usuário administrador: ${error.message || "Erro desconhecido"}`);
-      
-      // Display the error on the page
-      toast({
-        title: "Erro ao Criar Usuário",
-        description: error.message || "Ocorreu um erro ao criar o usuário administrador.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setIsCreatingAdmin(false);
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    setError(null);
-    
-    try {
-      console.log("Attempting login with password:", password);
-      
-      // Check if the password is correct
-      if (password === 'agenda123') {
-        console.log("Password is correct, attempting Supabase sign in");
-        
-        // If password is correct, sign in with Supabase
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'agenda@gmail.com',
-          password: 'agenda123'
-        });
-        
-        console.log("Supabase sign in response:", { data, error });
-        
-        if (error) {
-          console.error("Supabase authentication error:", error);
-          setError(`Falha no login: ${error.message}`);
-          throw error;
-        }
-        
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao painel administrativo",
-          duration: 3000,
-        });
-        
-        setIsLoginOpen(false);
-        navigate('/admin');
-      } else {
-        console.log("Incorrect password entered");
-        setError("Senha incorreta");
-        throw new Error('Senha incorreta');
-      }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      toast({
-        title: "Erro de Login",
-        description: "Senha incorreta ou erro de autenticação. Por favor, tente novamente.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
+  const { isCreatingAdmin, adminCreated, error, createAdminUser } = useAdminUser();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">
-      {/* Background image with overlay */}
+      {/* Imagem de fundo com sobreposição */}
       <div className="absolute inset-0 z-0">
         <img 
           src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
           alt="Fotógrafo profissional" 
           className="w-full h-full object-cover"
         />
-        {/* Overlay to make text more visible */}
+        {/* Sobreposição para tornar o texto mais visível */}
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
       
-      {/* Login button in top-right corner */}
+      {/* Botão de login no canto superior direito */}
       <div className="absolute top-4 right-4 z-10">
         <Button 
           onClick={() => setIsLoginOpen(true)}
@@ -175,75 +33,18 @@ const Contact = () => {
         </Button>
       </div>
       
-      {/* Login Dialog */}
-      <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <DialogContent className="sm:max-w-[425px] mx-4">
-          <DialogHeader>
-            <DialogTitle>Acesso Administrativo</DialogTitle>
-          </DialogHeader>
-          
-          {error && (
-            <Alert variant="destructive" className="my-2">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          {!adminCreated ? (
-            <div className="space-y-4 pt-4">
-              <p className="text-sm text-muted-foreground">
-                O usuário administrador ainda não foi criado. Clique no botão abaixo para criá-lo.
-              </p>
-              <Button 
-                onClick={createAdminUser} 
-                className="w-full"
-                disabled={isCreatingAdmin}
-              >
-                {isCreatingAdmin ? "Criando..." : "Criar Usuário Administrador"}
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleLogin} className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Senha</Label>
-                <Input 
-                  id="login-password" 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite sua senha" 
-                  required
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isLoggingIn}
-              >
-                {isLoggingIn ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Diálogo de Login */}
+      <LoginDialog 
+        isOpen={isLoginOpen} 
+        onOpenChange={setIsLoginOpen}
+        adminCreated={adminCreated}
+        createAdminUser={createAdminUser}
+        isCreatingAdmin={isCreatingAdmin}
+        error={error}
+      />
 
-      {/* Content overlaid on the image - contained properly to prevent overflow */}
-      <div className="relative z-10 text-white text-center px-4 max-w-4xl">
-        <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
-        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
-          A solução completa para fotógrafos profissionais
-        </h1>
-        <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
-          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
-        </p>
-        <Button 
-          onClick={() => navigate('/survey')}
-          size="lg"
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
-        >
-          COMEÇAR AGORA
-        </Button>
-      </div>
+      {/* Conteúdo sobreposto na imagem - contido adequadamente para evitar overflow */}
+      <HeroSection />
     </div>
   );
 };
