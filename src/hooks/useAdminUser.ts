@@ -49,7 +49,7 @@ export const useAdminUser = () => {
         setError(error.message);
         toast({
           title: "Erro no Login",
-          description: error.message,
+          description: "Credenciais de login inválidas",
           variant: "destructive",
           duration: 5000,
         });

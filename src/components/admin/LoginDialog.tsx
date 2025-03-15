@@ -20,17 +20,16 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 }) => {
   const [email, setEmail] = useState('agenda@gmail.com');
   const [password, setPassword] = useState('agenda123');
-  const { isLoading, error, loginAdmin } = useAdminUser();
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const { isLoading, loginAdmin } = useAdminUser();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
     
-    if (!email) {
-      return;
-    }
-    
-    if (!password) {
+    if (!email || !password) {
+      setLoginError("Por favor, preencha todos os campos");
       return;
     }
     
@@ -38,6 +37,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
     if (success) {
       onOpenChange(false);
       navigate('/admin');
+    } else {
+      setLoginError("Credenciais de login inválidas");
     }
   };
 
@@ -51,10 +52,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        {error && (
+        {loginError && (
           <Alert variant="destructive" className="my-2">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{loginError}</AlertDescription>
           </Alert>
         )}
         

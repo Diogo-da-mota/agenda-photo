@@ -4,10 +4,20 @@ import { Button } from "@/components/ui/button";
 import LoginDialog from "@/components/admin/LoginDialog";
 import HeroSection from "@/components/hero/HeroSection";
 import { useAdminUser } from "@/hooks/useAdminUser";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { isAuthenticated } = useAdminUser();
+  const { isAuthenticated, logoutAdmin } = useAdminUser();
+  const navigate = useNavigate();
+
+  const handleAdminClick = () => {
+    if (isAuthenticated) {
+      navigate('/admin');
+    } else {
+      setIsLoginOpen(true);
+    }
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">
@@ -22,14 +32,14 @@ const Contact = () => {
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
       
-      {/* Botão de login no canto superior direito */}
+      {/* Botão de login/admin no canto superior direito */}
       <div className="absolute top-4 right-4 z-10">
         <Button 
-          onClick={() => setIsLoginOpen(true)}
+          onClick={handleAdminClick}
           variant="outline" 
           className="bg-white/80 backdrop-blur-sm hover:bg-white/90"
         >
-          Admin
+          {isAuthenticated ? "Painel Admin" : "Admin"}
         </Button>
       </div>
       
