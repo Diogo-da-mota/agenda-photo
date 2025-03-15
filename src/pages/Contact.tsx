@@ -59,12 +59,12 @@ const Contact = () => {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/lovable-uploads/189280e7-f4b9-4654-acaa-45f59551c0b1.png" 
+          src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
           alt="Fotógrafo profissional" 
           className="w-full h-full object-cover"
         />
         {/* Overlay to make text more visible */}
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
       
       {/* Login button in top-right corner */}
@@ -107,19 +107,19 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Content overlaid on the image - centered with improved width and styling */}
-      <div className="relative z-10 text-white text-center px-4 sm:px-6 max-w-xl mx-auto">
-        <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2 text-blue-200">AGENDA PRO</h2>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
+      {/* Content overlaid on the image - centered and properly positioned */}
+      <div className="relative z-10 text-white text-center px-4 max-w-md mx-auto flex flex-col items-center">
+        <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
           A solução completa para fotógrafos profissionais
         </h1>
-        <p className="text-base sm:text-xl opacity-90 mb-8 max-w-lg mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
           Gerencie sua agenda, clientes, finanças e presença online em um único lugar
         </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-6 px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
         >
           INICIAR
         </Button>
