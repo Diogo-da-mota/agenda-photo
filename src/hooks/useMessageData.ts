@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, initializeDatabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface CustomerMessage {
@@ -37,7 +37,17 @@ export const useMessageData = (isAuthenticated: boolean) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      checkTables();
+      // Initialize database tables if needed
+      initializeDatabase().then(() => {
+        checkTables();
+      }).catch(error => {
+        console.error('Error initializing database:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao inicializar o banco de dados",
+          variant: "destructive",
+        });
+      });
     }
   }, [isAuthenticated]);
 
@@ -111,14 +121,14 @@ export const useMessageData = (isAuthenticated: boolean) => {
         .select('*')
         .limit(1);
       
-      console.log('Verificação de mensagens_do_cliente:', { customerData, customerError });
+      console.log('Verificação de customer_messages:', { customerData, customerError });
       
       if (!customerError) {
-        console.log('Tabela mensagens_do_cliente existe e está acessível');
+        console.log('Tabela customer_messages existe e está acessível');
         setTablesExist(prev => ({ ...prev, customerMessages: true }));
         fetchCustomerMessages();
       } else {
-        console.error('Erro ao acessar mensagens_do_cliente:', customerError);
+        console.error('Erro ao acessar customer_messages:', customerError);
         setTablesExist(prev => ({ ...prev, customerMessages: false }));
       }
 
@@ -128,14 +138,14 @@ export const useMessageData = (isAuthenticated: boolean) => {
         .select('*')
         .limit(1);
       
-      console.log('Verificação de mensagens:', { messagesData, messagesError });
+      console.log('Verificação de messages:', { messagesData, messagesError });
       
       if (!messagesError) {
-        console.log('Tabela mensagens existe e está acessível');
+        console.log('Tabela messages existe e está acessível');
         setTablesExist(prev => ({ ...prev, messages: true }));
         fetchMessages();
       } else {
-        console.error('Erro ao acessar mensagens:', messagesError);
+        console.error('Erro ao acessar messages:', messagesError);
         setTablesExist(prev => ({ ...prev, messages: false }));
       }
     } catch (error) {

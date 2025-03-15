@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/utils/formatDate";
 import { useMessageData } from "@/hooks/useMessageData";
+import { initializeDatabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
@@ -15,6 +16,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
   const { toast } = useToast();
   
   const { 
@@ -35,12 +37,26 @@ const Admin = () => {
     }
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError(null);
     if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem("adminAuthenticated", "true");
-      checkTables();
+      setIsInitializing(true);
+      try {
+        // Initialize database tables if needed
+        await initializeDatabase();
+        setIsAuthenticated(true);
+        localStorage.setItem("adminAuthenticated", "true");
+        checkTables();
+      } catch (error) {
+        console.error('Error initializing database:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao inicializar o banco de dados",
+          variant: "destructive",
+        });
+      } finally {
+        setIsInitializing(false);
+      }
     } else {
       setError("Senha incorreta. Tente novamente.");
     }
@@ -67,6 +83,7 @@ const Admin = () => {
             password={password}
             setPassword={setPassword}
             error={error}
+            isLoading={isInitializing}
           />
         ) : isLoading ? (
           <div className="flex justify-center items-center py-12">
