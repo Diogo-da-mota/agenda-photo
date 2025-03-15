@@ -62,7 +62,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_customer_messages_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_messages_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

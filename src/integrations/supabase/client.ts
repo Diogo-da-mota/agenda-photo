@@ -25,9 +25,9 @@ export const initializeDatabase = async () => {
     if (customerMessagesCheckError) {
       console.error('Error checking customer_messages table:', customerMessagesCheckError);
       
-      // Create customer_messages table using SQL query instead of RPC
+      // Create customer_messages table using RPC
       const { error: createCustomerMessagesError } = await supabase
-        .rpc('create_customer_messages_table', {});
+        .rpc('create_customer_messages_table');
       
       if (createCustomerMessagesError) {
         console.error('Error creating customer_messages table:', createCustomerMessagesError);
@@ -47,9 +47,9 @@ export const initializeDatabase = async () => {
     if (messagesCheckError) {
       console.error('Error checking messages table:', messagesCheckError);
       
-      // Create messages table using SQL query instead of RPC
+      // Create messages table using RPC
       const { error: createMessagesError } = await supabase
-        .rpc('create_messages_table', {});
+        .rpc('create_messages_table');
       
       if (createMessagesError) {
         console.error('Error creating messages table:', createMessagesError);
