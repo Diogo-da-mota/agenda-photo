@@ -113,9 +113,6 @@ const Contact = () => {
         <h1 className="text-2xl md:text-4xl font-bold mb-4">
           A solução completa para fotógrafos profissionais
         </h1>
-        <p className="text-base md:text-lg opacity-90 mb-8">
-          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
-        </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
