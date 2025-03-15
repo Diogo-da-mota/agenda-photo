@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Contact = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -14,6 +16,7 @@ const Contact = () => {
   const [adminCreated, setAdminCreated] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -45,14 +48,19 @@ const Contact = () => {
 
   const createAdminUser = async () => {
     setIsCreatingAdmin(true);
+    setError(null);
+    
     try {
+      console.log("Invoking Edge Function: create-admin-user");
       // Call Edge function to create admin user
       const { data, error } = await supabase.functions.invoke('create-admin-user');
       
-      console.log("User creation response:", data, error);
+      console.log("Edge function response:", data, error);
       
       if (error) {
-        throw new Error(error.message || "Failed to create admin user");
+        console.error("Edge function error:", error);
+        setError(`Failed to create admin user: ${error.message}`);
+        throw error;
       }
       
       setAdminCreated(true);
@@ -63,6 +71,7 @@ const Contact = () => {
       });
     } catch (error) {
       console.error("Error creating user:", error);
+      setError(`Failed to create admin user: ${error.message || "Unknown error"}`);
       toast({
         title: "Error Creating User",
         description: error.message || "An error occurred while creating the admin user.",
@@ -77,6 +86,7 @@ const Contact = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
+    setError(null);
     
     try {
       console.log("Attempting login with password:", password);
@@ -95,6 +105,7 @@ const Contact = () => {
         
         if (error) {
           console.error("Supabase authentication error:", error);
+          setError(`Login failed: ${error.message}`);
           throw error;
         }
         
@@ -108,6 +119,7 @@ const Contact = () => {
         navigate('/admin');
       } else {
         console.log("Incorrect password entered");
+        setError("Incorrect password");
         throw new Error('Incorrect password');
       }
     } catch (error) {
@@ -153,6 +165,13 @@ const Contact = () => {
           <DialogHeader>
             <DialogTitle>Administrative Access</DialogTitle>
           </DialogHeader>
+          
+          {error && (
+            <Alert variant="destructive" className="my-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           
           {!adminCreated ? (
             <div className="space-y-4 pt-4">
