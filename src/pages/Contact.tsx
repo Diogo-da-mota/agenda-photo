@@ -107,8 +107,8 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Content overlaid on the image - centered and properly positioned */}
-      <div className="relative z-10 text-white text-center px-4 max-w-md mx-auto flex flex-col items-center">
+      {/* Content overlaid on the image - made more responsive */}
+      <div className="relative z-10 text-white text-center px-4 max-w-4xl">
         <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
           A solução completa para fotógrafos profissionais
@@ -124,13 +124,6 @@ const Contact = () => {
           INICIAR
         </Button>
       </div>
-
-      {/* Remove any overflow content */}
-      <style jsx>{`
-        body {
-          overflow-x: hidden;
-        }
-      `}</style>
     </div>
   );
 };
