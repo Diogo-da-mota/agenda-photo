@@ -13,66 +13,90 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface LoginDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  adminCreated: boolean;
-  createAdminUser: () => Promise<void>;
-  isCreatingAdmin: boolean;
-  error: string | null;
 }
 
 const LoginDialog: React.FC<LoginDialogProps> = ({
   isOpen,
-  onOpenChange,
-  adminCreated,
-  createAdminUser,
-  isCreatingAdmin,
-  error
+  onOpenChange
 }) => {
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('agenda@gmail.com');
+  const [password, setPassword] = useState('agenda123');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
+    setError(null);
     
     try {
-      console.log("Tentando login com senha:", password);
+      if (!email) {
+        setError("O e-mail é obrigatório");
+        throw new Error("O e-mail é obrigatório");
+      }
       
-      // Verifica se a senha está correta
-      if (password === 'agenda123') {
-        console.log("Senha correta, tentando login no Supabase");
-        
-        // Se a senha estiver correta, faz login no Supabase
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'agenda@gmail.com',
-          password: 'agenda123'
+      if (!password) {
+        setError("A senha é obrigatória");
+        throw new Error("A senha é obrigatória");
+      }
+      
+      // Try to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      // If user doesn't exist, create it
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              role: 'admin'
+            }
+          }
         });
-        
-        console.log("Resposta de login do Supabase:", { data, error });
-        
-        if (error) {
-          console.error("Erro de autenticação do Supabase:", error);
-          throw error;
+
+        if (signUpError) {
+          throw signUpError;
         }
-        
+
+        // Try signing in again after creating the account
+        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (finalSignInError) {
+          throw finalSignInError;
+        }
+
         toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao painel administrativo",
+          title: "Conta criada e conectada",
+          description: "Sua conta foi criada e você foi conectado automaticamente.",
           duration: 3000,
         });
-        
-        onOpenChange(false);
-        navigate('/admin');
-      } else {
-        console.log("Senha incorreta");
-        throw new Error('Senha incorreta');
+      } else if (signInError) {
+        throw signInError;
       }
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo ao painel administrativo",
+        duration: 3000,
+      });
+      
+      onOpenChange(false);
+      navigate('/admin');
     } catch (error) {
       console.error('Erro ao fazer login:', error);
+      setError(error instanceof Error ? error.message : "Ocorreu um erro durante o login");
       toast({
         title: "Erro de Login",
-        description: "Senha incorreta ou erro de autenticação. Por favor, tente novamente.",
+        description: error instanceof Error ? error.message : "Erro de autenticação. Por favor, tente novamente.",
         variant: "destructive",
         duration: 3000,
       });
@@ -87,7 +111,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Acesso Administrativo</DialogTitle>
           <DialogDescription>
-            Faça login como administrador para acessar o painel de controle.
+            Faça login para acessar o sistema.
           </DialogDescription>
         </DialogHeader>
         
@@ -98,41 +122,39 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
           </Alert>
         )}
         
-        {!adminCreated ? (
-          <div className="space-y-4 pt-4">
-            <p className="text-sm text-muted-foreground">
-              O usuário administrador ainda não foi criado. Clique no botão abaixo para criá-lo.
-            </p>
-            <Button 
-              onClick={createAdminUser} 
-              className="w-full"
-              disabled={isCreatingAdmin}
-            >
-              {isCreatingAdmin ? "Criando..." : "Criar Usuário Administrador"}
-            </Button>
+        <form onSubmit={handleLogin} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="login-email">E-mail</Label>
+            <Input 
+              id="login-email" 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu e-mail" 
+              required
+            />
           </div>
-        ) : (
-          <form onSubmit={handleLogin} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="login-password">Senha</Label>
-              <Input 
-                id="login-password" 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Digite sua senha" 
-                required
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-        )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="login-password">Senha</Label>
+            <Input 
+              id="login-password" 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite sua senha" 
+              required
+            />
+          </div>
+          
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? "Entrando..." : "Entrar"}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );
