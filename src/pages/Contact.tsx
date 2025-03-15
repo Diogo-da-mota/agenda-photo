@@ -186,11 +186,11 @@ const Contact = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Digite a senha (agenda123)"
+                placeholder="Digite a senha"
                 required
               />
               <p className="text-xs text-gray-500">
-                Use o email: agenda@gmail.com e senha: agenda123
+                Email: agenda@gmail.com
               </p>
             </div>
             <DialogFooter>
