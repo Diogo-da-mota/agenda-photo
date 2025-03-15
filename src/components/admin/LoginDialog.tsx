@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +86,9 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
       <DialogContent className="sm:max-w-[425px] mx-4">
         <DialogHeader>
           <DialogTitle>Acesso Administrativo</DialogTitle>
+          <DialogDescription>
+            Faça login como administrador para acessar o painel de controle.
+          </DialogDescription>
         </DialogHeader>
         
         {error && (

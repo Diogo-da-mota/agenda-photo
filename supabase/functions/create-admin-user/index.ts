@@ -9,9 +9,11 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log("Função Edge recebeu requisição:", req.method)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log("Handling CORS preflight request")
+    console.log("Lidando com requisição preflight CORS")
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders 
@@ -19,22 +21,22 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Request received to create admin user")
+    console.log("Iniciando criação de usuário admin")
     
     // Create Supabase client with service key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-    console.log("Environment variables status:", { 
-      urlExists: !!supabaseUrl, 
-      keyExists: !!supabaseServiceKey 
+    console.log("Status das variáveis de ambiente:", { 
+      urlExiste: !!supabaseUrl, 
+      keyExiste: !!supabaseServiceKey 
     })
 
     if (!supabaseServiceKey || !supabaseUrl) {
-      console.error("Missing environment variables")
+      console.error("Variáveis de ambiente não configuradas")
       
       return new Response(
-        JSON.stringify({ error: 'Service role key or URL is missing' }),
+        JSON.stringify({ error: 'Chave de serviço ou URL não configurados' }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -44,7 +46,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    console.log("Attempting to create admin user: agenda@gmail.com")
+    console.log("Tentando criar usuário admin: agenda@gmail.com")
     
     // Create the admin user
     const { data, error } = await supabase.auth.admin.createUser({
@@ -54,12 +56,12 @@ serve(async (req) => {
     })
 
     if (error) {
-      console.error("Error creating user:", error.message)
+      console.error("Erro ao criar usuário:", error.message)
       
       // Check if user already exists
       if (error.message.includes('already exists')) {
         return new Response(
-          JSON.stringify({ message: 'User already exists, try logging in' }),
+          JSON.stringify({ message: 'Usuário já existe, tente fazer login' }),
           { 
             status: 409, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -76,11 +78,11 @@ serve(async (req) => {
       )
     }
 
-    console.log("User created successfully:", data.user.id)
+    console.log("Usuário criado com sucesso:", data.user.id)
     
     return new Response(
       JSON.stringify({ 
-        message: 'Admin user created successfully',
+        message: 'Usuário admin criado com sucesso',
         userId: data.user.id 
       }),
       { 
@@ -89,9 +91,9 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error("Unexpected error:", error.message, error.stack)
+    console.error("Erro inesperado:", error.message, error.stack)
     return new Response(
-      JSON.stringify({ error: `Unexpected error: ${error.message}` }),
+      JSON.stringify({ error: `Erro inesperado: ${error.message}` }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
