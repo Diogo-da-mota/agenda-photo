@@ -20,15 +20,24 @@ const Contact = () => {
     setIsLoggingIn(true);
     
     try {
+      console.log("Attempting login with password:", password);
+      
       // Check if the password is correct (hardcoded for simplicity)
       if (password === 'agenda123') {
+        console.log("Password is correct, attempting Supabase sign in");
+        
         // If password is correct, sign in with Supabase using predefined credentials
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: 'agenda@gmail.com',
           password: 'agenda123'
         });
         
-        if (error) throw error;
+        console.log("Supabase sign in response:", { data, error });
+        
+        if (error) {
+          console.error("Supabase authentication error:", error);
+          throw error;
+        }
         
         toast({
           title: "Login bem-sucedido",
@@ -39,13 +48,14 @@ const Contact = () => {
         setIsLoginOpen(false);
         navigate('/admin');
       } else {
+        console.log("Incorrect password entered");
         throw new Error('Senha incorreta');
       }
     } catch (error) {
       console.error('Error logging in:', error);
       toast({
         title: "Erro no login",
-        description: "Senha incorreta. Por favor, tente novamente.",
+        description: "Senha incorreta ou erro na autenticação. Por favor, tente novamente.",
         variant: "destructive",
         duration: 3000,
       });
