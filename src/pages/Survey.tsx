@@ -27,6 +27,20 @@ interface Question {
   followUp?: FollowUp;
 }
 
+// Define interfaces for component props
+interface FeatureSectionProps {
+  icon: React.ReactNode;
+  title: string;
+  features: string[];
+}
+
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  color: string;
+  title: string;
+  description: string;
+}
+
 const questions: Question[] = [
   {
     question: "Qual o tipo de evento que você mais fotografa atualmente?",
@@ -80,7 +94,7 @@ const questions: Question[] = [
 ];
 
 // Componente para a seção de recursos
-const FeatureSection = ({ icon, title, features }) => (
+const FeatureSection = ({ icon, title, features }: FeatureSectionProps) => (
   <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
     <div className="flex items-center gap-3 mb-3">
       {icon}
@@ -98,7 +112,7 @@ const FeatureSection = ({ icon, title, features }) => (
 );
 
 // Componente para o novo formato de card de recursos
-const FeatureCard = ({ icon, color, title, description }) => (
+const FeatureCard = ({ icon, color, title, description }: FeatureCardProps) => (
   <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col items-center text-center">
     <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center mb-4`}>
       {icon}
