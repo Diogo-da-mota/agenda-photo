@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,6 +45,12 @@ const questions: Question[] = [
     question: "Qual o tipo de evento que você mais fotografa atualmente?",
     options: ["Casamentos", "Ensaios (gestante, newborn, família)", "Eventos corporativos", "Moda", "Outros"],
     type: "checkbox",
+    followUp: {
+      condition: ["Outros"],
+      fields: [
+        { label: "Quais outros tipos de evento você fotografa?", type: "text" },
+      ],
+    },
   },
   {
     question: "Você utiliza uma agenda online para organizar seus compromissos?",
@@ -228,9 +233,14 @@ const Survey = () => {
   };
 
   const currentQuestionObj = questions[currentQuestion];
+  
+  // For checkbox type questions, we need to check if the specific option that has a follow-up is selected
   const showFollowUp = currentQuestionObj.followUp && 
-                        selectedOption && 
-                        currentQuestionObj.followUp.condition.includes(selectedOption);
+                      (currentQuestionObj.type === 'radio' ? 
+                        (selectedOption && currentQuestionObj.followUp.condition.includes(selectedOption)) : 
+                        (responses[currentQuestion] && 
+                         responses[currentQuestion].some(response => 
+                           currentQuestionObj.followUp?.condition.includes(response))));
 
   if (showThankYou) {
     return (
