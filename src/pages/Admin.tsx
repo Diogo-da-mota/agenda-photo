@@ -36,6 +36,10 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [tablesExist, setTablesExist] = useState({
+    customerMessages: false,
+    messages: false
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,8 +47,7 @@ const Admin = () => {
     const storedAuth = localStorage.getItem("adminAuthenticated");
     if (storedAuth === "true") {
       setIsAuthenticated(true);
-      fetchCustomerMessages();
-      fetchMessages();
+      checkTables();
     } else {
       setIsLoading(false);
     }
@@ -89,13 +92,51 @@ const Admin = () => {
     }
   }, [isAuthenticated, toast]);
 
+  const checkTables = async () => {
+    setIsLoading(true);
+    try {
+      // Check if customer_messages table exists
+      const { data: customerData, error: customerError } = await supabase
+        .from('customer_messages')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      // If no error, table exists
+      if (!customerError) {
+        setTablesExist(prev => ({ ...prev, customerMessages: true }));
+        fetchCustomerMessages();
+      } else {
+        console.log('customer_messages table does not exist:', customerError);
+      }
+
+      // Check if messages table exists
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('messages')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      // If no error, table exists
+      if (!messagesError) {
+        setTablesExist(prev => ({ ...prev, messages: true }));
+        fetchMessages();
+      } else {
+        console.log('messages table does not exist:', messagesError);
+      }
+    } catch (error) {
+      console.error('Error checking tables:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleLogin = () => {
     setError(null);
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       localStorage.setItem("adminAuthenticated", "true");
-      fetchCustomerMessages();
-      fetchMessages();
+      checkTables();
     } else {
       setError("Senha incorreta. Tente novamente.");
     }
@@ -107,14 +148,15 @@ const Admin = () => {
   };
 
   const fetchCustomerMessages = async () => {
-    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('customer_messages')
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
       setCustomerMessages(data || []);
     } catch (error) {
@@ -124,8 +166,6 @@ const Admin = () => {
         description: "Não foi possível carregar as mensagens dos clientes",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -136,7 +176,9 @@ const Admin = () => {
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
       setMessages(data || []);
     } catch (error) {
@@ -213,84 +255,106 @@ const Admin = () => {
         ) : (
           <div className="space-y-8">
             {/* Customer Messages Section */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Mensagens dos Clientes</h2>
-              {customerMessages.length === 0 ? (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <p>Nenhuma mensagem de cliente encontrada</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-6">
-                  {customerMessages.map((message) => (
-                    <Card key={message.id}>
-                      <CardHeader>
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
-                          <div>
-                            <CardTitle>{message.name}</CardTitle>
-                            <CardDescription>{message.email}</CardDescription>
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
-                            {formatDate(message.created_at)}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <Separator />
-                      <CardContent className="pt-6">
-                        <div className="space-y-4">
-                          {message.phone && (
+            {tablesExist.customerMessages ? (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Mensagens dos Clientes</h2>
+                {customerMessages.length === 0 ? (
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <p>Nenhuma mensagem de cliente encontrada</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid gap-6">
+                    {customerMessages.map((message) => (
+                      <Card key={message.id}>
+                        <CardHeader>
+                          <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                             <div>
-                              <h4 className="font-medium">Telefone:</h4>
-                              <p>{message.phone}</p>
+                              <CardTitle>{message.name}</CardTitle>
+                              <CardDescription>{message.email}</CardDescription>
                             </div>
-                          )}
-                          <div>
-                            <h4 className="font-medium">Mensagem:</h4>
-                            <p className="whitespace-pre-line">{message.message}</p>
+                            <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
+                              {formatDate(message.created_at)}
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+                        </CardHeader>
+                        <Separator />
+                        <CardContent className="pt-6">
+                          <div className="space-y-4">
+                            {message.phone && (
+                              <div>
+                                <h4 className="font-medium">Telefone:</h4>
+                                <p>{message.phone}</p>
+                              </div>
+                            )}
+                            <div>
+                              <h4 className="font-medium">Mensagem:</h4>
+                              <p className="whitespace-pre-line">{message.message}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>A tabela de mensagens de clientes ainda não foi criada no Supabase.</AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
+            )}
             
             {/* New Messages Section */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Mensagens em Tempo Real</h2>
-              {messages.length === 0 ? (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <p>Nenhuma mensagem em tempo real encontrada</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Usuário ID</TableHead>
-                          <TableHead>Conteúdo</TableHead>
-                          <TableHead>Data</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {messages.map((message) => (
-                          <TableRow key={message.id}>
-                            <TableCell className="font-medium">{message.user_id}</TableCell>
-                            <TableCell>{message.content}</TableCell>
-                            <TableCell>{formatDate(message.created_at)}</TableCell>
+            {tablesExist.messages ? (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Mensagens em Tempo Real</h2>
+                {messages.length === 0 ? (
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <p>Nenhuma mensagem em tempo real encontrada</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardContent className="p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Usuário ID</TableHead>
+                            <TableHead>Conteúdo</TableHead>
+                            <TableHead>Data</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                        </TableHeader>
+                        <TableBody>
+                          {messages.map((message) => (
+                            <TableRow key={message.id}>
+                              <TableCell className="font-medium">{message.user_id}</TableCell>
+                              <TableCell>{message.content}</TableCell>
+                              <TableCell>{formatDate(message.created_at)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>A tabela de mensagens em tempo real ainda não foi criada no Supabase.</AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
