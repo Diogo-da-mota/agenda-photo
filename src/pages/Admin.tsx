@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -55,8 +54,11 @@ const Admin = () => {
     return () => {
       // Cleanup function to remove subscription when component unmounts
       const cleanup = async () => {
-        const { error } = await supabase.removeAllChannels();
-        if (error) console.error('Error removing channels:', error);
+        // Fix: removeAllChannels returns an array of statuses, not an object with error property
+        const statuses = await supabase.removeAllChannels();
+        if (statuses.includes('error')) {
+          console.error('Error removing channels:', statuses);
+        }
       };
       
       if (isAuthenticated) {
