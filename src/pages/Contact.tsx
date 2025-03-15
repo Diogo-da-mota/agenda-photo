@@ -55,8 +55,8 @@ const Contact = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image */}
+    <div className="relative min-h-screen flex items-center justify-center">
+      {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <img 
           src="/lovable-uploads/99d33cab-856f-4fc2-a814-58f0764face9.png" 
@@ -107,7 +107,7 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Content overlaid on the image - made more responsive */}
+      {/* Content overlaid on the image - contained properly to prevent overflow */}
       <div className="relative z-10 text-white text-center px-4 max-w-4xl">
         <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
