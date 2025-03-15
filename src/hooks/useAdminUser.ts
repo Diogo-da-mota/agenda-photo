@@ -17,22 +17,19 @@ export const useAdminUser = () => {
   const checkAdminExists = async () => {
     try {
       console.log("Verificando se o usuário administrador existe...");
-      // Tenta fazer login com as credenciais de administrador para ver se existem
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'agenda@gmail.com',
-        password: 'agenda123'
-      });
       
-      if (!error) {
-        // Se não houver erro, o usuário existe
-        console.log("Usuário administrador já existe");
+      // Obter a sessão atual
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Se já existe uma sessão, o usuário já está autenticado
+        console.log("Usuário já está autenticado");
         setAdminCreated(true);
-        
-        // Sai imediatamente
-        await supabase.auth.signOut();
-      } else {
-        console.log("Usuário administrador não existe ou credenciais inválidas");
+        return;
       }
+      
+      // Não tenta fazer login automaticamente, apenas verifica se o usuário existe
+      console.log("Usuário administrador não existe ou não está autenticado");
     } catch (error) {
       console.log("Erro ao verificar se o administrador existe:", error);
     }
@@ -43,14 +40,29 @@ export const useAdminUser = () => {
     setError(null);
     
     try {
-      console.log("Criando usuário administrador diretamente");
+      // Verificar se há um usuário já logado
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Cria o usuário administrador diretamente
-      const { data, error } = await supabase.auth.signUp({
+      if (session) {
+        console.log("Usuário já está autenticado");
+        setAdminCreated(true);
+        toast({
+          title: "Usuário Existente",
+          description: "Já existe um usuário autenticado.",
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // Desabilitar a verificação automática para criação de usuário
+      const { error } = await supabase.auth.signUp({
         email: 'agenda@gmail.com',
         password: 'agenda123',
         options: {
-          emailRedirectTo: window.location.origin
+          emailRedirectTo: window.location.origin,
+          data: {
+            role: 'admin'
+          }
         }
       });
       
@@ -69,7 +81,7 @@ export const useAdminUser = () => {
         throw error;
       }
       
-      console.log("Usuário criado com sucesso:", data);
+      console.log("Usuário criado com sucesso");
       setAdminCreated(true);
       toast({
         title: "Usuário Criado",
@@ -78,12 +90,10 @@ export const useAdminUser = () => {
       });
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
-      
-      setError(`Falha ao criar usuário: ${error.message || "Erro desconhecido"}`);
-      
+      setError(error instanceof Error ? error.message : "Erro desconhecido");
       toast({
         title: "Erro ao Criar Usuário",
-        description: `Falha ao criar usuário: ${error.message || "Erro desconhecido"}`,
+        description: error instanceof Error ? error.message : "Erro desconhecido",
         variant: "destructive",
         duration: 5000,
       });

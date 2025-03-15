@@ -34,69 +34,47 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
     try {
       if (!email) {
         setError("O e-mail é obrigatório");
-        throw new Error("O e-mail é obrigatório");
+        return;
       }
       
       if (!password) {
         setError("A senha é obrigatória");
-        throw new Error("A senha é obrigatória");
+        return;
       }
       
-      // Try to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // Try to sign in with existing credentials
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
-      // If user doesn't exist, create it
-      if (signInError && signInError.message.includes('Invalid login credentials')) {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              role: 'admin'
-            }
-          }
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        // Try signing in again after creating the account
-        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (finalSignInError) {
-          throw finalSignInError;
-        }
-
+      // If successful login
+      if (data?.user) {
         toast({
-          title: "Conta criada e conectada",
-          description: "Sua conta foi criada e você foi conectado automaticamente.",
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao painel administrativo",
           duration: 3000,
         });
-      } else if (signInError) {
-        throw signInError;
+        
+        onOpenChange(false);
+        navigate('/admin');
+        return;
       }
       
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo ao painel administrativo",
-        duration: 3000,
-      });
-      
-      onOpenChange(false);
-      navigate('/admin');
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      setError(error instanceof Error ? error.message : "Ocorreu um erro durante o login");
+      // If login failed with invalid credentials, show appropriate message
+      if (signInError) {
+        if (signInError.message.includes('Invalid login credentials')) {
+          setError("Credenciais inválidas. Usuário não existe ou senha incorreta.");
+        } else {
+          setError(signInError.message);
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao fazer login:', err);
+      setError(err instanceof Error ? err.message : "Ocorreu um erro durante o login");
       toast({
         title: "Erro de Login",
-        description: error instanceof Error ? error.message : "Erro de autenticação. Por favor, tente novamente.",
+        description: err instanceof Error ? err.message : "Erro de autenticação. Por favor, tente novamente.",
         variant: "destructive",
         duration: 3000,
       });
