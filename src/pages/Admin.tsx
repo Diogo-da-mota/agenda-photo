@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, RefreshCcw } from "lucide-react";
+import { AlertCircle, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 
@@ -21,7 +21,7 @@ interface CustomerMessage {
 }
 
 interface Message {
-  id: string;
+  id: number | string;
   user_id: string;
   content: string;
   created_at: string;
@@ -33,6 +33,7 @@ const Admin = () => {
   const [customerMessages, setCustomerMessages] = useState<CustomerMessage[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +59,7 @@ const Admin = () => {
         // Fix: removeAllChannels returns an array of statuses, not an object with error property
         const statuses = await supabase.removeAllChannels();
         if (statuses.includes('error')) {
-          console.error('Error removing channels:', statuses);
+          console.error('Erro ao remover canais:', statuses);
         }
       };
       
@@ -82,16 +83,18 @@ const Admin = () => {
             table: 'messages'
           },
           (payload) => {
-            console.log('New message received:', payload);
+            console.log('Nova mensagem recebida:', payload);
             const newMessage = payload.new as Message;
-            setMessages(prevMessages => [...prevMessages, newMessage]);
+            setMessages(prevMessages => [newMessage, ...prevMessages]);
             toast({
               title: "Nova mensagem recebida",
-              description: "Uma nova mensagem foi adicionada",
+              description: `Nova mensagem: ${newMessage.content.substring(0, 30)}${newMessage.content.length > 30 ? '...' : ''}`,
             });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status da inscrição em messages:', status);
+        });
 
       // Set up realtime subscription to customer_messages table
       const customerChannel = supabase
@@ -104,7 +107,7 @@ const Admin = () => {
             table: 'customer_messages'
           },
           (payload) => {
-            console.log('New customer message received:', payload);
+            console.log('Nova mensagem de cliente recebida:', payload);
             const newMessage = payload.new as CustomerMessage;
             setCustomerMessages(prevMessages => [newMessage, ...prevMessages]);
             toast({
@@ -113,7 +116,9 @@ const Admin = () => {
             });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status da inscrição em customer_messages:', status);
+        });
 
       // Cleanup function
       return () => {
@@ -249,10 +254,16 @@ const Admin = () => {
   };
 
   const handleRefresh = () => {
-    checkTables();
-    toast({
-      title: "Atualizando",
-      description: "Buscando novas mensagens..."
+    setIsRefreshing(true);
+    Promise.all([
+      tablesExist.customerMessages ? fetchCustomerMessages() : Promise.resolve(),
+      tablesExist.messages ? fetchMessages() : Promise.resolve()
+    ]).finally(() => {
+      setIsRefreshing(false);
+      toast({
+        title: "Atualizado",
+        description: "As mensagens foram atualizadas com sucesso"
+      });
     });
   };
 
@@ -269,10 +280,15 @@ const Admin = () => {
               <Button 
                 variant="outline" 
                 onClick={handleRefresh}
+                disabled={isRefreshing}
                 className="flex items-center gap-2"
               >
-                <RefreshCcw className="h-4 w-4" />
-                Atualizar
+                {isRefreshing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCcw className="h-4 w-4" />
+                )}
+                {isRefreshing ? "Atualizando..." : "Atualizar"}
               </Button>
             )}
             <Button variant="outline" onClick={isAuthenticated ? handleLogout : () => window.location.href = '/'}>
@@ -315,8 +331,9 @@ const Admin = () => {
             </CardContent>
           </Card>
         ) : isLoading ? (
-          <div className="text-center py-12">
-            <p>Carregando mensagens...</p>
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2">Carregando mensagens...</span>
           </div>
         ) : (
           <div className="space-y-8">
@@ -377,7 +394,7 @@ const Admin = () => {
               )}
             </div>
             
-            {/* New Messages Section */}
+            {/* Messages Section */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Mensagens em Tempo Real</h2>
               {!tablesExist.messages ? (
@@ -403,6 +420,7 @@ const Admin = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>ID</TableHead>
                           <TableHead>Usuário ID</TableHead>
                           <TableHead>Conteúdo</TableHead>
                           <TableHead>Data</TableHead>
@@ -411,7 +429,8 @@ const Admin = () => {
                       <TableBody>
                         {messages.map((message) => (
                           <TableRow key={message.id}>
-                            <TableCell className="font-medium">{message.user_id}</TableCell>
+                            <TableCell className="font-medium">{message.id}</TableCell>
+                            <TableCell>{message.user_id}</TableCell>
                             <TableCell>{message.content}</TableCell>
                             <TableCell>{formatDate(message.created_at)}</TableCell>
                           </TableRow>
