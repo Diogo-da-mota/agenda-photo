@@ -364,6 +364,72 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          calendar_cost: number | null
+          calendar_dislikes: string | null
+          calendar_likes: string | null
+          calendar_tool: string | null
+          contact_info: string | null
+          created_at: string
+          event_type: string[] | null
+          has_portfolio: string | null
+          id: string
+          ideal_site_description: string | null
+          other_event_type: string | null
+          other_tools: string | null
+          other_tools_cost: number | null
+          site_cost: number | null
+          site_dislikes: string | null
+          site_likes: string | null
+          site_platform: string | null
+          uses_online_calendar: boolean | null
+          uses_other_tools: boolean | null
+        }
+        Insert: {
+          calendar_cost?: number | null
+          calendar_dislikes?: string | null
+          calendar_likes?: string | null
+          calendar_tool?: string | null
+          contact_info?: string | null
+          created_at?: string
+          event_type?: string[] | null
+          has_portfolio?: string | null
+          id?: string
+          ideal_site_description?: string | null
+          other_event_type?: string | null
+          other_tools?: string | null
+          other_tools_cost?: number | null
+          site_cost?: number | null
+          site_dislikes?: string | null
+          site_likes?: string | null
+          site_platform?: string | null
+          uses_online_calendar?: boolean | null
+          uses_other_tools?: boolean | null
+        }
+        Update: {
+          calendar_cost?: number | null
+          calendar_dislikes?: string | null
+          calendar_likes?: string | null
+          calendar_tool?: string | null
+          contact_info?: string | null
+          created_at?: string
+          event_type?: string[] | null
+          has_portfolio?: string | null
+          id?: string
+          ideal_site_description?: string | null
+          other_event_type?: string | null
+          other_tools?: string | null
+          other_tools_cost?: number | null
+          site_cost?: number | null
+          site_dislikes?: string | null
+          site_likes?: string | null
+          site_platform?: string | null
+          uses_online_calendar?: boolean | null
+          uses_other_tools?: boolean | null
+        }
+        Relationships: []
+      }
       user_integrations: {
         Row: {
           company_logo: string | null
@@ -406,6 +472,27 @@ export type Database = {
           user_id?: string
           webhook_enabled?: boolean | null
           webhook_id?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+        }
+        Update: {
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
         }
         Relationships: []
       }
