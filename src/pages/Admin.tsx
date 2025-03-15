@@ -8,7 +8,6 @@ import { initializeDatabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
-import MessagesList from "@/components/admin/MessagesList";
 
 const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
@@ -20,8 +19,7 @@ const Admin = () => {
   const { toast } = useToast();
   
   const { 
-    customerMessages, 
-    messages, 
+    mensagens, 
     isLoading, 
     isRefreshing, 
     tablesExist, 
@@ -93,16 +91,10 @@ const Admin = () => {
         ) : (
           <div className="space-y-8">
             <CustomerMessagesList 
-              tableExists={tablesExist.customerMessages}
-              customerMessages={customerMessages}
+              tableExists={tablesExist.mensagemAgenda}
+              mensagens={mensagens}
               formatDate={formatDate}
               checkTables={checkTables}
-            />
-            
-            <MessagesList 
-              tableExists={tablesExist.messages}
-              messages={messages}
-              formatDate={formatDate}
             />
           </div>
         )}

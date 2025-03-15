@@ -36,6 +36,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mensagem_agenda: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -63,6 +90,10 @@ export type Database = {
     }
     Functions: {
       create_customer_messages_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_mensagem_agenda_table: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

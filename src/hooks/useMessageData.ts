@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase, initializeDatabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface CustomerMessage {
+interface MensagemAgenda {
   id: string;
   created_at: string;
   name: string;
@@ -12,26 +12,16 @@ interface CustomerMessage {
   message: string;
 }
 
-interface Message {
-  id: number | string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}
-
 interface TablesExistState {
-  customerMessages: boolean;
-  messages: boolean;
+  mensagemAgenda: boolean;
 }
 
 export const useMessageData = (isAuthenticated: boolean) => {
-  const [customerMessages, setCustomerMessages] = useState<CustomerMessage[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [mensagens, setMensagens] = useState<MensagemAgenda[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [tablesExist, setTablesExist] = useState<TablesExistState>({
-    customerMessages: false,
-    messages: false
+    mensagemAgenda: false
   });
   const { toast } = useToast();
 
@@ -54,58 +44,33 @@ export const useMessageData = (isAuthenticated: boolean) => {
   useEffect(() => {
     // Only set up realtime subscription if authenticated
     if (isAuthenticated) {
-      // Set up realtime subscription to messages table
+      // Set up realtime subscription to mensagem_agenda table
       const channel = supabase
-        .channel('mensagens-changes')
+        .channel('mensagem-agenda-changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'messages'  // Use the TypeScript-defined table name
+            table: 'mensagem_agenda'
           },
           (payload) => {
             console.log('Nova mensagem recebida:', payload);
-            const newMessage = payload.new as Message;
-            setMessages(prevMessages => [newMessage, ...prevMessages]);
+            const newMessage = payload.new as MensagemAgenda;
+            setMensagens(prevMessages => [newMessage, ...prevMessages]);
             toast({
               title: "Nova mensagem recebida",
-              description: `Nova mensagem: ${newMessage.content.substring(0, 30)}${newMessage.content.length > 30 ? '...' : ''}`,
-            });
-          }
-        )
-        .subscribe((status) => {
-          console.log('Status da inscrição em mensagens:', status);
-        });
-
-      // Set up realtime subscription to customer_messages table
-      const customerChannel = supabase
-        .channel('mensagens-do-cliente-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'customer_messages'  // Use the TypeScript-defined table name
-          },
-          (payload) => {
-            console.log('Nova mensagem de cliente recebida:', payload);
-            const newMessage = payload.new as CustomerMessage;
-            setCustomerMessages(prevMessages => [newMessage, ...prevMessages]);
-            toast({
-              title: "Nova mensagem de cliente recebida",
               description: `Nova mensagem de ${newMessage.name}`,
             });
           }
         )
         .subscribe((status) => {
-          console.log('Status da inscrição em mensagens_do_cliente:', status);
+          console.log('Status da inscrição em mensagem_agenda:', status);
         });
 
       // Cleanup function
       return () => {
         supabase.removeChannel(channel);
-        supabase.removeChannel(customerChannel);
       };
     }
   }, [isAuthenticated, toast]);
@@ -115,38 +80,21 @@ export const useMessageData = (isAuthenticated: boolean) => {
     try {
       console.log('Verificando tabelas...');
       
-      // Verificar tabela customer_messages tentando buscar dados diretamente
-      const { data: customerData, error: customerError } = await supabase
-        .from('customer_messages')  // Use the TypeScript-defined table name
+      // Verificar tabela mensagem_agenda tentando buscar dados diretamente
+      const { data: mensagemData, error: mensagemError } = await supabase
+        .from('mensagem_agenda')
         .select('*')
         .limit(1);
       
-      console.log('Verificação de customer_messages:', { customerData, customerError });
+      console.log('Verificação de mensagem_agenda:', { mensagemData, mensagemError });
       
-      if (!customerError) {
-        console.log('Tabela customer_messages existe e está acessível');
-        setTablesExist(prev => ({ ...prev, customerMessages: true }));
-        fetchCustomerMessages();
+      if (!mensagemError) {
+        console.log('Tabela mensagem_agenda existe e está acessível');
+        setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+        fetchMensagens();
       } else {
-        console.error('Erro ao acessar customer_messages:', customerError);
-        setTablesExist(prev => ({ ...prev, customerMessages: false }));
-      }
-
-      // Verificar tabela messages tentando buscar dados diretamente
-      const { data: messagesData, error: messagesError } = await supabase
-        .from('messages')  // Use the TypeScript-defined table name
-        .select('*')
-        .limit(1);
-      
-      console.log('Verificação de messages:', { messagesData, messagesError });
-      
-      if (!messagesError) {
-        console.log('Tabela messages existe e está acessível');
-        setTablesExist(prev => ({ ...prev, messages: true }));
-        fetchMessages();
-      } else {
-        console.error('Erro ao acessar messages:', messagesError);
-        setTablesExist(prev => ({ ...prev, messages: false }));
+        console.error('Erro ao acessar mensagem_agenda:', mensagemError);
+        setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
       }
     } catch (error) {
       console.error('Erro ao verificar tabelas:', error);
@@ -160,35 +108,11 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   };
 
-  const fetchCustomerMessages = async () => {
-    try {
-      console.log('Buscando mensagens de clientes...');
-      const { data, error } = await supabase
-        .from('customer_messages')  // Use the TypeScript-defined table name
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        throw error;
-      }
-      
-      console.log('Mensagens de clientes recebidas:', data);
-      setCustomerMessages(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar mensagens de clientes:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as mensagens dos clientes",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchMessages = async () => {
+  const fetchMensagens = async () => {
     try {
       console.log('Buscando mensagens...');
       const { data, error } = await supabase
-        .from('messages')  // Use the TypeScript-defined table name
+        .from('mensagem_agenda')
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -197,7 +121,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
       }
       
       console.log('Mensagens recebidas:', data);
-      setMessages(data || []);
+      setMensagens(data || []);
     } catch (error) {
       console.error('Erro ao buscar mensagens:', error);
       toast({
@@ -211,8 +135,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
   const handleRefresh = () => {
     setIsRefreshing(true);
     Promise.all([
-      tablesExist.customerMessages ? fetchCustomerMessages() : Promise.resolve(),
-      tablesExist.messages ? fetchMessages() : Promise.resolve()
+      tablesExist.mensagemAgenda ? fetchMensagens() : Promise.resolve()
     ]).finally(() => {
       setIsRefreshing(false);
       toast({
@@ -223,8 +146,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
   };
 
   return {
-    customerMessages,
-    messages,
+    mensagens,
     isLoading,
     isRefreshing,
     tablesExist,

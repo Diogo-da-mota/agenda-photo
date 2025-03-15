@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface CustomerMessage {
+interface MensagemAgenda {
   id: string;
   created_at: string;
   name: string;
@@ -17,41 +17,41 @@ interface CustomerMessage {
 
 interface CustomerMessagesListProps {
   tableExists: boolean;
-  customerMessages: CustomerMessage[];
+  mensagens: MensagemAgenda[];
   formatDate: (dateString: string) => string;
   checkTables: () => void;
 }
 
 const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   tableExists,
-  customerMessages,
+  mensagens,
   formatDate,
   checkTables
 }) => {
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Mensagens dos Clientes</h2>
+      <h2 className="text-xl font-semibold mb-4">Mensagens da Agenda</h2>
       {!tableExists ? (
         <Card className="text-center py-8">
           <CardContent>
             <Alert className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                A tabela de mensagens de clientes não foi encontrada no Supabase.
+                A tabela de mensagens da agenda não foi encontrada no Supabase.
               </AlertDescription>
             </Alert>
             <Button onClick={checkTables}>Verificar novamente</Button>
           </CardContent>
         </Card>
-      ) : customerMessages.length === 0 ? (
+      ) : mensagens.length === 0 ? (
         <Card className="text-center py-8">
           <CardContent>
-            <p>Nenhuma mensagem de cliente encontrada</p>
+            <p>Nenhuma mensagem encontrada</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-6">
-          {customerMessages.map((message) => (
+          {mensagens.map((message) => (
             <Card key={message.id}>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
