@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, Facebook } from "lucide-react";
+import { ArrowRight, Facebook, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('agenda@gmail.com');
+  const [password, setPassword] = useState('agenda123');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -82,6 +83,13 @@ const Login = () => {
             <h2 className="text-2xl font-medium">Bem-vindo à Agenda PRO</h2>
             <p className="text-muted-foreground mt-2">Entre para acessar sua conta</p>
           </div>
+          
+          <Alert className="mb-6 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-sm text-blue-700">
+              Utilize o email <strong>agenda@gmail.com</strong> e senha <strong>agenda123</strong> para acessar o sistema.
+            </AlertDescription>
+          </Alert>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
