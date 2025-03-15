@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 type CustomerMessage = {
   id: string;
@@ -24,40 +25,42 @@ const Admin = () => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
-        navigate('/login');
+        toast.error('Você precisa estar logado para acessar esta página');
+        navigate('/');
+      } else {
+        fetchMessages();
       }
     };
 
     checkSession();
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('customer_messages')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customer_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching messages:', error);
-          return;
-        }
-
-        setMessages(data as CustomerMessage[]);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
+      if (error) {
+        console.error('Error fetching messages:', error);
+        toast.error('Erro ao carregar mensagens');
+        return;
       }
-    };
 
-    fetchMessages();
-  }, []);
+      setMessages(data as CustomerMessage[]);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Ocorreu um erro ao carregar as mensagens');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
+    toast.success('Logout realizado com sucesso');
+    navigate('/');
   };
 
   if (loading) {
