@@ -107,21 +107,25 @@ const Contact = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Content overlaid on the image - centered */}
-      <div className="relative z-10 text-white text-center px-4 max-w-sm mx-auto">
-        <h2 className="text-sm md:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
-        <h1 className="text-2xl md:text-4xl font-bold mb-4">
+      {/* Content overlaid on the image - centered and properly positioned */}
+      <div className="relative z-10 text-white text-center px-4 max-w-md mx-auto flex flex-col items-center">
+        <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
           A solução completa para fotógrafos profissionais
         </h1>
+        <p className="text-base sm:text-lg md:text-xl opacity-90 mb-6 sm:mb-10">
+          Gerencie sua agenda, clientes, finanças e presença online em um único lugar
+        </p>
         <Button 
           onClick={() => navigate('/survey')}
           size="lg"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-lg py-2 px-8 rounded-full shadow-lg hover:shadow-xl transition-all"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
         >
           INICIAR
         </Button>
       </div>
 
+      {/* Add CSS using className instead of inline style with jsx */}
       <style>
         {`
           body {
