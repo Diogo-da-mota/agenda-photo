@@ -37,10 +37,6 @@ const Contact = () => {
       <LoginDialog 
         isOpen={isLoginOpen} 
         onOpenChange={setIsLoginOpen}
-        adminCreated={adminCreated}
-        createAdminUser={createAdminUser}
-        isCreatingAdmin={isCreatingAdmin}
-        error={error}
       />
 
       {/* Conteúdo sobreposto na imagem - contido adequadamente para evitar overflow */}
