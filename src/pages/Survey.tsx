@@ -328,8 +328,20 @@ const Survey = () => {
       // Convert survey responses to a string message
       const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
         const questionObj = questions[parseInt(questionIndex)];
-        return `${questionObj.question}: ${answers.join(", ")}`;
-      }).join("\n");
+        const questionText = questionObj.question;
+        let answerText = answers.join(", ");
+        
+        // Add follow-up responses if they exist
+        if (followUpResponses[parseInt(questionIndex)]) {
+          const followUpData = followUpResponses[parseInt(questionIndex)];
+          const followUpText = Object.entries(followUpData)
+            .map(([label, value]) => `${label}: ${value}`)
+            .join("; ");
+          answerText += ` [Detalhes adicionais: ${followUpText}]`;
+        }
+        
+        return `${questionText}: ${answerText}`;
+      }).join("\n\n");
 
       // Create data for Supabase
       const contactData = {
@@ -338,6 +350,8 @@ const Survey = () => {
         e_mail: finalContactInfo || "sem-email@exemplo.com", // Use the final contact info as email
         mensagem: surveyMessage,
       };
+
+      console.log("Sending data to Supabase:", contactData);
 
       const { data, error } = await supabase
         .from('mensagens_de_contato')
@@ -368,7 +382,7 @@ const Survey = () => {
   };
 
   const handleSubmit = () => {
-    // In a real app, this would send the data to a server
+    // Log collected data for debugging
     console.log("Contato:", contactInfo);
     console.log("Respostas:", responses);
     console.log("Respostas complementares:", followUpResponses);

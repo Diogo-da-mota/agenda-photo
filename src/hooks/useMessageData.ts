@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, checkTableExists, createContactMessagesTable } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,34 +11,102 @@ interface ContactMessage {
   message: string;
 }
 
+interface MensagemDeContato {
+  id: string;
+  criado_em: string;
+  nome: string;
+  e_mail: string;
+  telefone: string;
+  mensagem: string;
+}
+
+// Union type for all message types
+type Message = ContactMessage | MensagemDeContato;
+
 export const useMessageData = (isAuthenticated: boolean) => {
-  const [mensagens, setMensagens] = useState<ContactMessage[]>([]);
+  const [mensagens, setMensagens] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCreatingTable, setIsCreatingTable] = useState(false);
   const [tableExists, setTableExists] = useState(false);
   const { toast } = useToast();
 
-  // Função para buscar mensagens do Supabase
-  const fetchMensagens = useCallback(async () => {
-    if (!tableExists) return;
-    
+  // Função para buscar mensagens de todas as tabelas disponíveis
+  const fetchAllMessages = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log('Buscando mensagens da tabela contact_messages...');
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        throw error;
+      let allMessages: Message[] = [];
+      let contactMessagesExists = false;
+      let mensagensDeContatoExists = false;
+
+      // Check which tables exist
+      contactMessagesExists = await checkTableExists('contact_messages');
+      mensagensDeContatoExists = await checkTableExists('mensagens_de_contato');
+
+      console.log('Tables status:', { contactMessagesExists, mensagensDeContatoExists });
+      
+      // Set tableExists to true if either table exists
+      setTableExists(contactMessagesExists || mensagensDeContatoExists);
+      
+      if (!contactMessagesExists && !mensagensDeContatoExists) {
+        setIsLoading(false);
+        return;
       }
       
-      console.log('Mensagens recebidas:', data);
-      setMensagens(data || []);
+      // Fetch from contact_messages if it exists
+      if (contactMessagesExists) {
+        console.log('Fetching from contact_messages...');
+        const { data: contactData, error: contactError } = await supabase
+          .from('contact_messages')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (contactError) {
+          console.error('Error fetching from contact_messages:', contactError);
+        } else if (contactData) {
+          console.log(`Received ${contactData.length} messages from contact_messages`);
+          allMessages = [...allMessages, ...contactData];
+        }
+      }
+      
+      // Fetch from mensagens_de_contato if it exists
+      if (mensagensDeContatoExists) {
+        console.log('Fetching from mensagens_de_contato...');
+        const { data: mensagensData, error: mensagensError } = await supabase
+          .from('mensagens_de_contato')
+          .select('*')
+          .order('criado_em', { ascending: false });
+          
+        if (mensagensError) {
+          console.error('Error fetching from mensagens_de_contato:', mensagensError);
+        } else if (mensagensData) {
+          console.log(`Received ${mensagensData.length} messages from mensagens_de_contato`);
+          
+          // Map the mensagens_de_contato fields to match contact_messages format for display
+          const mappedMensagens = mensagensData.map(msg => ({
+            id: msg.id,
+            created_at: msg.criado_em,
+            name: msg.nome,
+            email: msg.e_mail,
+            phone: msg.telefone,
+            message: msg.mensagem
+          }));
+          
+          allMessages = [...allMessages, ...mappedMensagens];
+        }
+      }
+      
+      // Sort all messages by date (newest first)
+      allMessages.sort((a, b) => {
+        const dateA = a.created_at || (a as any).criado_em;
+        const dateB = b.created_at || (b as any).criado_em;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
+      
+      console.log('All messages sorted:', allMessages);
+      setMensagens(allMessages);
     } catch (error) {
-      console.error('Erro ao buscar mensagens:', error);
+      console.error('Error fetching messages:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as mensagens",
@@ -48,9 +115,9 @@ export const useMessageData = (isAuthenticated: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  }, [tableExists, toast]);
+  }, [toast]);
 
-  // Nova função para criar a tabela diretamente
+  // Create table function remains the same
   const createTable = useCallback(async () => {
     setIsCreatingTable(true);
     try {
@@ -68,7 +135,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         setTableExists(contactMessagesExists);
         
         if (contactMessagesExists) {
-          fetchMensagens();
+          fetchAllMessages();
         }
       } else {
         toast({
@@ -87,26 +154,27 @@ export const useMessageData = (isAuthenticated: boolean) => {
     } finally {
       setIsCreatingTable(false);
     }
-  }, [fetchMensagens, toast]);
+  }, [fetchAllMessages, toast]);
 
   // Verificar se a tabela existe e buscar mensagens
   const verifyTableAndFetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log('Verificando se a tabela contact_messages existe...');
+      console.log('Verificando tabelas existentes...');
       
-      // Verificar se a tabela está acessível
+      // Check both tables
       const contactMessagesExists = await checkTableExists('contact_messages');
+      const mensagensDeContatoExists = await checkTableExists('mensagens_de_contato');
       
-      setTableExists(contactMessagesExists);
+      setTableExists(contactMessagesExists || mensagensDeContatoExists);
       
-      if (contactMessagesExists) {
-        fetchMensagens();
+      if (contactMessagesExists || mensagensDeContatoExists) {
+        fetchAllMessages();
       } else {
         setIsLoading(false);
         toast({
           title: "Tabela não encontrada",
-          description: "A tabela de mensagens não foi encontrada. Clique em 'Criar tabela' para criá-la manualmente.",
+          description: "Nenhuma tabela de mensagens foi encontrada. Clique em 'Criar tabela' para criar uma nova.",
           variant: "destructive",
         });
       }
@@ -114,7 +182,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
       console.error('Erro ao verificar tabela:', error);
       setIsLoading(false);
     }
-  }, [fetchMensagens, toast]);
+  }, [fetchAllMessages, toast]);
 
   // Efeito inicial para verificar a tabela e buscar mensagens
   useEffect(() => {
@@ -123,10 +191,11 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [isAuthenticated, verifyTableAndFetchData]);
 
-  // Configurar escuta de tempo real para atualizações na tabela contact_messages
+  // Configure real-time listeners for both tables
   useEffect(() => {
     if (isAuthenticated && tableExists) {
-      const channel = supabase
+      // Listen for changes on contact_messages
+      const contactMessagesChannel = supabase
         .channel('contact-messages-changes')
         .on(
           'postgres_changes',
@@ -136,7 +205,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
             table: 'contact_messages'
           },
           (payload) => {
-            console.log('Nova mensagem recebida:', payload);
+            console.log('Nova mensagem em contact_messages recebida:', payload);
             const newMessage = payload.new as ContactMessage;
             setMensagens(prevMessages => [newMessage, ...prevMessages]);
             toast({
@@ -145,12 +214,44 @@ export const useMessageData = (isAuthenticated: boolean) => {
             });
           }
         )
-        .subscribe((status) => {
-          console.log('Status da inscrição em contact_messages:', status);
-        });
+        .subscribe();
+
+      // Listen for changes on mensagens_de_contato
+      const mensagensDeContatoChannel = supabase
+        .channel('mensagens-contato-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'mensagens_de_contato'
+          },
+          (payload) => {
+            console.log('Nova mensagem em mensagens_de_contato recebida:', payload);
+            const newMessage = payload.new as MensagemDeContato;
+            
+            // Convert to the standard format
+            const mappedMessage = {
+              id: newMessage.id,
+              created_at: newMessage.criado_em,
+              name: newMessage.nome,
+              email: newMessage.e_mail,
+              phone: newMessage.telefone,
+              message: newMessage.mensagem
+            };
+            
+            setMensagens(prevMessages => [mappedMessage, ...prevMessages]);
+            toast({
+              title: "Nova mensagem recebida",
+              description: `Nova mensagem de ${newMessage.nome}`,
+            });
+          }
+        )
+        .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(contactMessagesChannel);
+        supabase.removeChannel(mensagensDeContatoChannel);
       };
     }
   }, [isAuthenticated, tableExists, toast]);
@@ -164,7 +265,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         title: "Verificação concluída",
         description: tableExists 
           ? "As mensagens foram atualizadas" 
-          : "A tabela ainda não existe. Use a opção 'Criar tabela' para criá-la manualmente."
+          : "Nenhuma tabela de mensagens foi encontrada. Use a opção 'Criar tabela' para criar uma."
       });
     });
   }, [verifyTableAndFetchData, tableExists, toast]);
