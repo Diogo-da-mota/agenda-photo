@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, checkTableExists } from "@/integrations/supabase/client";
+import { supabase, checkTableExists, ensureContactMessagesTable } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface ContactMessage {
@@ -52,10 +52,15 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [tablesExist.contactMessages, toast]);
 
-  // Verificar se as tabelas existem e buscar mensagens se existirem
+  // Verificar se as tabelas existem, criar se necessário e buscar mensagens
   const verifyTableAndFetchData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Primeiro, garantimos que a tabela contact_messages existe usando a função RPC
+      const tableCreated = await ensureContactMessagesTable();
+      console.log('Resultado da criação/verificação da tabela:', tableCreated);
+      
+      // Depois verificamos se as tabelas estão acessíveis
       const mensagemAgendaExists = await checkTableExists('mensagem_agenda');
       const contactMessagesExists = await checkTableExists('contact_messages');
       
@@ -70,12 +75,12 @@ export const useMessageData = (isAuthenticated: boolean) => {
         setIsLoading(false);
         toast({
           title: "Tabela não encontrada",
-          description: "A tabela de mensagens não foi encontrada. Certifique-se de que ela foi criada no Supabase.",
+          description: "A tabela de mensagens não foi encontrada. Estamos tentando criá-la automaticamente, aguarde um momento e tente novamente.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar tabelas:', error);
+      console.error('Erro ao verificar/criar tabelas:', error);
       setIsLoading(false);
     }
   }, [fetchMensagens, toast]);
@@ -128,7 +133,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         title: "Verificação concluída",
         description: tablesExist.contactMessages 
           ? "As mensagens foram atualizadas" 
-          : "A tabela ainda não está disponível"
+          : "Tentando criar a tabela automaticamente. Aguarde um momento e tente novamente."
       });
     });
   }, [verifyTableAndFetchData, tablesExist.contactMessages, toast]);

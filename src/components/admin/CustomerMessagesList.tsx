@@ -30,17 +30,17 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
 }) => {
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Mensagens da Agenda</h2>
+      <h2 className="text-xl font-semibold mb-4">Mensagens de Contato</h2>
       {!tableExists ? (
         <Card className="text-center py-8">
           <CardContent>
             <Alert className="mb-4 bg-yellow-50 border-yellow-200">
               <AlertCircle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800">
-                A tabela de mensagens não foi encontrada no Supabase.
+                A tabela de mensagens está sendo criada automaticamente.
                 <p className="mt-2 text-sm">
-                  A tabela foi criada, mas pode levar alguns instantes para ficar disponível.
-                  Por favor, aguarde um pouco e tente novamente.
+                  Se este é o primeiro acesso, pode levar alguns instantes para ficar disponível.
+                  Por favor, clique em "Verificar novamente" após alguns segundos.
                 </p>
               </AlertDescription>
             </Alert>
@@ -54,8 +54,8 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               </Button>
             </div>
             <div className="mt-4 text-sm text-gray-500">
-              <p>A tabela foi criada com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
-              <p className="mt-2 font-medium">Se o problema persistir após várias tentativas, tente atualizar a página inteira ou abrir o console do Supabase para verificar o estado da tabela.</p>
+              <p>A tabela está sendo criada com as colunas: id, created_at, name, email, phone, message.</p>
+              <p className="mt-2 font-medium">Se o problema persistir após várias tentativas, tente atualizar a página inteira.</p>
             </div>
           </CardContent>
         </Card>

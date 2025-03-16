@@ -10,24 +10,21 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-// Verifica se a tabela mensagem_agenda existe
-export const checkMensagemAgendaExists = async (): Promise<boolean> => {
+// Função para garantir que a tabela contact_messages existe através da chamada da função SQL
+export const ensureContactMessagesTable = async (): Promise<boolean> => {
   try {
-    console.log('Verificando se a tabela mensagem_agenda existe...');
-    const { data, error } = await supabase
-      .from('mensagem_agenda')
-      .select('id')
-      .limit(1);
+    console.log('Executando função para garantir que a tabela contact_messages existe...');
+    const { data, error } = await supabase.rpc('ensure_contact_messages_table');
     
     if (error) {
-      console.log('Erro ao verificar tabela mensagem_agenda:', error);
+      console.error('Erro ao executar ensure_contact_messages_table:', error);
       return false;
     }
     
-    console.log('Tabela mensagem_agenda encontrada!');
+    console.log('Função ensure_contact_messages_table executada com sucesso:', data);
     return true;
   } catch (e) {
-    console.error('Exceção ao verificar tabela mensagem_agenda:', e);
+    console.error('Exceção ao executar ensure_contact_messages_table:', e);
     return false;
   }
 };
@@ -50,6 +47,28 @@ export const checkContactMessagesExists = async (): Promise<boolean> => {
     return true;
   } catch (e) {
     console.error('Exceção ao verificar tabela contact_messages:', e);
+    return false;
+  }
+};
+
+// Função para garantir que a tabela mensagem_agenda existe
+export const checkMensagemAgendaExists = async (): Promise<boolean> => {
+  try {
+    console.log('Verificando se a tabela mensagem_agenda existe...');
+    const { data, error } = await supabase
+      .from('mensagem_agenda')
+      .select('id')
+      .limit(1);
+    
+    if (error) {
+      console.log('Erro ao verificar tabela mensagem_agenda:', error);
+      return false;
+    }
+    
+    console.log('Tabela mensagem_agenda encontrada!');
+    return true;
+  } catch (e) {
+    console.error('Exceção ao verificar tabela mensagem_agenda:', e);
     return false;
   }
 };
