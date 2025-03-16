@@ -36,6 +36,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mensagens_de_contato: {
+        Row: {
+          criado_em: string
+          e_mail: string
+          id: string
+          mensagem: string
+          nome: string
+          telefone: string
+        }
+        Insert: {
+          criado_em?: string
+          e_mail: string
+          id?: string
+          mensagem: string
+          nome: string
+          telefone: string
+        }
+        Update: {
+          criado_em?: string
+          e_mail?: string
+          id?: string
+          mensagem?: string
+          nome?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
