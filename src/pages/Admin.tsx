@@ -77,7 +77,7 @@ const Admin = () => {
         ) : (
           <div className="space-y-8">
             <CustomerMessagesList 
-              tableExists={tablesExist.mensagemAgenda}
+              tableExists={tablesExist.contactMessages}
               mensagens={mensagens}
               formatDate={formatDate}
               checkTables={handleRefresh}

@@ -32,13 +32,37 @@ export const checkMensagemAgendaExists = async (): Promise<boolean> => {
   }
 };
 
+// Verifica se a tabela contact_messages existe
+export const checkContactMessagesExists = async (): Promise<boolean> => {
+  try {
+    console.log('Verificando se a tabela contact_messages existe...');
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('id')
+      .limit(1);
+    
+    if (error) {
+      console.log('Erro ao verificar tabela contact_messages:', error);
+      return false;
+    }
+    
+    console.log('Tabela contact_messages encontrada!');
+    return true;
+  } catch (e) {
+    console.error('Exceção ao verificar tabela contact_messages:', e);
+    return false;
+  }
+};
+
 // Função genérica para verificar tabelas com verificação de tipos
-export const checkTableExists = async (tableName: 'mensagem_agenda'): Promise<boolean> => {
+export const checkTableExists = async (tableName: 'mensagem_agenda' | 'contact_messages'): Promise<boolean> => {
   try {
     console.log(`Verificando se a tabela ${tableName} existe...`);
     
     if (tableName === 'mensagem_agenda') {
       return await checkMensagemAgendaExists();
+    } else if (tableName === 'contact_messages') {
+      return await checkContactMessagesExists();
     }
     
     // Adicione mais casos aqui se precisar verificar outras tabelas

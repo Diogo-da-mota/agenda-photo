@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase, checkTableExists } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface MensagemAgenda {
+interface ContactMessage {
   id: string;
   created_at: string;
   name: string;
@@ -13,21 +13,24 @@ interface MensagemAgenda {
 }
 
 export const useMessageData = (isAuthenticated: boolean) => {
-  const [mensagens, setMensagens] = useState<MensagemAgenda[]>([]);
+  const [mensagens, setMensagens] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [tableExists, setTableExists] = useState(false);
+  const [tablesExist, setTablesExist] = useState({
+    mensagemAgenda: false,
+    contactMessages: false
+  });
   const { toast } = useToast();
 
   // Função para buscar mensagens do Supabase
   const fetchMensagens = useCallback(async () => {
-    if (!tableExists) return;
+    if (!tablesExist.contactMessages) return;
     
     setIsLoading(true);
     try {
-      console.log('Buscando mensagens...');
+      console.log('Buscando mensagens da tabela contact_messages...');
       const { data, error } = await supabase
-        .from('mensagem_agenda')
+        .from('contact_messages')
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -47,16 +50,21 @@ export const useMessageData = (isAuthenticated: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  }, [tableExists, toast]);
+  }, [tablesExist.contactMessages, toast]);
 
-  // Verificar se a tabela existe e buscar mensagens se existir
+  // Verificar se as tabelas existem e buscar mensagens se existirem
   const verifyTableAndFetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const exists = await checkTableExists('mensagem_agenda');
-      setTableExists(exists);
+      const mensagemAgendaExists = await checkTableExists('mensagem_agenda');
+      const contactMessagesExists = await checkTableExists('contact_messages');
       
-      if (exists) {
+      setTablesExist({
+        mensagemAgenda: mensagemAgendaExists,
+        contactMessages: contactMessagesExists
+      });
+      
+      if (contactMessagesExists) {
         fetchMensagens();
       } else {
         setIsLoading(false);
@@ -67,7 +75,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar tabela:', error);
+      console.error('Erro ao verificar tabelas:', error);
       setIsLoading(false);
     }
   }, [fetchMensagens, toast]);
@@ -79,21 +87,21 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [isAuthenticated, verifyTableAndFetchData]);
 
-  // Configurar escuta de tempo real para atualizações na tabela
+  // Configurar escuta de tempo real para atualizações na tabela contact_messages
   useEffect(() => {
-    if (isAuthenticated && tableExists) {
+    if (isAuthenticated && tablesExist.contactMessages) {
       const channel = supabase
-        .channel('mensagem-agenda-changes')
+        .channel('contact-messages-changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'mensagem_agenda'
+            table: 'contact_messages'
           },
           (payload) => {
             console.log('Nova mensagem recebida:', payload);
-            const newMessage = payload.new as MensagemAgenda;
+            const newMessage = payload.new as ContactMessage;
             setMensagens(prevMessages => [newMessage, ...prevMessages]);
             toast({
               title: "Nova mensagem recebida",
@@ -102,14 +110,14 @@ export const useMessageData = (isAuthenticated: boolean) => {
           }
         )
         .subscribe((status) => {
-          console.log('Status da inscrição em mensagem_agenda:', status);
+          console.log('Status da inscrição em contact_messages:', status);
         });
 
       return () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [isAuthenticated, tableExists, toast]);
+  }, [isAuthenticated, tablesExist.contactMessages, toast]);
 
   // Função para atualizar manualmente as mensagens
   const handleRefresh = useCallback(() => {
@@ -118,16 +126,18 @@ export const useMessageData = (isAuthenticated: boolean) => {
       setIsRefreshing(false);
       toast({
         title: "Verificação concluída",
-        description: tableExists ? "As mensagens foram atualizadas" : "A tabela ainda não está disponível"
+        description: tablesExist.contactMessages 
+          ? "As mensagens foram atualizadas" 
+          : "A tabela ainda não está disponível"
       });
     });
-  }, [verifyTableAndFetchData, tableExists, toast]);
+  }, [verifyTableAndFetchData, tablesExist.contactMessages, toast]);
 
   return {
     mensagens,
     isLoading,
     isRefreshing,
-    tablesExist: { mensagemAgenda: tableExists },
+    tablesExist,
     handleRefresh
   };
 };

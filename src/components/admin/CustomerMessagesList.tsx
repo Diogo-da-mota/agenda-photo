@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface MensagemAgenda {
+interface ContactMessage {
   id: string;
   created_at: string;
   name: string;
@@ -17,7 +17,7 @@ interface MensagemAgenda {
 
 interface CustomerMessagesListProps {
   tableExists: boolean;
-  mensagens: MensagemAgenda[];
+  mensagens: ContactMessage[];
   formatDate: (dateString: string) => string;
   checkTables: () => void;
 }
@@ -37,7 +37,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
             <Alert className="mb-4 bg-yellow-50 border-yellow-200">
               <AlertCircle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800">
-                A tabela 'mensagem_agenda' não foi encontrada no Supabase.
+                A tabela de mensagens não foi encontrada no Supabase.
                 <p className="mt-2 text-sm">
                   A tabela foi criada, mas pode levar alguns instantes para ficar disponível.
                   Por favor, aguarde um pouco e tente novamente.
@@ -54,7 +54,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               </Button>
             </div>
             <div className="mt-4 text-sm text-gray-500">
-              <p>A tabela 'mensagem_agenda' foi criada com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
+              <p>A tabela foi criada com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
               <p className="mt-2 font-medium">Se o problema persistir após várias tentativas, tente atualizar a página inteira ou abrir o console do Supabase para verificar o estado da tabela.</p>
             </div>
           </CardContent>
