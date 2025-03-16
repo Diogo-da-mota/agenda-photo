@@ -34,19 +34,31 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
       {!tableExists ? (
         <Card className="text-center py-8">
           <CardContent>
-            <Alert className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                A tabela de mensagens da agenda não foi encontrada no Supabase.
+            <Alert className="mb-4 bg-yellow-50 border-yellow-200">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                A tabela 'mensagem_agenda' não foi encontrada no Supabase.
+                <p className="mt-2 text-sm">
+                  Por favor, verifique se a tabela foi criada corretamente no painel do Supabase.
+                </p>
               </AlertDescription>
             </Alert>
-            <Button onClick={checkTables}>Verificar novamente</Button>
+            <div className="mt-4">
+              <Button onClick={checkTables}>Verificar novamente</Button>
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Dica: Acesse o Supabase e verifique se a tabela 'mensagem_agenda' existe.</p>
+              <p>Se não existir, crie-a com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
+            </div>
           </CardContent>
         </Card>
       ) : mensagens.length === 0 ? (
         <Card className="text-center py-8">
           <CardContent>
             <p>Nenhuma mensagem encontrada</p>
+            <div className="mt-4">
+              <Button onClick={checkTables} variant="outline">Atualizar</Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

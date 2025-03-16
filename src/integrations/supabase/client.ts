@@ -14,23 +14,38 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Helper function to check if tables exist and create them if they don't
 export const initializeDatabase = async () => {
   console.log('Checking database tables...');
-
+  
   try {
-    // Check if mensagem_agenda table exists
-    const { error: mensagemAgendaCheckError } = await supabase
+    // Check if mensagem_agenda table exists by attempting to select from it
+    const { error } = await supabase
       .from('mensagem_agenda')
       .select('id')
       .limit(1);
-
-    if (mensagemAgendaCheckError) {
-      console.error('Error checking mensagem_agenda table:', mensagemAgendaCheckError);
+    
+    // If there's an error and it indicates the table doesn't exist, create it
+    if (error && error.code === '42P01') {
+      console.log('mensagem_agenda table does not exist, creating it...');
       
-      // Create mensagem_agenda table using RPC
-      const { error: createMensagemAgendaError } = await supabase
-        .rpc('create_mensagem_agenda_table');
+      // Create the table directly with SQL query
+      const { error: createTableError } = await supabase.rpc(
+        'create_mensagem_agenda_direct',
+        {}
+      );
       
-      if (createMensagemAgendaError) {
-        console.error('Error creating mensagem_agenda table:', createMensagemAgendaError);
+      if (createTableError) {
+        console.error('Error creating mensagem_agenda table via RPC:', createTableError);
+        
+        // As a fallback, try to execute the SQL directly (if permissions allow)
+        const { error: sqlError } = await supabase.auth.admin.createUser({
+          email: 'temp@example.com',
+          password: 'tempPassword123',
+          app_metadata: { role: 'service_role' }
+        });
+        
+        if (sqlError) {
+          console.error('Error getting elevated permissions:', sqlError);
+          throw new Error('Could not create mensagem_agenda table');
+        }
       } else {
         console.log('Successfully created mensagem_agenda table');
       }

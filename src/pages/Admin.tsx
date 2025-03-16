@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/utils/formatDate";
 import { useMessageData } from "@/hooks/useMessageData";
-import { initializeDatabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
@@ -23,7 +22,6 @@ const Admin = () => {
     isLoading, 
     isRefreshing, 
     tablesExist, 
-    checkTables, 
     handleRefresh 
   } = useMessageData(isAuthenticated);
 
@@ -40,16 +38,13 @@ const Admin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsInitializing(true);
       try {
-        // Initialize database tables if needed
-        await initializeDatabase();
         setIsAuthenticated(true);
         localStorage.setItem("adminAuthenticated", "true");
-        checkTables();
       } catch (error) {
-        console.error('Error initializing database:', error);
+        console.error('Error during login:', error);
         toast({
           title: "Erro",
-          description: "Erro ao inicializar o banco de dados",
+          description: "Erro ao inicializar a sessão",
           variant: "destructive",
         });
       } finally {
@@ -94,7 +89,7 @@ const Admin = () => {
               tableExists={tablesExist.mensagemAgenda}
               mensagens={mensagens}
               formatDate={formatDate}
-              checkTables={checkTables}
+              checkTables={handleRefresh}
             />
           </div>
         )}

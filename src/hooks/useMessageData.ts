@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase, initializeDatabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface MensagemAgenda {
@@ -25,25 +25,49 @@ export const useMessageData = (isAuthenticated: boolean) => {
   });
   const { toast } = useToast();
 
+  // Function to check if the mensagem_agenda table exists
+  const checkTableExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('mensagem_agenda')
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.error('Error checking table:', error);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error('Exception checking table:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
-      // Initialize database tables if needed
-      initializeDatabase().then(() => {
-        checkTables();
-      }).catch(error => {
-        console.error('Error initializing database:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao inicializar o banco de dados",
-          variant: "destructive",
-        });
+      // Check if table exists first
+      checkTableExists().then(exists => {
+        if (exists) {
+          setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+          fetchMensagens();
+        } else {
+          console.log('Table does not exist, showing message to user');
+          setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
+          setIsLoading(false);
+          toast({
+            title: "Tabela não encontrada",
+            description: "A tabela de mensagens não foi encontrada no Supabase. Por favor, verifique sua configuração.",
+            variant: "destructive",
+          });
+        }
       });
     }
   }, [isAuthenticated, toast]);
 
   useEffect(() => {
-    // Only set up realtime subscription if authenticated
-    if (isAuthenticated) {
+    // Only set up realtime subscription if authenticated and table exists
+    if (isAuthenticated && tablesExist.mensagemAgenda) {
       // Set up realtime subscription to mensagem_agenda table
       const channel = supabase
         .channel('mensagem-agenda-changes')
@@ -73,42 +97,10 @@ export const useMessageData = (isAuthenticated: boolean) => {
         supabase.removeChannel(channel);
       };
     }
-  }, [isAuthenticated, toast]);
-
-  const checkTables = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Verificando tabelas...');
-      
-      // Verificar tabela mensagem_agenda tentando buscar dados diretamente
-      const { data: mensagemData, error: mensagemError } = await supabase
-        .from('mensagem_agenda')
-        .select('*')
-        .limit(1);
-      
-      console.log('Verificação de mensagem_agenda:', { mensagemData, mensagemError });
-      
-      if (!mensagemError) {
-        console.log('Tabela mensagem_agenda existe e está acessível');
-        setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
-        fetchMensagens();
-      } else {
-        console.error('Erro ao acessar mensagem_agenda:', mensagemError);
-        setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
-      }
-    } catch (error) {
-      console.error('Erro ao verificar tabelas:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao verificar tabelas no Supabase",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [isAuthenticated, tablesExist.mensagemAgenda, toast]);
 
   const fetchMensagens = async () => {
+    setIsLoading(true);
     try {
       console.log('Buscando mensagens...');
       const { data, error } = await supabase
@@ -129,20 +121,39 @@ export const useMessageData = (isAuthenticated: boolean) => {
         description: "Não foi possível carregar as mensagens",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    Promise.all([
-      tablesExist.mensagemAgenda ? fetchMensagens() : Promise.resolve()
-    ]).finally(() => {
-      setIsRefreshing(false);
-      toast({
-        title: "Atualizado",
-        description: "As mensagens foram atualizadas com sucesso"
+    if (!tablesExist.mensagemAgenda) {
+      // Re-check if table exists
+      checkTableExists().then(exists => {
+        if (exists) {
+          setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+          fetchMensagens();
+          toast({
+            title: "Tabela encontrada",
+            description: "A tabela de mensagens foi encontrada e os dados foram carregados."
+          });
+        } else {
+          toast({
+            title: "Tabela não encontrada",
+            description: "A tabela de mensagens ainda não existe no Supabase."
+          });
+        }
       });
-    });
+    } else {
+      setIsRefreshing(true);
+      fetchMensagens().finally(() => {
+        setIsRefreshing(false);
+        toast({
+          title: "Atualizado",
+          description: "As mensagens foram atualizadas com sucesso"
+        });
+      });
+    }
   };
 
   return {
@@ -150,7 +161,6 @@ export const useMessageData = (isAuthenticated: boolean) => {
     isLoading,
     isRefreshing,
     tablesExist,
-    checkTables,
     handleRefresh
   };
 };
