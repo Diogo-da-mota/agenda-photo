@@ -21,7 +21,7 @@ const Admin = () => {
     isLoading, 
     isRefreshing, 
     isCreatingTable,
-    tablesExist, 
+    tableExists, 
     handleRefresh,
     createTable
   } = useMessageData(isAuthenticated);
@@ -79,7 +79,7 @@ const Admin = () => {
         ) : (
           <div className="space-y-8">
             <CustomerMessagesList 
-              tableExists={tablesExist.contactMessages}
+              tableExists={tableExists}
               mensagens={mensagens}
               formatDate={formatDate}
               checkTables={handleRefresh}

@@ -17,15 +17,12 @@ export const useMessageData = (isAuthenticated: boolean) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCreatingTable, setIsCreatingTable] = useState(false);
-  const [tablesExist, setTablesExist] = useState({
-    mensagemAgenda: false,
-    contactMessages: false
-  });
+  const [tableExists, setTableExists] = useState(false);
   const { toast } = useToast();
 
   // Função para buscar mensagens do Supabase
   const fetchMensagens = useCallback(async () => {
-    if (!tablesExist.contactMessages) return;
+    if (!tableExists) return;
     
     setIsLoading(true);
     try {
@@ -51,7 +48,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  }, [tablesExist.contactMessages, toast]);
+  }, [tableExists, toast]);
 
   // Nova função para criar a tabela diretamente
   const createTable = useCallback(async () => {
@@ -68,10 +65,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         // Verificamos novamente se a tabela agora existe
         const contactMessagesExists = await checkTableExists('contact_messages');
         
-        setTablesExist(prev => ({
-          ...prev,
-          contactMessages: contactMessagesExists
-        }));
+        setTableExists(contactMessagesExists);
         
         if (contactMessagesExists) {
           fetchMensagens();
@@ -95,20 +89,16 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [fetchMensagens, toast]);
 
-  // Verificar se as tabelas existem e buscar mensagens
+  // Verificar se a tabela existe e buscar mensagens
   const verifyTableAndFetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log('Verificando se as tabelas existem...');
+      console.log('Verificando se a tabela contact_messages existe...');
       
-      // Verificar se as tabelas estão acessíveis
-      const mensagemAgendaExists = await checkTableExists('mensagem_agenda');
+      // Verificar se a tabela está acessível
       const contactMessagesExists = await checkTableExists('contact_messages');
       
-      setTablesExist({
-        mensagemAgenda: mensagemAgendaExists,
-        contactMessages: contactMessagesExists
-      });
+      setTableExists(contactMessagesExists);
       
       if (contactMessagesExists) {
         fetchMensagens();
@@ -121,7 +111,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar tabelas:', error);
+      console.error('Erro ao verificar tabela:', error);
       setIsLoading(false);
     }
   }, [fetchMensagens, toast]);
@@ -135,7 +125,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
 
   // Configurar escuta de tempo real para atualizações na tabela contact_messages
   useEffect(() => {
-    if (isAuthenticated && tablesExist.contactMessages) {
+    if (isAuthenticated && tableExists) {
       const channel = supabase
         .channel('contact-messages-changes')
         .on(
@@ -163,7 +153,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         supabase.removeChannel(channel);
       };
     }
-  }, [isAuthenticated, tablesExist.contactMessages, toast]);
+  }, [isAuthenticated, tableExists, toast]);
 
   // Função para atualizar manualmente as mensagens
   const handleRefresh = useCallback(() => {
@@ -172,19 +162,19 @@ export const useMessageData = (isAuthenticated: boolean) => {
       setIsRefreshing(false);
       toast({
         title: "Verificação concluída",
-        description: tablesExist.contactMessages 
+        description: tableExists 
           ? "As mensagens foram atualizadas" 
           : "A tabela ainda não existe. Use a opção 'Criar tabela' para criá-la manualmente."
       });
     });
-  }, [verifyTableAndFetchData, tablesExist.contactMessages, toast]);
+  }, [verifyTableAndFetchData, tableExists, toast]);
 
   return {
     mensagens,
     isLoading,
     isRefreshing,
     isCreatingTable,
-    tablesExist,
+    tableExists,
     handleRefresh,
     createTable
   };
