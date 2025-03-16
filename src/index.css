@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -53,15 +53,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    min-height: 100vh;
-    width: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Classes utilitárias simplificadas */
+  /* Custom utility classes */
   .glass {
     @apply backdrop-blur-lg bg-white/90 shadow-xl border border-white/20;
   }
@@ -71,26 +67,28 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+    @apply transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1;
   }
 
   .button-hover {
-    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0;
+    @apply transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-none;
   }
 
   .input-focus {
-    @apply focus:ring-2 focus:border-primary transition-all;
+    @apply focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200;
   }
 }
 
-/* Animações de página simplificadas */
+/* Delicate animations for page transitions */
 .page-enter {
   opacity: 0;
+  transform: translateY(10px);
 }
 
 .page-enter-active {
   opacity: 1;
-  transition: opacity 250ms;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
 }
 
 .page-exit {
@@ -99,20 +97,18 @@
 
 .page-exit-active {
   opacity: 0;
-  transition: opacity 250ms;
+  transition: opacity 300ms;
 }
 
-/* Scroll suave apenas quando necessário */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }
 
-/* Scrollbar otimizada */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -122,4 +118,8 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
