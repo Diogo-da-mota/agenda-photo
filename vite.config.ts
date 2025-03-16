@@ -32,35 +32,58 @@ export default defineConfig(({ mode }) => ({
     // Melhorar divisão de código
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@/components/ui'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            } else if (id.includes('ui')) {
+              return 'ui-components';
+            }
+            return 'vendor'; // outros node_modules
+          }
         },
       },
     },
     // Reduzir tamanho do pacote final
-    chunkSizeWarningLimit: 1000,
-    // Definir navegadores alvo diretamente sem usar browserslist
+    chunkSizeWarningLimit: 1500,
+    // Definir navegadores alvo para compatibilidade
     target: 'es2015',
-    // Forçar atualização do browserslist durante o build
+    // Prevenir o erro EISDIR
+    emptyOutDir: true,
+    // Melhorar compatibilidade com CommonJS
     commonjsOptions: {
       transformMixedEsModules: true,
       include: [/node_modules/],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      requireReturnsDefault: 'auto',
       defaultIsModuleExports: true,
     },
     // Garantir compatibilidade com navegadores modernos
     modulePreload: {
       polyfill: true,
     },
-    // Aumentar limite de tempo para evitar timeouts durante o build
+    // Configurações adicionais para melhorar a estabilidade
     assetsInlineLimit: 4096,
-    // Otimizar a geração de assets
     cssCodeSplit: true,
     sourcemap: false,
+    reportCompressedSize: false,
   },
   // Desabilitar verificações de browserlist durante o desenvolvimento
   esbuild: {
     target: 'es2015',
     legalComments: 'none',
+    supported: {
+      'top-level-await': true
+    },
   },
+  // Otimizar o processo de resolução de dependências
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'es2015',
+      supported: { 
+        bigint: true 
+      },
+    },
+    exclude: [],
+  }
 }));
