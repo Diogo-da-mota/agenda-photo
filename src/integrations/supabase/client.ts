@@ -23,7 +23,8 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
     // For type safety, we need to check if the table name is one we expect
     if (tableName === 'contact_messages') {
       // Try to query the table to see if it exists and is accessible
-      const { data, error } = await supabase
+      // Using any type here to bypass type checking since we're just checking if the table exists
+      const { data, error } = await (supabase as any)
         .from('contact_messages')
         .select('*')
         .limit(1);
@@ -74,7 +75,8 @@ export const createContactMessagesTable = async (): Promise<boolean> => {
     console.log('Attempting to create contact_messages table...');
     
     // Call the stored procedure to create the table
-    const { data, error } = await supabase.rpc('ensure_contact_messages_table');
+    // Using any type here to bypass type checking since ensure_contact_messages_table exists in the DB but not in types
+    const { data, error } = await (supabase as any).rpc('ensure_contact_messages_table');
     
     if (error) {
       console.error('Error creating contact_messages table:', error.message);

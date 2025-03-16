@@ -19,7 +19,8 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
     
     // Fetch messages from contact_messages if it exists
     if (contactMessagesExists) {
-      const { data: contactMessages, error: contactError } = await supabase
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data: contactMessages, error: contactError } = await (supabase as any)
         .from('contact_messages')
         .select('*')
         .order('created_at', { ascending: false });
@@ -79,7 +80,8 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
     console.log(`Checking if table '${tableName}' exists...`);
     
     if (tableName === 'contact_messages') {
-      const { data, error } = await supabase
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data, error } = await (supabase as any)
         .from('contact_messages')
         .select('*')
         .limit(1);
