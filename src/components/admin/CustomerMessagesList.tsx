@@ -6,18 +6,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw, Database, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface ContactMessage {
+// Define the standardized message type
+interface StandardizedMessage {
   id: string;
   created_at: string;
   name: string;
   email: string;
   phone: string | null;
   message: string;
+  original_table?: string;
 }
 
 interface CustomerMessagesListProps {
   tableExists: boolean;
-  mensagens: ContactMessage[];
+  mensagens: StandardizedMessage[];
   formatDate: (dateString: string) => string;
   checkTables: () => void;
   createTable: () => Promise<void>;
@@ -104,6 +106,11 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
                   </div>
                   <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
                     {formatDate(message.created_at)}
+                    {message.original_table && (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({message.original_table === 'contact_messages' ? 'Contato' : 'Questionário'})
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardHeader>

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase, checkTableExists, createContactMessagesTable } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+// Define the types for the different message formats
 interface ContactMessage {
   id: string;
   created_at: string;
@@ -21,11 +22,19 @@ interface MensagemDeContato {
   mensagem: string;
 }
 
-// Union type for all message types
-type Message = ContactMessage | MensagemDeContato;
+// Create a standardized message type that both tables can be mapped to
+interface StandardizedMessage {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  original_table?: string; // Track which table the message came from
+}
 
 export const useMessageData = (isAuthenticated: boolean) => {
-  const [mensagens, setMensagens] = useState<Message[]>([]);
+  const [mensagens, setMensagens] = useState<StandardizedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCreatingTable, setIsCreatingTable] = useState(false);
@@ -36,7 +45,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
   const fetchAllMessages = useCallback(async () => {
     setIsLoading(true);
     try {
-      let allMessages: Message[] = [];
+      let allMessages: StandardizedMessage[] = [];
       let contactMessagesExists = false;
       let mensagensDeContatoExists = false;
 
@@ -66,7 +75,13 @@ export const useMessageData = (isAuthenticated: boolean) => {
           console.error('Error fetching from contact_messages:', contactError);
         } else if (contactData) {
           console.log(`Received ${contactData.length} messages from contact_messages`);
-          allMessages = [...allMessages, ...contactData];
+          // Map directly as they already match StandardizedMessage format
+          const standardizedContactMessages = contactData.map(msg => ({
+            ...msg,
+            original_table: 'contact_messages'
+          } as StandardizedMessage));
+          
+          allMessages = [...allMessages, ...standardizedContactMessages];
         }
       }
       
@@ -83,30 +98,24 @@ export const useMessageData = (isAuthenticated: boolean) => {
         } else if (mensagensData) {
           console.log(`Received ${mensagensData.length} messages from mensagens_de_contato`);
           
-          // Map the mensagens_de_contato fields to match contact_messages format for display
-          const mappedMensagens = mensagensData.map(msg => ({
+          // Map the mensagens_de_contato fields to match StandardizedMessage format
+          const standardizedMensagens = mensagensData.map(msg => ({
             id: msg.id,
             created_at: msg.criado_em,
             name: msg.nome,
             email: msg.e_mail,
             phone: msg.telefone,
-            message: msg.mensagem
-          })) as ContactMessage[];
+            message: msg.mensagem,
+            original_table: 'mensagens_de_contato'
+          } as StandardizedMessage));
           
-          allMessages = [...allMessages, ...mappedMensagens];
+          allMessages = [...allMessages, ...standardizedMensagens];
         }
       }
       
       // Sort all messages by date (newest first)
       allMessages.sort((a, b) => {
-        const dateA = a.hasOwnProperty('created_at') 
-          ? (a as ContactMessage).created_at 
-          : (a as MensagemDeContato).criado_em;
-        const dateB = b.hasOwnProperty('created_at') 
-          ? (b as ContactMessage).created_at 
-          : (b as MensagemDeContato).criado_em;
-        
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
       
       console.log('All messages sorted:', allMessages);
@@ -213,7 +222,12 @@ export const useMessageData = (isAuthenticated: boolean) => {
           (payload) => {
             console.log('Nova mensagem em contact_messages recebida:', payload);
             const newMessage = payload.new as ContactMessage;
-            setMensagens(prevMessages => [newMessage, ...prevMessages]);
+            const standardizedMessage: StandardizedMessage = {
+              ...newMessage,
+              original_table: 'contact_messages'
+            };
+            
+            setMensagens(prevMessages => [standardizedMessage, ...prevMessages]);
             toast({
               title: "Nova mensagem recebida",
               description: `Nova mensagem de ${newMessage.name}`,
@@ -237,16 +251,17 @@ export const useMessageData = (isAuthenticated: boolean) => {
             const newMessage = payload.new as MensagemDeContato;
             
             // Convert to the standard format
-            const mappedMessage = {
+            const standardizedMessage: StandardizedMessage = {
               id: newMessage.id,
               created_at: newMessage.criado_em,
               name: newMessage.nome,
               email: newMessage.e_mail,
               phone: newMessage.telefone,
-              message: newMessage.mensagem
+              message: newMessage.mensagem,
+              original_table: 'mensagens_de_contato'
             };
             
-            setMensagens(prevMessages => [mappedMessage, ...prevMessages]);
+            setMensagens(prevMessages => [standardizedMessage, ...prevMessages]);
             toast({
               title: "Nova mensagem recebida",
               description: `Nova mensagem de ${newMessage.nome}`,
