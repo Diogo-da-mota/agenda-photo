@@ -39,7 +39,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         });
       });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, toast]);
 
   useEffect(() => {
     // Only set up realtime subscription if authenticated
