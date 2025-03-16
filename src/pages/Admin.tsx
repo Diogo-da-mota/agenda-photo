@@ -7,6 +7,7 @@ import { useMessageData } from "@/hooks/useMessageData";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
+import { initializeDatabase } from "@/integrations/supabase/client";
 
 const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
@@ -38,6 +39,8 @@ const Admin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsInitializing(true);
       try {
+        // Try to initialize the database on login
+        await initializeDatabase();
         setIsAuthenticated(true);
         localStorage.setItem("adminAuthenticated", "true");
       } catch (error) {

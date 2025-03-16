@@ -16,37 +16,37 @@ export const initializeDatabase = async () => {
   console.log('Checking database tables...');
   
   try {
-    // Check if mensagem_agenda table exists by attempting to select from it
+    // More direct approach - try creating the table via RPC first
+    console.log('Attempting to create mensagem_agenda table via RPC...');
+    
+    const { error: createTableError } = await supabase.rpc(
+      'create_mensagem_agenda_table',
+      {}
+    );
+    
+    if (createTableError) {
+      console.error('Error creating mensagem_agenda table via RPC:', createTableError);
+      console.log('Will check if table already exists despite RPC error...');
+    } else {
+      console.log('RPC call to create table completed without errors');
+    }
+    
+    // Now check if the table exists after attempting to create it
+    console.log('Verifying if mensagem_agenda table exists...');
     const { error } = await supabase
       .from('mensagem_agenda')
       .select('id')
       .limit(1);
     
-    // If there's an error and it indicates the table doesn't exist, create it
     if (error && error.code === '42P01') {
-      console.log('mensagem_agenda table does not exist, creating it...');
-      
-      // Create the table using the defined function in the Database type
-      const { error: createTableError } = await supabase.rpc(
-        'create_mensagem_agenda_table',
-        {}
-      );
-      
-      if (createTableError) {
-        console.error('Error creating mensagem_agenda table via RPC:', createTableError);
-        
-        // Let the user know what happened
-        return false;
-      } else {
-        console.log('Successfully created mensagem_agenda table');
-        return true;
-      }
+      console.error('Table still does not exist after creation attempt:', error);
+      return false;
     } else if (error) {
-      // Handle other errors
-      console.error('Error checking mensagem_agenda table:', error);
+      // Some other error occurred during verification
+      console.error('Error verifying mensagem_agenda table:', error);
       return false;
     } else {
-      console.log('mensagem_agenda table exists');
+      console.log('mensagem_agenda table verified and exists');
       return true;
     }
   } catch (error) {

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, initializeDatabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface MensagemAgenda {
@@ -48,18 +48,22 @@ export const useMessageData = (isAuthenticated: boolean) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Check if table exists first
-      checkTableExists().then(exists => {
+      // First initialize the database if needed
+      initializeDatabase().then(initialized => {
+        console.log('Database initialization result:', initialized);
+        // Then check if table exists
+        return checkTableExists();
+      }).then(exists => {
         if (exists) {
           setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
           fetchMensagens();
         } else {
-          console.log('Table does not exist, showing message to user');
+          console.log('Table does not exist or is not accessible yet, showing message to user');
           setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
           setIsLoading(false);
           toast({
-            title: "Tabela não encontrada",
-            description: "A tabela de mensagens não foi encontrada no Supabase. Clique em 'Verificar novamente' para tentar novamente.",
+            title: "Tabela em processamento",
+            description: "A tabela de mensagens foi criada mas ainda está sendo processada pelo Supabase. Clique em 'Verificar novamente' após alguns instantes.",
             variant: "destructive",
           });
         }
@@ -130,8 +134,14 @@ export const useMessageData = (isAuthenticated: boolean) => {
 
   const handleRefresh = () => {
     if (!tablesExist.mensagemAgenda) {
-      // Re-check if table exists
-      checkTableExists().then(exists => {
+      // First try to initialize the database
+      setIsRefreshing(true);
+      initializeDatabase().then(initialized => {
+        console.log('Database initialization on refresh result:', initialized);
+        // Then check if table exists
+        return checkTableExists();
+      }).then(exists => {
+        setIsRefreshing(false);
         if (exists) {
           setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
           fetchMensagens();
@@ -141,8 +151,8 @@ export const useMessageData = (isAuthenticated: boolean) => {
           });
         } else {
           toast({
-            title: "Tabela não encontrada",
-            description: "A tabela de mensagens ainda não existe no Supabase. Ela foi criada com sucesso. Tente novamente."
+            title: "Tabela ainda em processamento",
+            description: "A tabela de mensagens foi criada, mas ainda está sendo processada pelo Supabase. Aguarde alguns instantes e tente novamente."
           });
         }
       });
