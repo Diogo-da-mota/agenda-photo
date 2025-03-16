@@ -474,7 +474,7 @@ const Survey = () => {
     console.log("Respostas complementares:", followUpResponses);
     
     // First, try to submit to Supabase before showing the thank you page
-    submitToSupabase().then(() => {
+    submitToSupabase().then((success) => {
       setAnimation('fade-out');
       setTimeout(() => {
         setShowThankYou(true);
@@ -848,4 +848,4 @@ const Survey = () => {
 
   if (showContactForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6
