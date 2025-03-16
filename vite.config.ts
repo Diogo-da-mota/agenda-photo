@@ -41,6 +41,16 @@ export default defineConfig(({ mode }) => ({
     // Reduzir tamanho do pacote final
     chunkSizeWarningLimit: 1000,
     // Corrigir problema com browserlist
-    target: 'esnext'
+    target: 'esnext',
+    // Forçar atualização do browserslist durante o build
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    // Garantir compatibilidade com navegadores modernos
+    modulePreload: {
+      polyfill: true,
+    },
+    // Aumentar limite de tempo para evitar timeouts durante o build
+    assetsInlineLimit: 4096,
   },
 }));
