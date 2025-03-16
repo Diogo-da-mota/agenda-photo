@@ -7,7 +7,6 @@ import { useMessageData } from "@/hooks/useMessageData";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
-import { initializeDatabase } from "@/integrations/supabase/client";
 
 const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
@@ -15,7 +14,6 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(false);
   const { toast } = useToast();
   
   const { 
@@ -34,25 +32,15 @@ const Admin = () => {
     }
   }, []);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     setError(null);
     if (password === ADMIN_PASSWORD) {
-      setIsInitializing(true);
-      try {
-        // Try to initialize the database on login
-        await initializeDatabase();
-        setIsAuthenticated(true);
-        localStorage.setItem("adminAuthenticated", "true");
-      } catch (error) {
-        console.error('Error during login:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao inicializar a sessão",
-          variant: "destructive",
-        });
-      } finally {
-        setIsInitializing(false);
-      }
+      setIsAuthenticated(true);
+      localStorage.setItem("adminAuthenticated", "true");
+      toast({
+        title: "Login realizado",
+        description: "Você foi autenticado com sucesso."
+      });
     } else {
       setError("Senha incorreta. Tente novamente.");
     }
@@ -79,7 +67,7 @@ const Admin = () => {
             password={password}
             setPassword={setPassword}
             error={error}
-            isLoading={isInitializing}
+            isLoading={false}
           />
         ) : isLoading ? (
           <div className="flex justify-center items-center py-12">
