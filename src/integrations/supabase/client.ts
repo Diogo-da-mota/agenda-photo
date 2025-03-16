@@ -26,9 +26,9 @@ export const initializeDatabase = async () => {
     if (error && error.code === '42P01') {
       console.log('mensagem_agenda table does not exist, creating it...');
       
-      // Create the table directly with SQL query
+      // Create the table using the defined function in the Database type
       const { error: createTableError } = await supabase.rpc(
-        'create_mensagem_agenda_direct',
+        'create_mensagem_agenda_table',
         {}
       );
       
