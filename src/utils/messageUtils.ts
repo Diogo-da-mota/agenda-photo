@@ -152,17 +152,66 @@ export const submitSurveyData = async (
       return `${questionText}: ${answerText}`;
     }).join("\n\n");
 
-    // Create data for Supabase
+    // Create data for Supabase - strictly match column names
     const contactData = {
       nome: contactInfo.nome,
       e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
-      telefone: contactInfo.telefone,
+      telefone: contactInfo.telefone || contactInfo.phone || "",
       mensagem: surveyMessage,
+      // Note: criado_em is automatically set by Supabase with DEFAULT now()
     };
 
-    console.log("Enviando dados para Supabase:", contactData);
+    console.log("Enviando dados para o Supabase:", contactData);
 
     // Using the supabase client directly to ensure proper submission
+    const { data, error } = await supabase
+      .from('mensagens_de_contato')
+      .insert(contactData)
+      .select();
+
+    if (error) {
+      console.error("Erro ao enviar dados para Supabase:", error);
+      return false;
+    }
+    
+    console.log("Dados enviados com sucesso para Supabase:", data);
+    return true;
+  } catch (error) {
+    console.error("Exceção ao enviar dados para Supabase:", error);
+    return false;
+  }
+};
+
+/**
+ * Submit a simple contact form to Supabase
+ * @param formData Form data with name, email, phone, and message
+ * @returns Boolean indicating success of data submission
+ */
+export const submitContactForm = async (formData: {
+  nome: string;
+  email?: string;
+  e_mail?: string;
+  telefone?: string;
+  phone?: string;
+  mensagem?: string;
+  message?: string;
+}): Promise<boolean> => {
+  console.log('Submitting contact form to Supabase...');
+  console.log('Form data:', formData);
+  
+  try {
+    // Map form data to match the table column names exactly
+    const contactData = {
+      nome: formData.nome,
+      e_mail: formData.e_mail || formData.email || "",
+      telefone: formData.telefone || formData.phone || "",
+      mensagem: formData.mensagem || formData.message || "",
+      // criado_em is set automatically by Supabase
+    };
+
+    console.log("Enviando dados para o Supabase:", contactData);
+
+    // Insert into mensagens_de_contato table
     const { data, error } = await supabase
       .from('mensagens_de_contato')
       .insert(contactData)

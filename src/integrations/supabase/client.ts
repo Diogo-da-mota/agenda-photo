@@ -58,20 +58,6 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
       }
     }
     
-    // If the query approach didn't give a definitive answer, try using the RPC function
-    // Only applicable for contact_messages
-    if (tableName === 'contact_messages') {
-      const { data: tableInfo, error: tableError } = await supabase
-        .rpc('ensure_contact_messages_table');
-        
-      if (tableError) {
-        console.log('Error checking table existence via RPC:', tableError.message);
-        return false;
-      }
-      
-      return !!tableInfo;
-    }
-    
     return false;
   } catch (error) {
     console.error('Error checking if table exists:', error);
@@ -99,6 +85,40 @@ export const createContactMessagesTable = async (): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error('Error creating contact_messages table:', error);
+    return false;
+  }
+};
+
+/**
+ * Make a direct test submission to mensagens_de_contato table
+ * @returns Boolean indicating success of submission
+ */
+export const testSubmitMensagem = async (): Promise<boolean> => {
+  const testData = {
+    nome: "Teste de Integração",
+    e_mail: "teste@exemplo.com",
+    telefone: "11999999999",
+    mensagem: "Este é um teste de integração com o Supabase."
+    // criado_em is automatically set by DEFAULT now()
+  };
+  
+  try {
+    console.log('Fazendo envio de teste para mensagens_de_contato:', testData);
+    
+    const { data, error } = await supabase
+      .from('mensagens_de_contato')
+      .insert(testData)
+      .select();
+    
+    if (error) {
+      console.error('Erro ao fazer teste de envio:', error);
+      return false;
+    }
+    
+    console.log('Teste de envio bem-sucedido:', data);
+    return true;
+  } catch (error) {
+    console.error('Exceção ao fazer teste de envio:', error);
     return false;
   }
 };
