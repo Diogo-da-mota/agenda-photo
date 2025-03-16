@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { testarEnvioSupabase, testarEnvioFormulario } from '@/utils/testarEnvioSupabase';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AlertCircle, CheckCircle, Terminal } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "@/hooks/use-toast";
 
 export const TestSupabaseForm = () => {
   const [loading, setLoading] = useState(false);
@@ -23,9 +23,27 @@ export const TestSupabaseForm = () => {
       const response = await testarEnvioSupabase();
       setResult(response);
       console.log('Test results:', response);
+      
+      if (response.success) {
+        toast({
+          title: "Teste concluído com sucesso",
+          description: "Os dados padrão foram enviados para o Supabase",
+        });
+      } else {
+        toast({
+          title: "Erro no teste",
+          description: `Falha ao enviar dados: ${response.error?.message || 'Erro desconhecido'}`,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error in test:', error);
       setResult({ success: false, error });
+      toast({
+        title: "Erro no teste",
+        description: "Ocorreu um erro ao realizar o teste",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -41,18 +59,46 @@ export const TestSupabaseForm = () => {
         customDataObj = JSON.parse(customData);
       } catch (e) {
         setResult({ success: false, error: 'Formato JSON inválido. Verifique os dados inseridos.' });
+        toast({
+          title: "Formato JSON inválido",
+          description: "Verifique os dados inseridos e tente novamente",
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
 
       const response = await testarEnvioFormulario(customDataObj);
       setResult(response);
+      
+      if (response.success) {
+        toast({
+          title: "Teste concluído com sucesso",
+          description: "Os dados personalizados foram enviados para o Supabase",
+        });
+      } else {
+        toast({
+          title: "Erro no teste",
+          description: `Falha ao enviar dados: ${response.error?.message || 'Erro desconhecido'}`,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error in test:', error);
       setResult({ success: false, error });
+      toast({
+        title: "Erro no teste",
+        description: "Ocorreu um erro ao realizar o teste",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClearResults = () => {
+    setShowResponse(false);
+    setResult(null);
   };
 
   return (
@@ -73,6 +119,7 @@ export const TestSupabaseForm = () => {
           <Button 
             onClick={handleTestDefaultData} 
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             {loading ? 'Enviando...' : 'Testar com Dados Padrão'}
           </Button>
@@ -101,6 +148,7 @@ export const TestSupabaseForm = () => {
           <Button 
             onClick={handleTestCustomData} 
             disabled={loading || !customData.trim()}
+            className="w-full sm:w-auto"
           >
             {loading ? 'Enviando...' : 'Testar com Dados Personalizados'}
           </Button>
@@ -111,10 +159,19 @@ export const TestSupabaseForm = () => {
             <Separator />
             
             <div className="space-y-4">
-              <h3 className="font-medium flex items-center">
-                <Terminal className="mr-2 h-4 w-4" />
-                Resultado do Teste
-              </h3>
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium flex items-center">
+                  <Terminal className="mr-2 h-4 w-4" />
+                  Resultado do Teste
+                </h3>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleClearResults}
+                >
+                  Limpar resultados
+                </Button>
+              </div>
               
               {result && (
                 <Alert variant={result.success ? "default" : "destructive"}>
