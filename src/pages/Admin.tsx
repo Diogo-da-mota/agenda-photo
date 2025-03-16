@@ -26,19 +26,39 @@ const Admin = () => {
     createTable
   } = useMessageData(isAuthenticated);
 
+  // Removemos a verificação de localStorage para garantir que sempre peça a senha
+  // ao invés disso, vamos verificar a presença de um token na sessão atual
+  // que expira rapidamente
   useEffect(() => {
-    // Check if user is already authenticated from previous session
-    const storedAuth = localStorage.getItem("adminAuthenticated");
-    if (storedAuth === "true") {
-      setIsAuthenticated(true);
-    }
+    const checkAuthStatus = () => {
+      const authTimestamp = sessionStorage.getItem("adminAuthTimestamp");
+      if (authTimestamp) {
+        // Verificar se o token ainda é válido (menos de 5 minutos)
+        const timestamp = parseInt(authTimestamp, 10);
+        const now = Date.now();
+        const fiveMinutesInMs = 5 * 60 * 1000;
+        
+        if (now - timestamp < fiveMinutesInMs) {
+          setIsAuthenticated(true);
+        } else {
+          // Token expirado, remover da sessão
+          sessionStorage.removeItem("adminAuthTimestamp");
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+    
+    checkAuthStatus();
   }, []);
 
   const handleLogin = () => {
     setError(null);
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      localStorage.setItem("adminAuthenticated", "true");
+      // Armazenar timestamp atual na sessão ao invés de localStorage
+      sessionStorage.setItem("adminAuthTimestamp", Date.now().toString());
       toast({
         title: "Login realizado",
         description: "Você foi autenticado com sucesso."
@@ -50,7 +70,7 @@ const Admin = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem("adminAuthenticated");
+    sessionStorage.removeItem("adminAuthTimestamp");
   };
 
   return (
