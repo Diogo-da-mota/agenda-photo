@@ -20,27 +20,45 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
     console.log(`Checking if table '${tableName}' exists...`);
     
-    // First try to query the table to see if it exists and is accessible
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*')
-      .limit(1);
-      
-    if (error) {
-      console.log(`Error querying table '${tableName}':`, error.message);
-      
-      // If the error is "relation does not exist", the table definitely doesn't exist
-      if (error.message.includes('relation') && error.message.includes('does not exist')) {
-        return false;
+    // For type safety, we need to check if the table name is one we expect
+    if (tableName === 'contact_messages') {
+      // Try to query the table to see if it exists and is accessible
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .limit(1);
+        
+      if (error) {
+        console.log(`Error querying table '${tableName}':`, error.message);
+        
+        // If the error is "relation does not exist", the table definitely doesn't exist
+        if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          return false;
+        }
+      } else {
+        console.log(`Table '${tableName}' exists and is accessible.`);
+        return true;
       }
-      
-      // For other errors, we'll try another approach
-    } else {
-      console.log(`Table '${tableName}' exists and is accessible.`);
-      return true;
+    } else if (tableName === 'mensagens_de_contato') {
+      // Try to query the table
+      const { data, error } = await supabase
+        .from('mensagens_de_contato')
+        .select('*')
+        .limit(1);
+        
+      if (error) {
+        console.log(`Error querying table '${tableName}':`, error.message);
+        
+        if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          return false;
+        }
+      } else {
+        console.log(`Table '${tableName}' exists and is accessible.`);
+        return true;
+      }
     }
     
-    // If the query approach didn't give a definitive answer, try using system tables
+    // If the query approach didn't give a definitive answer, try using the RPC function
     const { data: tableInfo, error: tableError } = await supabase
       .rpc('ensure_contact_messages_table');
       
