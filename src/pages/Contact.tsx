@@ -1,14 +1,26 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import HeroSection from "@/components/hero/HeroSection";
 import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import ContactForm from "@/components/contact/ContactForm";
 
 const Contact = () => {
   const navigate = useNavigate();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleAdminClick = () => {
     navigate('/admin');
+  };
+
+  const handleButtonClick = () => {
+    setIsFormOpen(true);
   };
 
   return (
@@ -36,7 +48,17 @@ const Contact = () => {
       </div>
       
       {/* Conteúdo sobreposto na imagem */}
-      <HeroSection />
+      <HeroSection onButtonClick={handleButtonClick} />
+      
+      {/* Dialog para o formulário de contato */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Fale Conosco</DialogTitle>
+          </DialogHeader>
+          <ContactForm />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
