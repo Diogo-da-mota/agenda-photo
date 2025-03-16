@@ -3,18 +3,16 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import HeroSection from "@/components/hero/HeroSection";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const Contact = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
 
   const handleAdminClick = () => {
     navigate('/admin');
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center">
       {/* Imagem de fundo com sobreposição */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -32,7 +30,6 @@ const Contact = () => {
           onClick={handleAdminClick}
           variant="outline" 
           className="bg-white/80 backdrop-blur-sm hover:bg-white/90"
-          size={isMobile ? "sm" : "default"}
         >
           Admin
         </Button>

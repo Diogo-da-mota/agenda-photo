@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -143,23 +144,6 @@ const FeatureCard = ({ icon, color, title, description }: FeatureCardProps) => (
   </div>
 );
 
-// Função para formatar valores monetários em Reais (R$)
-const formatCurrency = (value: string | number): string => {
-  // Converte para número se for uma string
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  
-  // Verifica se é um número válido
-  if (isNaN(numValue)) return 'R$ 0,00';
-  
-  // Formata o número como moeda brasileira
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(numValue);
-};
-
 // Contact information card component
 const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValues) => void }) => {
   const form = useForm<ContactFormValues>({
@@ -196,9 +180,9 @@ const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValue
               name="nome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome *</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu nome completo" {...field} required />
+                    <Input placeholder="Seu nome completo" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,9 +194,9 @@ const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValue
               name="telefone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefone *</FormLabel>
+                  <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu número de telefone" {...field} required />
+                    <Input placeholder="Seu número de telefone" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,9 +208,9 @@ const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValue
               name="cidade"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cidade *</FormLabel>
+                  <FormLabel>Cidade</FormLabel>
                   <FormControl>
-                    <Input placeholder="Sua cidade" {...field} required />
+                    <Input placeholder="Sua cidade" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -261,7 +245,6 @@ const Survey = () => {
   const [finalContactInfo, setFinalContactInfo] = useState('');
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [followUpErrors, setFollowUpErrors] = useState<{[key: string]: boolean}>({});
 
   const handleContactFormComplete = (values: ContactFormValues) => {
     setContactInfo(values);
@@ -270,16 +253,6 @@ const Survey = () => {
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
-      // Verificar se os campos follow-up obrigatórios estão preenchidos
-      if (hasUnfilledFollowUp()) {
-        toast({
-          title: "Campos obrigatórios",
-          description: "Por favor, preencha todos os campos adicionais.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       setAnimation('fade-out');
       setTimeout(() => {
         setCurrentQuestion(currentQuestion + 1);
@@ -287,44 +260,8 @@ const Survey = () => {
         setAnimation('fade-in');
       }, 300);
     } else {
-      // Verificar se os campos follow-up obrigatórios estão preenchidos antes de enviar
-      if (hasUnfilledFollowUp()) {
-        toast({
-          title: "Campos obrigatórios",
-          description: "Por favor, preencha todos os campos adicionais.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       handleSubmit();
     }
-  };
-
-  const hasUnfilledFollowUp = () => {
-    const currentQuestionObj = questions[currentQuestion];
-    
-    if (showFollowUp && currentQuestionObj?.followUp) {
-      const followUpData = followUpResponses[currentQuestion] || {};
-      let hasErrors = false;
-      const newErrors: {[key: string]: boolean} = {};
-      
-      // Verificar cada campo do follow-up
-      currentQuestionObj.followUp.fields.forEach(field => {
-        const value = followUpData[field.label] || '';
-        if (!value.trim()) {
-          newErrors[field.label] = true;
-          hasErrors = true;
-        } else {
-          newErrors[field.label] = false;
-        }
-      });
-      
-      setFollowUpErrors(newErrors);
-      return hasErrors;
-    }
-    
-    return false;
   };
 
   const handlePrev = () => {
@@ -382,14 +319,6 @@ const Survey = () => {
         [fieldLabel]: value
       }
     });
-    
-    // Limpar o erro quando o usuário digitar algo
-    if (value.trim()) {
-      setFollowUpErrors({
-        ...followUpErrors,
-        [fieldLabel]: false
-      });
-    }
   };
 
   const handleFinalContactInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -397,7 +326,7 @@ const Survey = () => {
   };
 
   const submitToSupabase = async () => {
-    if (!contactInfo) return false;
+    if (!contactInfo) return;
     
     try {
       // Convert survey responses to a string message
@@ -410,13 +339,7 @@ const Survey = () => {
         if (followUpResponses[parseInt(questionIndex)]) {
           const followUpData = followUpResponses[parseInt(questionIndex)];
           const followUpText = Object.entries(followUpData)
-            .map(([label, value]) => {
-              // Formatar valores monetários
-              if (label.toLowerCase().includes("quanto") || label.toLowerCase().includes("paga") || label.toLowerCase().includes("gasta")) {
-                return `${label}: ${formatCurrency(value)}`;
-              }
-              return `${label}: ${value}`;
-            })
+            .map(([label, value]) => `${label}: ${value}`)
             .join("; ");
           answerText += ` [Detalhes adicionais: ${followUpText}]`;
         }
@@ -473,32 +396,20 @@ const Survey = () => {
     console.log("Respostas:", responses);
     console.log("Respostas complementares:", followUpResponses);
     
-    // First, try to submit to Supabase before showing the thank you page
-    submitToSupabase().then((success) => {
-      setAnimation('fade-out');
-      setTimeout(() => {
-        setShowThankYou(true);
-        setAnimation('fade-in');
-        
-        toast({
-          title: "Pesquisa enviada com sucesso!",
-          description: "Obrigado por participar da nossa pesquisa.",
-          duration: 5000,
-        });
-      }, 300);
-    });
+    setAnimation('fade-out');
+    setTimeout(() => {
+      setShowThankYou(true);
+      setAnimation('fade-in');
+      
+      toast({
+        title: "Pesquisa enviada com sucesso!",
+        description: "Obrigado por participar da nossa pesquisa.",
+        duration: 5000,
+      });
+    }, 300);
   };
 
   const handleFinalSubmit = async () => {
-    if (!finalContactInfo) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, informe seu e-mail para continuar.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     console.log("Final submission with email:", finalContactInfo);
     setIsSubmitting(true);
     
@@ -532,13 +443,7 @@ const Survey = () => {
         if (followUpResponses[parseInt(questionIndex)]) {
           const followUpData = followUpResponses[parseInt(questionIndex)];
           const followUpText = Object.entries(followUpData)
-            .map(([label, value]) => {
-              // Formatar valores monetários
-              if (label.toLowerCase().includes("quanto") || label.toLowerCase().includes("paga") || label.toLowerCase().includes("gasta")) {
-                return `${label}: ${formatCurrency(value)}`;
-              }
-              return `${label}: ${value}`;
-            })
+            .map(([label, value]) => `${label}: ${value}`)
             .join("; ");
           answerText += ` [Detalhes adicionais: ${followUpText}]`;
         }
@@ -549,7 +454,7 @@ const Survey = () => {
       // Create data for Supabase - match column names exactly
       const contactData = {
         nome: contactInfo.nome,
-        e_mail: finalContactInfo, // Use the final contact info as email
+        e_mail: finalContactInfo || "sem-email@exemplo.com", // Use the final contact info as email
         telefone: contactInfo.telefone || "",
         mensagem: surveyMessage,
         // criado_em is automatically set by DEFAULT now()
@@ -814,11 +719,10 @@ const Survey = () => {
                 
                 <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
                   <Input 
-                    placeholder="Digite seu e-mail *" 
+                    placeholder="Digite seu e-mail" 
                     className="flex-1" 
                     value={finalContactInfo}
                     onChange={handleFinalContactInfoChange}
-                    required
                   />
                   <Button 
                     onClick={handleFinalSubmit}
@@ -848,4 +752,140 @@ const Survey = () => {
 
   if (showContactForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+        <ContactInfoCard onComplete={handleContactFormComplete} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex flex-col items-center justify-center p-6">
+      <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
+        <CardContent className="p-8">
+          <div className="mb-6 flex justify-between items-center">
+            <div className="text-xs text-muted-foreground">
+              Pergunta {currentQuestion + 1} de {questions.length}
+            </div>
+            <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-black rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <h2 className="text-xl font-medium">{currentQuestionObj.question}</h2>
+
+            {currentQuestionObj.type === 'radio' && currentQuestionObj.options && (
+              <RadioGroup
+                value={selectedOption || ''}
+                onValueChange={(value) => handleOptionChange(value)}
+                className="space-y-3"
+              >
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-3 cursor-pointer">
+                    <RadioGroupItem id={option} value={option} />
+                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+
+            {currentQuestionObj.type === 'checkbox' && currentQuestionObj.options && (
+              <div className="space-y-3">
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-3 cursor-pointer">
+                    <Checkbox 
+                      id={option} 
+                      checked={(responses[currentQuestion] || []).includes(option)}
+                      onCheckedChange={() => handleOptionChange(option)}
+                    />
+                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentQuestionObj.type === 'textarea' && (
+              <Textarea 
+                placeholder="Digite sua resposta aqui..." 
+                className="min-h-32 p-4"
+                value={(responses[currentQuestion] || [''])[0]}
+                onChange={handleTextAreaChange}
+              />
+            )}
+
+            {showFollowUp && (
+              <div className="mt-6 space-y-4 bg-gray-50 p-4 rounded-lg animate-slide-down">
+                <h3 className="text-sm font-medium">Informações adicionais:</h3>
+                {currentQuestionObj.followUp!.fields.map((field) => (
+                  <div key={field.label} className="space-y-2">
+                    <Label htmlFor={field.label}>{field.label}</Label>
+                    <Input
+                      id={field.label}
+                      type={field.type}
+                      value={(followUpResponses[currentQuestion] || {})[field.label] || ''}
+                      onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-8 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handlePrev}
+              className="button-hover"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Anterior
+            </Button>
+            
+            <Button
+              onClick={handleNext}
+              className="bg-black hover:bg-black/90 button-hover"
+              disabled={
+                (currentQuestionObj.type !== 'textarea' && 
+                 !responses[currentQuestion]?.length) ||
+                (currentQuestionObj.type === 'textarea' && 
+                 (!responses[currentQuestion] || !responses[currentQuestion][0]))
+              }
+            >
+              {currentQuestion < questions.length - 1 ? (
+                <>
+                  Próxima
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Enviar
+                  <Send className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Add test form at the very bottom, only in development and not visible in main UI */}
+      {process.env.NODE_ENV === 'development' && !showThankYou && !showContactForm && (
+        <div className="fixed bottom-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-white shadow-md opacity-50 hover:opacity-100"
+            onClick={() => window.open('/test-supabase', '_blank')}
+          >
+            🧪 Teste Supabase
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Survey;
