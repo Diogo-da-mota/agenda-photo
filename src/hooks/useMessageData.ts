@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, checkTableExists, ensureContactMessagesTable } from "@/integrations/supabase/client";
+import { supabase, checkTableExists, createContactMessagesTable } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface ContactMessage {
@@ -16,6 +16,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
   const [mensagens, setMensagens] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCreatingTable, setIsCreatingTable] = useState(false);
   const [tablesExist, setTablesExist] = useState({
     mensagemAgenda: false,
     contactMessages: false
@@ -52,15 +53,55 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [tablesExist.contactMessages, toast]);
 
-  // Verificar se as tabelas existem, criar se necessário e buscar mensagens
+  // Nova função para criar a tabela diretamente
+  const createTable = useCallback(async () => {
+    setIsCreatingTable(true);
+    try {
+      const result = await createContactMessagesTable();
+      
+      if (result) {
+        toast({
+          title: "Sucesso",
+          description: "Tabela criada com sucesso. Atualizando dados...",
+        });
+        
+        // Verificamos novamente se a tabela agora existe
+        const contactMessagesExists = await checkTableExists('contact_messages');
+        
+        setTablesExist(prev => ({
+          ...prev,
+          contactMessages: contactMessagesExists
+        }));
+        
+        if (contactMessagesExists) {
+          fetchMensagens();
+        }
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível criar a tabela. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao criar tabela:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a tabela. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingTable(false);
+    }
+  }, [fetchMensagens, toast]);
+
+  // Verificar se as tabelas existem e buscar mensagens
   const verifyTableAndFetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Primeiro, garantimos que a tabela contact_messages existe usando a função RPC
-      const tableCreated = await ensureContactMessagesTable();
-      console.log('Resultado da criação/verificação da tabela:', tableCreated);
+      console.log('Verificando se as tabelas existem...');
       
-      // Depois verificamos se as tabelas estão acessíveis
+      // Verificar se as tabelas estão acessíveis
       const mensagemAgendaExists = await checkTableExists('mensagem_agenda');
       const contactMessagesExists = await checkTableExists('contact_messages');
       
@@ -75,12 +116,12 @@ export const useMessageData = (isAuthenticated: boolean) => {
         setIsLoading(false);
         toast({
           title: "Tabela não encontrada",
-          description: "A tabela de mensagens não foi encontrada. Estamos tentando criá-la automaticamente, aguarde um momento e tente novamente.",
+          description: "A tabela de mensagens não foi encontrada. Clique em 'Criar tabela' para criá-la manualmente.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar/criar tabelas:', error);
+      console.error('Erro ao verificar tabelas:', error);
       setIsLoading(false);
     }
   }, [fetchMensagens, toast]);
@@ -133,7 +174,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         title: "Verificação concluída",
         description: tablesExist.contactMessages 
           ? "As mensagens foram atualizadas" 
-          : "Tentando criar a tabela automaticamente. Aguarde um momento e tente novamente."
+          : "A tabela ainda não existe. Use a opção 'Criar tabela' para criá-la manualmente."
       });
     });
   }, [verifyTableAndFetchData, tablesExist.contactMessages, toast]);
@@ -142,7 +183,9 @@ export const useMessageData = (isAuthenticated: boolean) => {
     mensagens,
     isLoading,
     isRefreshing,
+    isCreatingTable,
     tablesExist,
-    handleRefresh
+    handleRefresh,
+    createTable
   };
 };

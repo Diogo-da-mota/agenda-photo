@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ContactMessage {
@@ -20,13 +20,17 @@ interface CustomerMessagesListProps {
   mensagens: ContactMessage[];
   formatDate: (dateString: string) => string;
   checkTables: () => void;
+  createTable: () => Promise<void>;
+  isCreatingTable: boolean;
 }
 
 const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   tableExists,
   mensagens,
   formatDate,
-  checkTables
+  checkTables,
+  createTable,
+  isCreatingTable
 }) => {
   return (
     <div>
@@ -37,16 +41,33 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
             <Alert className="mb-4 bg-yellow-50 border-yellow-200">
               <AlertCircle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800">
-                A tabela de mensagens está sendo criada automaticamente.
+                A tabela de mensagens não foi encontrada.
                 <p className="mt-2 text-sm">
-                  Se este é o primeiro acesso, pode levar alguns instantes para ficar disponível.
-                  Por favor, clique em "Verificar novamente" após alguns segundos.
+                  Você pode tentar criar a tabela manualmente clicando no botão abaixo.
                 </p>
               </AlertDescription>
             </Alert>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                onClick={createTable} 
+                disabled={isCreatingTable}
+                className="flex items-center gap-2"
+              >
+                {isCreatingTable ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Criando tabela...
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-4 w-4" />
+                    Criar tabela manualmente
+                  </>
+                )}
+              </Button>
               <Button 
                 onClick={checkTables} 
+                variant="outline"
                 className="flex items-center gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
@@ -54,7 +75,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               </Button>
             </div>
             <div className="mt-4 text-sm text-gray-500">
-              <p>A tabela está sendo criada com as colunas: id, created_at, name, email, phone, message.</p>
+              <p>A tabela será criada com as colunas: id, created_at, name, email, phone, message.</p>
               <p className="mt-2 font-medium">Se o problema persistir após várias tentativas, tente atualizar a página inteira.</p>
             </div>
           </CardContent>

@@ -20,8 +20,10 @@ const Admin = () => {
     mensagens, 
     isLoading, 
     isRefreshing, 
+    isCreatingTable,
     tablesExist, 
-    handleRefresh 
+    handleRefresh,
+    createTable
   } = useMessageData(isAuthenticated);
 
   useEffect(() => {
@@ -81,6 +83,8 @@ const Admin = () => {
               mensagens={mensagens}
               formatDate={formatDate}
               checkTables={handleRefresh}
+              createTable={createTable}
+              isCreatingTable={isCreatingTable}
             />
           </div>
         )}

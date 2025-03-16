@@ -10,26 +10,28 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-// Função para garantir que a tabela contact_messages existe através da chamada da função SQL
-export const ensureContactMessagesTable = async (): Promise<boolean> => {
+// Função para CRIAR a tabela contact_messages diretamente via SQL
+export const createContactMessagesTable = async (): Promise<boolean> => {
   try {
-    console.log('Executando função para garantir que a tabela contact_messages existe...');
-    const { data, error } = await supabase.rpc('ensure_contact_messages_table');
+    console.log('Tentando criar a tabela contact_messages diretamente...');
+    
+    // Executar SQL diretamente para criar a tabela
+    const { data, error } = await supabase.rpc('create_contact_messages_table');
     
     if (error) {
-      console.error('Erro ao executar ensure_contact_messages_table:', error);
+      console.error('Erro ao criar tabela contact_messages:', error);
       return false;
     }
     
-    console.log('Função ensure_contact_messages_table executada com sucesso:', data);
+    console.log('Tabela contact_messages criada com sucesso:', data);
     return true;
   } catch (e) {
-    console.error('Exceção ao executar ensure_contact_messages_table:', e);
+    console.error('Exceção ao criar tabela contact_messages:', e);
     return false;
   }
 };
 
-// Verifica se a tabela contact_messages existe
+// Função para VERIFICAR se a tabela contact_messages existe
 export const checkContactMessagesExists = async (): Promise<boolean> => {
   try {
     console.log('Verificando se a tabela contact_messages existe...');
@@ -51,7 +53,29 @@ export const checkContactMessagesExists = async (): Promise<boolean> => {
   }
 };
 
-// Função para garantir que a tabela mensagem_agenda existe
+// Função que tenta criar a tabela se ela não existir
+export const ensureContactMessagesTable = async (): Promise<boolean> => {
+  try {
+    console.log('Verificando e criando tabela contact_messages se necessário...');
+    
+    // Primeiro verificamos se a tabela existe
+    const tableExists = await checkContactMessagesExists();
+    
+    if (tableExists) {
+      console.log('Tabela contact_messages já existe!');
+      return true;
+    }
+    
+    // Se não existir, tentamos criar
+    console.log('Tabela contact_messages não existe, tentando criar...');
+    return await createContactMessagesTable();
+  } catch (e) {
+    console.error('Erro ao garantir que a tabela contact_messages existe:', e);
+    return false;
+  }
+};
+
+// Função para verificar se a tabela mensagem_agenda existe
 export const checkMensagemAgendaExists = async (): Promise<boolean> => {
   try {
     console.log('Verificando se a tabela mensagem_agenda existe...');
