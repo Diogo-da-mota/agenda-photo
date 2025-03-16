@@ -14,7 +14,7 @@ const HeroSection: React.FC = memo(() => {
   }, [navigate]);
 
   return (
-    <div className="relative z-10 text-white text-center px-4 max-w-4xl w-full">
+    <div className="relative z-10 text-white text-center px-4 max-w-4xl mx-auto w-full">
       <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
       <h1 className={`text-2xl sm:text-4xl md:text-5xl font-bold mb-4 ${isMobile ? 'leading-tight' : ''}`}>
         A solução completa para fotógrafos profissionais
