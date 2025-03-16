@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -530,8 +529,7 @@ const Survey = () => {
                 </h2>
                 <p className="text-gray-600 mb-8">
                   Com base nas necessidades dos fotógrafos, estamos criando um aplicativo completo 
-                  que vai integrar tudo o que você precisa em um só lugar!
-                </p>
+                  que vai integrar tudo o que você precisa em um só lugar!</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -826,66 +824,4 @@ const Survey = () => {
                       id={field.label}
                       type={field.type}
                       value={(followUpResponses[currentQuestion] || {})[field.label] || ''}
-                      onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handlePrev}
-              className="button-hover"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Anterior
-            </Button>
-            
-            <Button
-              onClick={handleNext}
-              className="bg-black hover:bg-black/90 button-hover"
-              disabled={
-                (currentQuestionObj.type !== 'textarea' && 
-                 !responses[currentQuestion]?.length) ||
-                (currentQuestionObj.type === 'textarea' && 
-                 (!responses[currentQuestion] || !responses[currentQuestion][0]))
-              }
-            >
-              {currentQuestion < questions.length - 1 ? (
-                <>
-                  Próxima
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Enviar
-                  <Send className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Add test form at the very bottom, only in development and not visible in main UI */}
-      {process.env.NODE_ENV === 'development' && !showThankYou && !showContactForm && (
-        <div className="fixed bottom-4 right-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white shadow-md opacity-50 hover:opacity-100"
-            onClick={() => window.open('/test-supabase', '_blank')}
-          >
-            🧪 Teste Supabase
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Survey;
+                      onChange={(e) =>
