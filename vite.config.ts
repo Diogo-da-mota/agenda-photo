@@ -40,5 +40,7 @@ export default defineConfig(({ mode }) => ({
     },
     // Reduzir tamanho do pacote final
     chunkSizeWarningLimit: 1000,
+    // Corrigir problema com browserlist
+    target: 'esnext'
   },
 }));
