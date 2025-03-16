@@ -8,6 +8,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface FollowUpField {
   label: string;
@@ -39,6 +44,15 @@ interface FeatureCardProps {
   title: string;
   description: string;
 }
+
+// Contact info form schema
+const contactFormSchema = z.object({
+  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  telefone: z.string().min(8, { message: "Telefone deve ter pelo menos 8 caracteres" }),
+  cidade: z.string().min(2, { message: "Cidade deve ter pelo menos 2 caracteres" }),
+});
+
+type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const questions: Question[] = [
   {
@@ -127,15 +141,111 @@ const FeatureCard = ({ icon, color, title, description }: FeatureCardProps) => (
   </div>
 );
 
+// Contact information card component
+const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValues) => void }) => {
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      cidade: "",
+    },
+  });
+
+  const onSubmit = (values: ContactFormValues) => {
+    onComplete(values);
+  };
+
+  return (
+    <Card className="w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-fade-in">
+      <CardContent className="p-8">
+        <div className="mb-6 flex justify-between items-center">
+          <div className="text-xs text-muted-foreground">
+            Informações de contato
+          </div>
+          <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-black rounded-full" style={{ width: '10%' }}></div>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-medium mb-6">Vamos começar com algumas informações básicas</h2>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu nome completo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="telefone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu número de telefone" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="cidade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Sua cidade" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="mt-8 flex justify-end">
+              <Button
+                type="submit"
+                className="bg-black hover:bg-black/90 button-hover"
+              >
+                Próxima
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Survey = () => {
+  const [showContactForm, setShowContactForm] = useState(true);
+  const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<{[key: number]: string[]}>({});
   const [followUpResponses, setFollowUpResponses] = useState<{[key: number]: {[key: string]: string}}>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showThankYou, setShowThankYou] = useState(false);
   const [animation, setAnimation] = useState('fade-in');
-  const [contactInfo, setContactInfo] = useState('');
+  const [finalContactInfo, setFinalContactInfo] = useState('');
   const { toast } = useToast();
+
+  const handleContactFormComplete = (values: ContactFormValues) => {
+    setContactInfo(values);
+    setShowContactForm(false);
+  };
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
@@ -156,6 +266,13 @@ const Survey = () => {
       setTimeout(() => {
         setCurrentQuestion(currentQuestion - 1);
         setSelectedOption(responses[currentQuestion - 1] ? responses[currentQuestion - 1][0] : null);
+        setAnimation('fade-in');
+      }, 300);
+    } else {
+      // If we're at the first question, go back to contact form
+      setAnimation('fade-out');
+      setTimeout(() => {
+        setShowContactForm(true);
         setAnimation('fade-in');
       }, 300);
     }
@@ -200,12 +317,59 @@ const Survey = () => {
     });
   };
 
-  const handleContactInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContactInfo(e.target.value);
+  const handleFinalContactInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFinalContactInfo(e.target.value);
+  };
+
+  const submitToSupabase = async () => {
+    if (!contactInfo) return;
+    
+    try {
+      // Convert survey responses to a string message
+      const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
+        const questionObj = questions[parseInt(questionIndex)];
+        return `${questionObj.question}: ${answers.join(", ")}`;
+      }).join("\n");
+
+      // Create data for Supabase
+      const contactData = {
+        nome: contactInfo.nome,
+        telefone: contactInfo.telefone,
+        e_mail: finalContactInfo || "sem-email@exemplo.com", // Use the final contact info as email
+        mensagem: surveyMessage,
+      };
+
+      const { data, error } = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData);
+
+      if (error) {
+        console.error("Error submitting to Supabase:", error);
+        toast({
+          title: "Erro ao enviar dados",
+          description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      } else {
+        console.log("Successfully submitted to Supabase:", data);
+        toast({
+          title: "Dados enviados com sucesso!",
+          description: "Suas respostas foram salvas.",
+        });
+      }
+    } catch (error) {
+      console.error("Exception when submitting to Supabase:", error);
+      toast({
+        title: "Erro ao enviar dados",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = () => {
     // In a real app, this would send the data to a server
+    console.log("Contato:", contactInfo);
     console.log("Respostas:", responses);
     console.log("Respostas complementares:", followUpResponses);
     
@@ -222,8 +386,11 @@ const Survey = () => {
     }, 300);
   };
 
-  const handleFinalSubmit = () => {
-    console.log("Informações de contato:", contactInfo);
+  const handleFinalSubmit = async () => {
+    console.log("Informações de contato finais:", finalContactInfo);
+    
+    // Save data to Supabase
+    await submitToSupabase();
     
     toast({
       title: "Obrigado pelo seu interesse!",
@@ -235,7 +402,7 @@ const Survey = () => {
   const currentQuestionObj = questions[currentQuestion];
   
   // For checkbox type questions, we need to check if the specific option that has a follow-up is selected
-  const showFollowUp = currentQuestionObj.followUp && 
+  const showFollowUp = currentQuestionObj?.followUp && 
                       (currentQuestionObj.type === 'radio' ? 
                         (selectedOption && currentQuestionObj.followUp.condition.includes(selectedOption)) : 
                         (responses[currentQuestion] && 
@@ -455,10 +622,10 @@ const Survey = () => {
                 
                 <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
                   <Input 
-                    placeholder="Digite seu nome e e-mail" 
+                    placeholder="Digite seu e-mail" 
                     className="flex-1" 
-                    value={contactInfo}
-                    onChange={handleContactInfoChange}
+                    value={finalContactInfo}
+                    onChange={handleFinalContactInfoChange}
                   />
                   <Button 
                     onClick={handleFinalSubmit}
@@ -472,6 +639,14 @@ const Survey = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (showContactForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+        <ContactInfoCard onComplete={handleContactFormComplete} />
       </div>
     );
   }
@@ -557,7 +732,6 @@ const Survey = () => {
             <Button
               variant="outline"
               onClick={handlePrev}
-              disabled={currentQuestion === 0}
               className="button-hover"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
