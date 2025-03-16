@@ -840,4 +840,4 @@ const Survey = () => {
   );
 };
 
-export default
+export default Survey;
