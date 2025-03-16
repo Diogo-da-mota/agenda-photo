@@ -2,23 +2,34 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { testarEnvioSupabase, testarEnvioFormulario } from '@/utils/testarEnvioSupabase';
+import { 
+  testarEnvioSupabase, 
+  testarEnvioFormulario,
+  gerarRelatorio,
+  obterHistoricoTestes,
+  limparHistoricoTestes
+} from '@/utils/testarEnvioSupabase';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Terminal } from 'lucide-react';
+import { AlertCircle, CheckCircle, Terminal, ClipboardList, Trash, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 export const TestSupabaseForm = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [customData, setCustomData] = useState('');
   const [showResponse, setShowResponse] = useState(false);
+  const [tabValue, setTabValue] = useState('resultado');
+  const [relatorio, setRelatorio] = useState<any>(null);
 
   const handleTestDefaultData = async () => {
     setLoading(true);
     setShowResponse(true);
+    setTabValue('resultado');
     try {
       const response = await testarEnvioSupabase();
       setResult(response);
@@ -52,6 +63,7 @@ export const TestSupabaseForm = () => {
   const handleTestCustomData = async () => {
     setLoading(true);
     setShowResponse(true);
+    setTabValue('resultado');
     try {
       // Parse the custom data from the textarea
       let customDataObj;
@@ -99,6 +111,34 @@ export const TestSupabaseForm = () => {
   const handleClearResults = () => {
     setShowResponse(false);
     setResult(null);
+  };
+  
+  const handleGerarRelatorio = () => {
+    const reportData = gerarRelatorio();
+    setRelatorio(reportData);
+    setTabValue('relatorio');
+    
+    toast({
+      title: "Relatório gerado",
+      description: `Taxa de sucesso: ${reportData.estatisticas.taxaSucesso}`,
+    });
+  };
+  
+  const handleLimparHistorico = () => {
+    limparHistoricoTestes();
+    setRelatorio(null);
+    toast({
+      title: "Histórico limpo",
+      description: "O histórico de testes foi limpo com sucesso",
+    });
+  };
+
+  const formatarDataHora = (isoString: string) => {
+    try {
+      return new Date(isoString).toLocaleString('pt-BR');
+    } catch (e) {
+      return isoString;
+    }
   };
 
   return (
@@ -160,44 +200,139 @@ export const TestSupabaseForm = () => {
             
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-medium flex items-center">
-                  <Terminal className="mr-2 h-4 w-4" />
-                  Resultado do Teste
-                </h3>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleGerarRelatorio}
+                    className="flex items-center gap-1"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    <span className="hidden sm:inline">Gerar Relatório</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleLimparHistorico}
+                    className="flex items-center gap-1"
+                  >
+                    <Trash className="h-4 w-4" />
+                    <span className="hidden sm:inline">Limpar Histórico</span>
+                  </Button>
+                </div>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleClearResults}
+                  className="flex items-center gap-1"
                 >
-                  Limpar resultados
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="hidden sm:inline">Limpar resultados</span>
                 </Button>
               </div>
               
-              {result && (
-                <Alert variant={result.success ? "default" : "destructive"}>
-                  {result.success ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4" />
+              <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="resultado">Resultado</TabsTrigger>
+                  <TabsTrigger value="relatorio">Relatório</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="resultado" className="mt-4">
+                  {result && (
+                    <Alert variant={result.success ? "default" : "destructive"}>
+                      {result.success ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4" />
+                      )}
+                      <AlertTitle>
+                        {result.success ? "Sucesso!" : "Erro!"}
+                      </AlertTitle>
+                      <AlertDescription>
+                        {result.success 
+                          ? "Dados enviados com sucesso para o Supabase." 
+                          : `Erro ao enviar dados: ${result.error?.message || JSON.stringify(result.error)}`
+                        }
+                      </AlertDescription>
+                    </Alert>
                   )}
-                  <AlertTitle>
-                    {result.success ? "Sucesso!" : "Erro!"}
-                  </AlertTitle>
-                  <AlertDescription>
-                    {result.success 
-                      ? "Dados enviados com sucesso para o Supabase." 
-                      : `Erro ao enviar dados: ${result.error?.message || JSON.stringify(result.error)}`
-                    }
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="text-sm font-medium mb-2">Resposta Completa:</h4>
-                <pre className="text-xs overflow-auto max-h-40 bg-gray-100 p-2 rounded">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
-              </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-md mt-4">
+                    <h4 className="text-sm font-medium mb-2">Resposta Completa:</h4>
+                    <pre className="text-xs overflow-auto max-h-40 bg-gray-100 p-2 rounded">
+                      {JSON.stringify(result, null, 2)}
+                    </pre>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="relatorio" className="mt-4">
+                  {relatorio ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <Card className="p-3">
+                          <CardTitle className="text-sm font-medium">Total de Testes</CardTitle>
+                          <p className="text-2xl font-bold mt-2">{relatorio.estatisticas.totalTestes}</p>
+                        </Card>
+                        <Card className="p-3">
+                          <CardTitle className="text-sm font-medium">Sucessos</CardTitle>
+                          <p className="text-2xl font-bold text-green-600 mt-2">{relatorio.estatisticas.sucessos}</p>
+                        </Card>
+                        <Card className="p-3">
+                          <CardTitle className="text-sm font-medium">Falhas</CardTitle>
+                          <p className="text-2xl font-bold text-red-600 mt-2">{relatorio.estatisticas.falhas}</p>
+                        </Card>
+                        <Card className="p-3">
+                          <CardTitle className="text-sm font-medium">Taxa de Sucesso</CardTitle>
+                          <p className="text-2xl font-bold mt-2">{relatorio.estatisticas.taxaSucesso}</p>
+                        </Card>
+                      </div>
+                      
+                      {relatorio.ultimosErros.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Últimos Erros:</h4>
+                          <div className="space-y-2">
+                            {relatorio.ultimosErros.map((erro: any, index: number) => (
+                              <Alert key={index} variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle className="flex items-center justify-between">
+                                  <span>Erro em {formatarDataHora(erro.timestamp)}</span>
+                                </AlertTitle>
+                                <AlertDescription>
+                                  <p>{erro.mensagem}</p>
+                                </AlertDescription>
+                              </Alert>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Histórico Completo:</h4>
+                        <div className="space-y-2 max-h-60 overflow-auto p-2 bg-gray-50 rounded">
+                          {relatorio.historicoCompleto.map((log: any, index: number) => (
+                            <div key={index} className="text-xs p-2 bg-white rounded border">
+                              <div className="flex justify-between items-center mb-1">
+                                <Badge variant={log.tipo === 'erro' ? 'destructive' : log.tipo === 'resposta' ? 'outline' : 'secondary'}>
+                                  {log.tipo.toUpperCase()}
+                                </Badge>
+                                <span className="text-gray-500">{formatarDataHora(log.timestamp)}</span>
+                              </div>
+                              {log.mensagem && <p className="font-medium">{log.mensagem}</p>}
+                              <pre className="text-xs overflow-auto mt-1 bg-gray-50 p-1 rounded">
+                                {JSON.stringify(log.dados, null, 2)}
+                              </pre>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Gere um relatório para ver estatísticas e histórico.</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </>
         )}

@@ -39,6 +39,7 @@ const TestSupabase = () => {
             <ol className="list-decimal pl-5 space-y-1">
               <li>Use "Testar com Dados Padrão" para enviar um conjunto de dados predefinido.</li>
               <li>Use "Testar com Dados Personalizados" para enviar dados específicos no formato JSON.</li>
+              <li>Clique em "Gerar Relatório" para ver estatísticas de todos os testes realizados.</li>
               <li>Verifique o console do navegador para logs detalhados (F12 &gt; Console).</li>
               <li>Os resultados também serão exibidos na interface após o envio.</li>
             </ol>
