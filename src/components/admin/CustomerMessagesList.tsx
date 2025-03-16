@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw, Database } from "lucide-react";
+import { AlertCircle, RefreshCw, Database, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ContactMessage {

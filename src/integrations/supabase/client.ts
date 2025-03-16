@@ -15,8 +15,8 @@ export const createContactMessagesTable = async (): Promise<boolean> => {
   try {
     console.log('Tentando criar a tabela contact_messages diretamente...');
     
-    // Executar SQL diretamente para criar a tabela
-    const { data, error } = await supabase.rpc('create_contact_messages_table');
+    // Executar SQL diretamente para criar a tabela usando a função correta disponível
+    const { data, error } = await supabase.rpc('ensure_contact_messages_table');
     
     if (error) {
       console.error('Erro ao criar tabela contact_messages:', error);
