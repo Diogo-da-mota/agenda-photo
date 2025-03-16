@@ -2,11 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://sykjzikcaclutfpuwuri.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5a2p6aWtjYWNsdXRmcHV3dXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0ODAxMTAsImV4cCI6MjA1NzA1NjExMH0.nmOHa9Bcmo7V_kIIqxgJ4ButiX2ybAyhg2U_RWDU0ng";
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+// Configuração correta para o banco de dados do Formulário
+const SUPABASE_URL = "https://rggswsvryywmffgozpj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnZ3N3c3ZyeXd5dm1mZmdvenBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNjI3NDIsImV4cCI6MjA1NzYzODc0Mn0.LBeo7mmw30uX1HTF4_IN0HvjJjKy5IlDHQKQV7lVhPk";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
