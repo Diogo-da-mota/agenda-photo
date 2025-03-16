@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import TestSupabaseForm from '@/components/TestSupabaseForm';
 
 interface FollowUpField {
   label: string;
@@ -666,7 +667,7 @@ const Survey = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex flex-col items-center justify-center p-6">
       <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
         <CardContent className="p-8">
           <div className="mb-6 flex justify-between items-center">
@@ -777,6 +778,20 @@ const Survey = () => {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Add test form at the very bottom, only in development and not visible in main UI */}
+      {process.env.NODE_ENV === 'development' && !showThankYou && !showContactForm && (
+        <div className="fixed bottom-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-white shadow-md opacity-50 hover:opacity-100"
+            onClick={() => window.open('/test-supabase', '_blank')}
+          >
+            🧪 Teste Supabase
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

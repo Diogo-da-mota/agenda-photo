@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, checkTableExists, createContactMessagesTable } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -90,7 +91,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
             email: msg.e_mail,
             phone: msg.telefone,
             message: msg.mensagem
-          }));
+          })) as ContactMessage[];
           
           allMessages = [...allMessages, ...mappedMensagens];
         }
@@ -98,8 +99,13 @@ export const useMessageData = (isAuthenticated: boolean) => {
       
       // Sort all messages by date (newest first)
       allMessages.sort((a, b) => {
-        const dateA = a.created_at || (a as any).criado_em;
-        const dateB = b.created_at || (b as any).criado_em;
+        const dateA = a.hasOwnProperty('created_at') 
+          ? (a as ContactMessage).created_at 
+          : (a as MensagemDeContato).criado_em;
+        const dateB = b.hasOwnProperty('created_at') 
+          ? (b as ContactMessage).created_at 
+          : (b as MensagemDeContato).criado_em;
+        
         return new Date(dateB).getTime() - new Date(dateA).getTime();
       });
       
