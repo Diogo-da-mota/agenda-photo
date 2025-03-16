@@ -852,4 +852,3 @@ const Survey = () => {
   }
 
   return (
-    <div className
