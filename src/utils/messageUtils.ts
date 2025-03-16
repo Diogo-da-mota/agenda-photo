@@ -158,7 +158,7 @@ export const submitSurveyData = async (
       e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
       telefone: contactInfo.telefone || contactInfo.phone || "",
       mensagem: surveyMessage,
-      // Note: criado_em is automatically set by Supabase with DEFAULT now()
+      // Note: criado_em is automatically set by DEFAULT now()
     };
 
     console.log("Enviando dados para o Supabase:", contactData);

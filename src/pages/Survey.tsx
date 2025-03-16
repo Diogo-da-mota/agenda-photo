@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -413,30 +414,77 @@ const Survey = () => {
     setIsSubmitting(true);
     
     try {
-      // Save data to Supabase using the utility function
-      const success = await submitSurveyData(
+      if (!contactInfo) {
+        console.error("Erro: Informações de contato não encontradas");
+        toast({
+          title: "Erro ao enviar",
+          description: "Dados de contato não encontrados. Por favor, tente novamente.",
+          variant: "destructive",
+          duration: 5000,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
+      console.log("Preparando envio para o Supabase com:", {
         contactInfo,
         responses,
         followUpResponses,
         finalContactInfo
-      );
+      });
       
-      if (success) {
+      // Convert survey responses to a string message
+      const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
+        const questionObj = questions[parseInt(questionIndex)];
+        const questionText = questionObj.question;
+        let answerText = answers.join(", ");
+        
+        // Add follow-up responses if they exist
+        if (followUpResponses[parseInt(questionIndex)]) {
+          const followUpData = followUpResponses[parseInt(questionIndex)];
+          const followUpText = Object.entries(followUpData)
+            .map(([label, value]) => `${label}: ${value}`)
+            .join("; ");
+          answerText += ` [Detalhes adicionais: ${followUpText}]`;
+        }
+        
+        return `${questionText}: ${answerText}`;
+      }).join("\n\n");
+
+      // Create data for Supabase - match column names exactly
+      const contactData = {
+        nome: contactInfo.nome,
+        e_mail: finalContactInfo || "sem-email@exemplo.com", // Use the final contact info as email
+        telefone: contactInfo.telefone || "",
+        mensagem: surveyMessage,
+        // criado_em is automatically set by DEFAULT now()
+      };
+
+      console.log("Enviando dados para Supabase (direto):", contactData);
+
+      // Direct Supabase insertion for debugging
+      const { data, error } = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData)
+        .select();
+
+      if (error) {
+        console.error("Erro ao enviar dados para Supabase (direto):", error);
+        toast({
+          title: "Erro ao enviar dados",
+          description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      } else {
+        console.log("Dados enviados com sucesso para Supabase (direto):", data);
         toast({
           title: "Obrigado pelo seu interesse!",
           description: "Entraremos em contato em breve.",
           duration: 5000,
         });
-      } else {
-        toast({
-          title: "Erro ao enviar",
-          description: "Houve um problema ao salvar seus dados. Por favor, tente novamente.",
-          variant: "destructive",
-          duration: 5000,
-        });
       }
     } catch (error) {
-      console.error("Erro ao enviar dados do formulário:", error);
+      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
