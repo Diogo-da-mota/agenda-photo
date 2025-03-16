@@ -40,11 +40,13 @@ export default defineConfig(({ mode }) => ({
     },
     // Reduzir tamanho do pacote final
     chunkSizeWarningLimit: 1000,
-    // Corrigir problema com browserlist
-    target: 'esnext',
+    // Definir navegadores alvo diretamente sem usar browserslist
+    target: 'es2015',
     // Forçar atualização do browserslist durante o build
     commonjsOptions: {
       transformMixedEsModules: true,
+      include: [/node_modules/],
+      defaultIsModuleExports: true,
     },
     // Garantir compatibilidade com navegadores modernos
     modulePreload: {
@@ -52,5 +54,13 @@ export default defineConfig(({ mode }) => ({
     },
     // Aumentar limite de tempo para evitar timeouts durante o build
     assetsInlineLimit: 4096,
+    // Otimizar a geração de assets
+    cssCodeSplit: true,
+    sourcemap: false,
+  },
+  // Desabilitar verificações de browserlist durante o desenvolvimento
+  esbuild: {
+    target: 'es2015',
+    legalComments: 'none',
   },
 }));
