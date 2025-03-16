@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import TestSupabaseForm from '@/components/TestSupabaseForm';
+import { submitSurveyData } from '@/utils/messageUtils';
 
 interface FollowUpField {
   label: string;
@@ -242,6 +243,7 @@ const Survey = () => {
   const [animation, setAnimation] = useState('fade-in');
   const [finalContactInfo, setFinalContactInfo] = useState('');
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContactFormComplete = (values: ContactFormValues) => {
     setContactInfo(values);
@@ -407,17 +409,42 @@ const Survey = () => {
   };
 
   const handleFinalSubmit = async () => {
-    console.log("Informações de contato finais:", finalContactInfo);
+    console.log("Final submission with email:", finalContactInfo);
+    setIsSubmitting(true);
     
-    // Save data to Supabase and show result
-    const success = await submitToSupabase();
-    
-    if (success) {
+    try {
+      // Save data to Supabase using the utility function
+      const success = await submitSurveyData(
+        contactInfo,
+        responses,
+        followUpResponses,
+        finalContactInfo
+      );
+      
+      if (success) {
+        toast({
+          title: "Obrigado pelo seu interesse!",
+          description: "Entraremos em contato em breve.",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "Erro ao enviar",
+          description: "Houve um problema ao salvar seus dados. Por favor, tente novamente.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao enviar dados do formulário:", error);
       toast({
-        title: "Obrigado pelo seu interesse!",
-        description: "Entraremos em contato em breve.",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
+        variant: "destructive",
         duration: 5000,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -652,9 +679,19 @@ const Survey = () => {
                   <Button 
                     onClick={handleFinalSubmit}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white button-hover"
+                    disabled={isSubmitting}
                   >
-                    Quero participar
-                    <ArrowRightIcon className="ml-2 h-4 w-4" />
+                    {isSubmitting ? (
+                      <>
+                        <span className="mr-2">Enviando...</span>
+                        <span className="animate-spin">↻</span>
+                      </>
+                    ) : (
+                      <>
+                        Quero participar
+                        <ArrowRightIcon className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -803,4 +840,4 @@ const Survey = () => {
   );
 };
 
-export default Survey;
+export default

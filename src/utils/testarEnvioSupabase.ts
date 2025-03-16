@@ -87,7 +87,7 @@ export async function testarEnvioSupabase() {
   registrarLog('requisicao', dadosTeste);
 
   try {
-    // Usando o cliente Supabase para enviar os dados
+    // Usando o cliente Supabase com headers explícitos para garantir autenticação
     const { data, error } = await supabase
       .from('mensagens_de_contato')
       .insert(dadosTeste)
@@ -96,6 +96,12 @@ export async function testarEnvioSupabase() {
     if (error) {
       console.error("❌ Erro ao enviar para Supabase:", error);
       registrarLog('erro', error, 'falha', error.message);
+      
+      // Log more detailed error information
+      if (error.code) {
+        console.error(`Error code: ${error.code}, Error message: ${error.message}, Error details:`, error.details);
+      }
+      
       return { success: false, error, timestamp: new Date().toISOString() };
     }
 
@@ -128,7 +134,7 @@ export async function testarEnvioFormulario(formData: any) {
   console.log("🔄 Dados formatados para envio:", dadosFormatados);
   registrarLog('requisicao', dadosFormatados, undefined, 'Dados formatados para envio');
   
-  // Tenta enviar os dados para o Supabase
+  // Tenta enviar os dados para o Supabase com headers explícitos
   try {
     const { data, error } = await supabase
       .from('mensagens_de_contato')
@@ -137,6 +143,12 @@ export async function testarEnvioFormulario(formData: any) {
       
     if (error) {
       console.error("❌ Erro ao enviar para Supabase:", error);
+      
+      // Log more detailed error information
+      if (error.code) {
+        console.error(`Error code: ${error.code}, Error message: ${error.message}, Error details:`, error.details);
+      }
+      
       registrarLog('erro', error, 'falha', error.message);
       return { success: false, error, timestamp: new Date().toISOString() };
     }
@@ -147,6 +159,51 @@ export async function testarEnvioFormulario(formData: any) {
   } catch (error) {
     console.error("❌ Exceção ao enviar para Supabase:", error);
     registrarLog('erro', error, 'falha', 'Exceção ao enviar dados');
+    return { success: false, error, timestamp: new Date().toISOString() };
+  }
+}
+
+// Adicione uma função de teste direto com API keys para depuração
+export async function testarEnvioComApiKeys(dados?: any) {
+  const dadosTeste = dados || {
+    nome: "Teste API Keys",
+    e_mail: "teste-api@lovable.com",
+    telefone: "999999999",
+    mensagem: "Teste de envio com API keys explícitas",
+  };
+
+  const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnZ3N3c3ZyeXd5dm1mZmdvenBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNjI3NDIsImV4cCI6MjA1NzYzODc0Mn0.LBeo7mmw30uX1HTF4_IN0HvjJjKy5IlDHQKQV7lVhPk";
+  const apiUrl = "https://rggswsvrywyvmffgozpj.supabase.co/rest/v1/mensagens_de_contato";
+
+  console.log("📤 Testando envio com fetch API e API keys explícitas:", dadosTeste);
+  registrarLog('requisicao', dadosTeste);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(dadosTeste)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Erro ao enviar para Supabase via fetch:", errorData);
+      registrarLog('erro', errorData, 'falha', `HTTP error ${response.status}: ${response.statusText}`);
+      return { success: false, error: errorData, timestamp: new Date().toISOString() };
+    }
+
+    const data = await response.json();
+    console.log("✅ Resposta do Supabase via fetch:", data);
+    registrarLog('resposta', data, 'sucesso', 'Dados enviados com sucesso via fetch API');
+    return { success: true, data, timestamp: new Date().toISOString() };
+  } catch (error) {
+    console.error("❌ Exceção ao enviar para Supabase via fetch:", error);
+    registrarLog('erro', error, 'falha', 'Exceção ao enviar dados via fetch API');
     return { success: false, error, timestamp: new Date().toISOString() };
   }
 }

@@ -1,347 +1,326 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { 
-  testarEnvioSupabase, 
-  testarEnvioFormulario,
-  gerarRelatorio,
-  obterHistoricoTestes,
-  limparHistoricoTestes
-} from '@/utils/testarEnvioSupabase';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Terminal, ClipboardList, Trash, RefreshCw } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { testarEnvioSupabase, testarEnvioFormulario, testarEnvioComApiKeys, obterHistoricoTestes, limparHistoricoTestes, gerarRelatorio } from '@/utils/testarEnvioSupabase';
 
-export const TestSupabaseForm = () => {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+interface TestResult {
+  success: boolean;
+  data?: any;
+  error?: any;
+  timestamp: string;
+}
+
+const TestSupabaseForm = () => {
+  const [formData, setFormData] = useState({
+    nome: "Teste Lovable",
+    e_mail: "teste@lovable.com",
+    telefone: "999999999",
+    mensagem: "Teste de envio pelo site",
+  });
   const [customData, setCustomData] = useState('');
-  const [showResponse, setShowResponse] = useState(false);
-  const [tabValue, setTabValue] = useState('resultado');
-  const [relatorio, setRelatorio] = useState<any>(null);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleTestDefaultData = async () => {
-    setLoading(true);
-    setShowResponse(true);
-    setTabValue('resultado');
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleCustomDataChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCustomData(e.target.value);
+  };
+
+  const handleTestWithDefaultData = async () => {
+    setIsLoading(true);
+    setShowResult(false);
+
     try {
-      const response = await testarEnvioSupabase();
-      setResult(response);
-      console.log('Test results:', response);
-      
-      if (response.success) {
+      const result = await testarEnvioSupabase();
+      setTestResult(result);
+      setShowResult(true);
+
+      if (result.success) {
         toast({
-          title: "Teste concluído com sucesso",
-          description: "Os dados padrão foram enviados para o Supabase",
+          title: "Sucesso!",
+          description: "Teste com dados padrão completado com sucesso.",
         });
       } else {
         toast({
-          title: "Erro no teste",
-          description: `Falha ao enviar dados: ${response.error?.message || 'Erro desconhecido'}`,
+          title: "Falha no teste",
+          description: "O teste com dados padrão falhou. Veja os detalhes abaixo.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error in test:', error);
-      setResult({ success: false, error });
+      console.error('Erro ao executar teste:', error);
+      setTestResult({
+        success: false,
+        error,
+        timestamp: new Date().toISOString()
+      });
+      setShowResult(true);
+
       toast({
-        title: "Erro no teste",
-        description: "Ocorreu um erro ao realizar o teste",
+        title: "Erro",
+        description: "Ocorreu um erro ao testar com dados padrão.",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleTestCustomData = async () => {
-    setLoading(true);
-    setShowResponse(true);
-    setTabValue('resultado');
-    try {
-      // Parse the custom data from the textarea
-      let customDataObj;
-      try {
-        customDataObj = JSON.parse(customData);
-      } catch (e) {
-        setResult({ success: false, error: 'Formato JSON inválido. Verifique os dados inseridos.' });
-        toast({
-          title: "Formato JSON inválido",
-          description: "Verifique os dados inseridos e tente novamente",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
+  const handleTestWithCustomData = async () => {
+    setIsLoading(true);
+    setShowResult(false);
 
-      const response = await testarEnvioFormulario(customDataObj);
-      setResult(response);
-      
-      if (response.success) {
+    try {
+      const parsedData = JSON.parse(customData);
+      const result = await testarEnvioFormulario(parsedData);
+      setTestResult(result);
+      setShowResult(true);
+
+      if (result.success) {
         toast({
-          title: "Teste concluído com sucesso",
-          description: "Os dados personalizados foram enviados para o Supabase",
+          title: "Sucesso!",
+          description: "Teste com dados personalizados completado com sucesso.",
         });
       } else {
         toast({
-          title: "Erro no teste",
-          description: `Falha ao enviar dados: ${response.error?.message || 'Erro desconhecido'}`,
+          title: "Falha no teste",
+          description: "O teste com dados personalizados falhou. Veja os detalhes abaixo.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error in test:', error);
-      setResult({ success: false, error });
+      console.error('Erro ao executar teste com dados personalizados:', error);
+      setTestResult({
+        success: false,
+        error,
+        timestamp: new Date().toISOString()
+      });
+      setShowResult(true);
+
       toast({
-        title: "Erro no teste",
-        description: "Ocorreu um erro ao realizar o teste",
+        title: "Erro",
+        description: "Ocorreu um erro ao testar com dados personalizados. Verifique o formato JSON.",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
-
-  const handleClearResults = () => {
-    setShowResponse(false);
-    setResult(null);
   };
   
-  const handleGerarRelatorio = () => {
-    const reportData = gerarRelatorio();
-    setRelatorio(reportData);
-    setTabValue('relatorio');
+  const handleTestWithApiKeys = async () => {
+    setIsLoading(true);
+    setShowResult(false);
     
-    toast({
-      title: "Relatório gerado",
-      description: `Taxa de sucesso: ${reportData.estatisticas.taxaSucesso}`,
-    });
-  };
-  
-  const handleLimparHistorico = () => {
-    limparHistoricoTestes();
-    setRelatorio(null);
-    toast({
-      title: "Histórico limpo",
-      description: "O histórico de testes foi limpo com sucesso",
-    });
+    try {
+      const result = await testarEnvioComApiKeys();
+      setTestResult(result);
+      setShowResult(true);
+      
+      if (result.success) {
+        toast({
+          title: "Sucesso!",
+          description: "Teste com API Keys completado com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Falha no teste",
+          description: "O teste com API Keys falhou. Veja os detalhes abaixo.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao executar teste com API Keys:', error);
+      setTestResult({ 
+        success: false, 
+        error, 
+        timestamp: new Date().toISOString() 
+      });
+      setShowResult(true);
+      
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao testar com API Keys.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const formatarDataHora = (isoString: string) => {
-    try {
-      return new Date(isoString).toLocaleString('pt-BR');
-    } catch (e) {
-      return isoString;
+  const handleShowReport = () => {
+    const report = gerarRelatorio();
+    console.log('Relatório de Testes:', report);
+    alert(JSON.stringify(report, null, 2));
+  };
+
+  const handleClearHistory = () => {
+    const result = limparHistoricoTestes();
+    if (result.success) {
+      toast({
+        title: "Histórico Limpo",
+        description: "O histórico de testes foi limpo com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Erro ao Limpar",
+        description: "Não foi possível limpar o histórico de testes.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl font-medium">Teste de Envio para Supabase</CardTitle>
-        <p className="text-sm text-gray-500">
-          Use esta ferramenta para testar o envio de dados para a tabela mensagens_de_contato
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Dados Padrão para Teste</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Use estes campos para modificar os dados padrão que serão enviados para o Supabase.
         </p>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="font-medium">Teste com Dados Padrão</h3>
-          <p className="text-sm text-gray-500">
-            Envia um conjunto de dados padrão para testar a conexão com o Supabase
-          </p>
-          <Button 
-            onClick={handleTestDefaultData} 
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
-            {loading ? 'Enviando...' : 'Testar com Dados Padrão'}
-          </Button>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-4">
-          <h3 className="font-medium">Teste com Dados Personalizados</h3>
-          <p className="text-sm text-gray-500">
-            Insira seus próprios dados no formato JSON para testar
-          </p>
-          <div className="space-y-2">
-            <Label htmlFor="customData">Dados personalizados (formato JSON)</Label>
-            <Textarea 
-              id="customData"
-              placeholder='{"nome": "Nome Teste", "e_mail": "email@teste.com", "telefone": "123456789", "mensagem": "Mensagem de teste"}'
-              className="min-h-32"
-              value={customData}
-              onChange={(e) => setCustomData(e.target.value)}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome</label>
+            <Input
+              type="text"
+              name="nome"
+              id="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              className="mt-1"
             />
-            <p className="text-xs text-gray-500">
-              Exemplo: {"{"}"nome": "Nome Teste", "e_mail": "email@teste.com", "telefone": "123456789", "mensagem": "Mensagem de teste"{"}"}
-            </p>
           </div>
-          <Button 
-            onClick={handleTestCustomData} 
-            disabled={loading || !customData.trim()}
-            className="w-full sm:w-auto"
-          >
-            {loading ? 'Enviando...' : 'Testar com Dados Personalizados'}
-          </Button>
+          <div>
+            <label htmlFor="e_mail" className="block text-sm font-medium text-gray-700">Email</label>
+            <Input
+              type="email"
+              name="e_mail"
+              id="e_mail"
+              value={formData.e_mail}
+              onChange={handleChange}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">Telefone</label>
+            <Input
+              type="text"
+              name="telefone"
+              id="telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label htmlFor="mensagem" className="block text-sm font-medium text-gray-700">Mensagem</label>
+            <Textarea
+              name="mensagem"
+              id="mensagem"
+              value={formData.mensagem}
+              onChange={handleChange}
+              className="mt-1"
+            />
+          </div>
         </div>
+      </div>
 
-        {showResponse && (
-          <>
-            <Separator />
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleGerarRelatorio}
-                    className="flex items-center gap-1"
-                  >
-                    <ClipboardList className="h-4 w-4" />
-                    <span className="hidden sm:inline">Gerar Relatório</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleLimparHistorico}
-                    className="flex items-center gap-1"
-                  >
-                    <Trash className="h-4 w-4" />
-                    <span className="hidden sm:inline">Limpar Histórico</span>
-                  </Button>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleClearResults}
-                  className="flex items-center gap-1"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  <span className="hidden sm:inline">Limpar resultados</span>
-                </Button>
-              </div>
-              
-              <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="resultado">Resultado</TabsTrigger>
-                  <TabsTrigger value="relatorio">Relatório</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="resultado" className="mt-4">
-                  {result && (
-                    <Alert variant={result.success ? "default" : "destructive"}>
-                      {result.success ? (
-                        <CheckCircle className="h-4 w-4" />
-                      ) : (
-                        <AlertCircle className="h-4 w-4" />
-                      )}
-                      <AlertTitle>
-                        {result.success ? "Sucesso!" : "Erro!"}
-                      </AlertTitle>
-                      <AlertDescription>
-                        {result.success 
-                          ? "Dados enviados com sucesso para o Supabase." 
-                          : `Erro ao enviar dados: ${result.error?.message || JSON.stringify(result.error)}`
-                        }
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  <div className="bg-gray-50 p-4 rounded-md mt-4">
-                    <h4 className="text-sm font-medium mb-2">Resposta Completa:</h4>
-                    <pre className="text-xs overflow-auto max-h-40 bg-gray-100 p-2 rounded">
-                      {JSON.stringify(result, null, 2)}
-                    </pre>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="relatorio" className="mt-4">
-                  {relatorio ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <Card className="p-3">
-                          <CardTitle className="text-sm font-medium">Total de Testes</CardTitle>
-                          <p className="text-2xl font-bold mt-2">{relatorio.estatisticas.totalTestes}</p>
-                        </Card>
-                        <Card className="p-3">
-                          <CardTitle className="text-sm font-medium">Sucessos</CardTitle>
-                          <p className="text-2xl font-bold text-green-600 mt-2">{relatorio.estatisticas.sucessos}</p>
-                        </Card>
-                        <Card className="p-3">
-                          <CardTitle className="text-sm font-medium">Falhas</CardTitle>
-                          <p className="text-2xl font-bold text-red-600 mt-2">{relatorio.estatisticas.falhas}</p>
-                        </Card>
-                        <Card className="p-3">
-                          <CardTitle className="text-sm font-medium">Taxa de Sucesso</CardTitle>
-                          <p className="text-2xl font-bold mt-2">{relatorio.estatisticas.taxaSucesso}</p>
-                        </Card>
-                      </div>
-                      
-                      {relatorio.ultimosErros.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Últimos Erros:</h4>
-                          <div className="space-y-2">
-                            {relatorio.ultimosErros.map((erro: any, index: number) => (
-                              <Alert key={index} variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertTitle className="flex items-center justify-between">
-                                  <span>Erro em {formatarDataHora(erro.timestamp)}</span>
-                                </AlertTitle>
-                                <AlertDescription>
-                                  <p>{erro.mensagem}</p>
-                                </AlertDescription>
-                              </Alert>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Histórico Completo:</h4>
-                        <div className="space-y-2 max-h-60 overflow-auto p-2 bg-gray-50 rounded">
-                          {relatorio.historicoCompleto.map((log: any, index: number) => (
-                            <div key={index} className="text-xs p-2 bg-white rounded border">
-                              <div className="flex justify-between items-center mb-1">
-                                <Badge variant={log.tipo === 'erro' ? 'destructive' : log.tipo === 'resposta' ? 'outline' : 'secondary'}>
-                                  {log.tipo.toUpperCase()}
-                                </Badge>
-                                <span className="text-gray-500">{formatarDataHora(log.timestamp)}</span>
-                              </div>
-                              {log.mensagem && <p className="font-medium">{log.mensagem}</p>}
-                              <pre className="text-xs overflow-auto mt-1 bg-gray-50 p-1 rounded">
-                                {JSON.stringify(log.dados, null, 2)}
-                              </pre>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500">Gere um relatório para ver estatísticas e histórico.</p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </div>
-          </>
-        )}
-      </CardContent>
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Testar com Dados Padrão</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Envia os dados preenchidos acima para o Supabase.
+        </p>
+        <Button
+          variant="outline"
+          onClick={handleTestWithDefaultData}
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? 'Enviando...' : 'Testar com Dados Padrão'}
+        </Button>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Testar com Dados Personalizados (JSON)</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Insira um objeto JSON para enviar dados personalizados para o Supabase.
+        </p>
+        <Textarea
+          placeholder='Ex: { "nome": "Teste JSON", "email": "json@example.com", "telefone": "123456789", "mensagem": "Teste JSON" }'
+          value={customData}
+          onChange={handleCustomDataChange}
+          className="min-h-32"
+        />
+        <Button
+          variant="outline"
+          onClick={handleTestWithCustomData}
+          disabled={isLoading}
+          className="w-full mt-2"
+        >
+          {isLoading ? 'Enviando...' : 'Testar com Dados Personalizados'}
+        </Button>
+      </div>
       
-      <CardFooter className="flex justify-between text-xs text-gray-500">
-        <p>Esta ferramenta é apenas para testes e não afeta o formulário original.</p>
-      </CardFooter>
-    </Card>
+      {/* Add a new button for testing with API keys */}
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Testar com API Keys Explícitas</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Este método usa fetch API com as chaves API diretamente, similar ao script PowerShell.
+        </p>
+        <Button 
+          variant="outline" 
+          onClick={handleTestWithApiKeys}
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? 'Enviando...' : 'Testar com API Keys Explícitas'}
+        </Button>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Ações</h3>
+        <Button variant="secondary" onClick={handleShowReport} className="w-full mb-2">
+          Gerar Relatório
+        </Button>
+        <Button variant="destructive" onClick={handleClearHistory} className="w-full">
+          Limpar Histórico
+        </Button>
+      </div>
+
+      {showResult && testResult && (
+        <div className="mt-8 p-4 border rounded-md">
+          <h4 className="font-medium mb-2">Resultado do Teste</h4>
+          {testResult.success ? (
+            <div className="text-green-600">
+              ✅ Sucesso! Dados enviados para o Supabase.
+              {testResult.data && (
+                <pre className="mt-2 p-2 bg-gray-100 rounded-md overflow-auto">
+                  {JSON.stringify(testResult.data, null, 2)}
+                </pre>
+              )}
+            </div>
+          ) : (
+            <div className="text-red-600">
+              ❌ Falha! Erro ao enviar para o Supabase.
+              {testResult.error && (
+                <pre className="mt-2 p-2 bg-gray-100 rounded-md overflow-auto">
+                  {JSON.stringify(testResult.error, null, 2)}
+                </pre>
+              )}
+            </div>
+          )}
+          <p className="text-gray-500 mt-2">Timestamp: {testResult.timestamp}</p>
+        </div>
+      )}
+    </div>
   );
 };
 
