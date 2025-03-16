@@ -352,33 +352,38 @@ const Survey = () => {
         mensagem: surveyMessage,
       };
 
-      console.log("Sending data to Supabase:", contactData);
+      console.log("Enviando dados para Supabase:", contactData);
 
+      // Using the supabase client directly to ensure proper submission
       const { data, error } = await supabase
         .from('mensagens_de_contato')
-        .insert(contactData);
+        .insert(contactData)
+        .select();
 
       if (error) {
-        console.error("Error submitting to Supabase:", error);
+        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
           variant: "destructive",
         });
+        return false;
       } else {
-        console.log("Successfully submitted to Supabase:", data);
+        console.log("Dados enviados com sucesso para Supabase:", data);
         toast({
           title: "Dados enviados com sucesso!",
           description: "Suas respostas foram salvas.",
         });
+        return true;
       }
     } catch (error) {
-      console.error("Exception when submitting to Supabase:", error);
+      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
         title: "Erro ao enviar dados",
         description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
         variant: "destructive",
       });
+      return false;
     }
   };
 
@@ -404,14 +409,16 @@ const Survey = () => {
   const handleFinalSubmit = async () => {
     console.log("Informações de contato finais:", finalContactInfo);
     
-    // Save data to Supabase
-    await submitToSupabase();
+    // Save data to Supabase and show result
+    const success = await submitToSupabase();
     
-    toast({
-      title: "Obrigado pelo seu interesse!",
-      description: "Entraremos em contato em breve.",
-      duration: 5000,
-    });
+    if (success) {
+      toast({
+        title: "Obrigado pelo seu interesse!",
+        description: "Entraremos em contato em breve.",
+        duration: 5000,
+      });
+    }
   };
 
   const currentQuestionObj = questions[currentQuestion];
