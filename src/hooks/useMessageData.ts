@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, initializeDatabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,89 +23,32 @@ export const useMessageData = (isAuthenticated: boolean) => {
   const [tablesExist, setTablesExist] = useState<TablesExistState>({
     mensagemAgenda: false
   });
+  const [initAttempts, setInitAttempts] = useState(0);
   const { toast } = useToast();
 
-  // Function to check if the mensagem_agenda table exists
-  const checkTableExists = async () => {
+  // Função para verificar se a tabela mensagem_agenda existe
+  const checkTableExists = useCallback(async () => {
     try {
-      console.log('Checking if mensagem_agenda table exists...');
+      console.log('Verificando se a tabela mensagem_agenda existe...');
       const { data, error } = await supabase
         .from('mensagem_agenda')
         .select('id')
         .limit(1);
       
       if (error) {
-        console.error('Error checking table:', error);
+        console.error('Erro ao verificar tabela:', error);
         return false;
       }
-      console.log('Table check successful', data);
+      console.log('Verificação de tabela bem-sucedida', data);
       return true;
     } catch (e) {
-      console.error('Exception checking table:', e);
+      console.error('Exceção ao verificar tabela:', e);
       return false;
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      // First initialize the database if needed
-      initializeDatabase().then(initialized => {
-        console.log('Database initialization result:', initialized);
-        // Then check if table exists
-        return checkTableExists();
-      }).then(exists => {
-        if (exists) {
-          setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
-          fetchMensagens();
-        } else {
-          console.log('Table does not exist or is not accessible yet, showing message to user');
-          setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
-          setIsLoading(false);
-          toast({
-            title: "Tabela em processamento",
-            description: "A tabela de mensagens foi criada mas ainda está sendo processada pelo Supabase. Clique em 'Verificar novamente' após alguns instantes.",
-            variant: "destructive",
-          });
-        }
-      });
-    }
-  }, [isAuthenticated, toast]);
-
-  useEffect(() => {
-    // Only set up realtime subscription if authenticated and table exists
-    if (isAuthenticated && tablesExist.mensagemAgenda) {
-      // Set up realtime subscription to mensagem_agenda table
-      const channel = supabase
-        .channel('mensagem-agenda-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'mensagem_agenda'
-          },
-          (payload) => {
-            console.log('Nova mensagem recebida:', payload);
-            const newMessage = payload.new as MensagemAgenda;
-            setMensagens(prevMessages => [newMessage, ...prevMessages]);
-            toast({
-              title: "Nova mensagem recebida",
-              description: `Nova mensagem de ${newMessage.name}`,
-            });
-          }
-        )
-        .subscribe((status) => {
-          console.log('Status da inscrição em mensagem_agenda:', status);
-        });
-
-      // Cleanup function
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [isAuthenticated, tablesExist.mensagemAgenda, toast]);
-
-  const fetchMensagens = async () => {
+  // Função para buscar mensagens do Supabase
+  const fetchMensagens = useCallback(async () => {
     setIsLoading(true);
     try {
       console.log('Buscando mensagens...');
@@ -130,34 +73,142 @@ export const useMessageData = (isAuthenticated: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const handleRefresh = () => {
+  // Efeito inicial para inicializar o banco de dados e verificar as tabelas
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Inicializar o banco de dados
+      const init = async () => {
+        try {
+          const tableExists = await checkTableExists();
+          
+          if (tableExists) {
+            console.log('Tabela já existe, buscando mensagens...');
+            setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+            fetchMensagens();
+          } else if (initAttempts < 3) {
+            console.log(`Tentativa ${initAttempts + 1} de inicializar o banco de dados...`);
+            const initialized = await initializeDatabase();
+            
+            if (initialized) {
+              const tableNowExists = await checkTableExists();
+              
+              if (tableNowExists) {
+                setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+                fetchMensagens();
+              } else {
+                setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
+                setIsLoading(false);
+                toast({
+                  title: "Tabela em processamento",
+                  description: "A tabela foi criada mas ainda está sendo processada. Tente novamente em instantes.",
+                  variant: "destructive",
+                });
+              }
+            } else {
+              setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
+              setIsLoading(false);
+            }
+            
+            setInitAttempts(prev => prev + 1);
+          } else {
+            setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
+            setIsLoading(false);
+            toast({
+              title: "Problema na criação da tabela",
+              description: "Não foi possível criar a tabela após várias tentativas.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error('Erro na inicialização:', error);
+          setIsLoading(false);
+          setTablesExist(prev => ({ ...prev, mensagemAgenda: false }));
+        }
+      };
+      
+      init();
+    }
+  }, [isAuthenticated, initAttempts, checkTableExists, fetchMensagens, toast]);
+
+  // Configurar escuta de tempo real para atualizações na tabela
+  useEffect(() => {
+    if (isAuthenticated && tablesExist.mensagemAgenda) {
+      const channel = supabase
+        .channel('mensagem-agenda-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'mensagem_agenda'
+          },
+          (payload) => {
+            console.log('Nova mensagem recebida:', payload);
+            const newMessage = payload.new as MensagemAgenda;
+            setMensagens(prevMessages => [newMessage, ...prevMessages]);
+            toast({
+              title: "Nova mensagem recebida",
+              description: `Nova mensagem de ${newMessage.name}`,
+            });
+          }
+        )
+        .subscribe((status) => {
+          console.log('Status da inscrição em mensagem_agenda:', status);
+        });
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [isAuthenticated, tablesExist.mensagemAgenda, toast]);
+
+  // Função para atualizar manualmente as mensagens
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    
     if (!tablesExist.mensagemAgenda) {
-      // First try to initialize the database
-      setIsRefreshing(true);
-      initializeDatabase().then(initialized => {
-        console.log('Database initialization on refresh result:', initialized);
-        // Then check if table exists
-        return checkTableExists();
-      }).then(exists => {
-        setIsRefreshing(false);
+      checkTableExists().then(exists => {
         if (exists) {
           setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
-          fetchMensagens();
-          toast({
-            title: "Tabela encontrada",
-            description: "A tabela de mensagens foi encontrada e os dados foram carregados."
+          fetchMensagens().finally(() => {
+            setIsRefreshing(false);
+            toast({
+              title: "Tabela encontrada",
+              description: "A tabela de mensagens foi encontrada e os dados foram carregados."
+            });
           });
         } else {
-          toast({
-            title: "Tabela ainda em processamento",
-            description: "A tabela de mensagens foi criada, mas ainda está sendo processada pelo Supabase. Aguarde alguns instantes e tente novamente."
+          initializeDatabase().then(initialized => {
+            if (initialized) {
+              checkTableExists().then(tableExists => {
+                if (tableExists) {
+                  setTablesExist(prev => ({ ...prev, mensagemAgenda: true }));
+                  fetchMensagens().finally(() => {
+                    setIsRefreshing(false);
+                  });
+                } else {
+                  setIsRefreshing(false);
+                  toast({
+                    title: "Tabela em processamento",
+                    description: "A tabela foi criada mas ainda está sendo processada. Tente novamente em instantes.",
+                    variant: "destructive",
+                  });
+                }
+              });
+            } else {
+              setIsRefreshing(false);
+              toast({
+                title: "Erro na criação da tabela",
+                description: "Não foi possível criar a tabela. Verifique o console para mais detalhes.",
+                variant: "destructive",
+              });
+            }
           });
         }
       });
     } else {
-      setIsRefreshing(true);
       fetchMensagens().finally(() => {
         setIsRefreshing(false);
         toast({
@@ -166,7 +217,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         });
       });
     }
-  };
+  }, [tablesExist.mensagemAgenda, checkTableExists, fetchMensagens, toast]);
 
   return {
     mensagens,

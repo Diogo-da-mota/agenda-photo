@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MensagemAgenda {
@@ -45,7 +45,13 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               </AlertDescription>
             </Alert>
             <div className="mt-4">
-              <Button onClick={checkTables}>Verificar novamente</Button>
+              <Button 
+                onClick={checkTables} 
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Verificar novamente
+              </Button>
             </div>
             <div className="mt-4 text-sm text-gray-500">
               <p>A tabela 'mensagem_agenda' foi criada com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
@@ -58,7 +64,10 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
           <CardContent>
             <p>Nenhuma mensagem encontrada</p>
             <div className="mt-4">
-              <Button onClick={checkTables} variant="outline">Atualizar</Button>
+              <Button onClick={checkTables} variant="outline" className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Atualizar
+              </Button>
             </div>
           </CardContent>
         </Card>
