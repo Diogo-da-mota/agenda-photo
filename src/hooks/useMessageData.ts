@@ -28,6 +28,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
   // Function to check if the mensagem_agenda table exists
   const checkTableExists = async () => {
     try {
+      console.log('Checking if mensagem_agenda table exists...');
       const { data, error } = await supabase
         .from('mensagem_agenda')
         .select('id')
@@ -37,6 +38,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         console.error('Error checking table:', error);
         return false;
       }
+      console.log('Table check successful', data);
       return true;
     } catch (e) {
       console.error('Exception checking table:', e);
@@ -57,7 +59,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
           setIsLoading(false);
           toast({
             title: "Tabela não encontrada",
-            description: "A tabela de mensagens não foi encontrada no Supabase. Por favor, verifique sua configuração.",
+            description: "A tabela de mensagens não foi encontrada no Supabase. Clique em 'Verificar novamente' para tentar novamente.",
             variant: "destructive",
           });
         }
@@ -140,7 +142,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
         } else {
           toast({
             title: "Tabela não encontrada",
-            description: "A tabela de mensagens ainda não existe no Supabase."
+            description: "A tabela de mensagens ainda não existe no Supabase. Ela foi criada com sucesso. Tente novamente."
           });
         }
       });

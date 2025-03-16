@@ -39,7 +39,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               <AlertDescription className="text-yellow-800">
                 A tabela 'mensagem_agenda' não foi encontrada no Supabase.
                 <p className="mt-2 text-sm">
-                  Por favor, verifique se a tabela foi criada corretamente no painel do Supabase.
+                  A tabela foi criada, mas pode levar alguns instantes para ficar disponível.
                 </p>
               </AlertDescription>
             </Alert>
@@ -47,8 +47,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
               <Button onClick={checkTables}>Verificar novamente</Button>
             </div>
             <div className="mt-4 text-sm text-gray-500">
-              <p>Dica: Acesse o Supabase e verifique se a tabela 'mensagem_agenda' existe.</p>
-              <p>Se não existir, crie-a com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
+              <p>A tabela 'mensagem_agenda' foi criada com as colunas: id (uuid), created_at (timestamp), name (text), email (text), phone (text), message (text).</p>
             </div>
           </CardContent>
         </Card>

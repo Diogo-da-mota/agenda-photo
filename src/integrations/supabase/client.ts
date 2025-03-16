@@ -35,25 +35,20 @@ export const initializeDatabase = async () => {
       if (createTableError) {
         console.error('Error creating mensagem_agenda table via RPC:', createTableError);
         
-        // As a fallback, try to execute the SQL directly (if permissions allow)
-        const { error: sqlError } = await supabase.auth.admin.createUser({
-          email: 'temp@example.com',
-          password: 'tempPassword123',
-          app_metadata: { role: 'service_role' }
-        });
-        
-        if (sqlError) {
-          console.error('Error getting elevated permissions:', sqlError);
-          throw new Error('Could not create mensagem_agenda table');
-        }
+        // Let the user know what happened
+        return false;
       } else {
         console.log('Successfully created mensagem_agenda table');
+        return true;
       }
+    } else if (error) {
+      // Handle other errors
+      console.error('Error checking mensagem_agenda table:', error);
+      return false;
     } else {
       console.log('mensagem_agenda table exists');
+      return true;
     }
-
-    return true;
   } catch (error) {
     console.error('Error initializing database:', error);
     return false;
