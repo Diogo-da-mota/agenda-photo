@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent } from '@/components/ui/card';
-import { FeatureSection, FeatureCard } from '@/components/FeatureComponents'; // Assuming these are in a separate file
+import { FeatureSection, FeatureCard } from '@/components/FeatureComponents';
+import { formatCurrency } from '@/utils/formatUtils';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface FollowUpField {
   label: string;
@@ -93,6 +100,95 @@ const questions: Question[] = [
   },
 ];
 
+// Contact information card component
+const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValues) => void }) => {
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      cidade: "",
+    },
+  });
+
+  const onSubmit = (values: ContactFormValues) => {
+    onComplete(values);
+  };
+
+  return (
+    <Card className="w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-fade-in">
+      <CardContent className="p-8">
+        <div className="mb-6 flex justify-between items-center">
+          <div className="text-xs text-muted-foreground">
+            Informações de contato
+          </div>
+          <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-black rounded-full" style={{ width: '10%' }}></div>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-medium mb-6">Vamos começar com algumas informações básicas</h2>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu nome completo" {...field} required />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="telefone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefone *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu número de telefone" {...field} required />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="cidade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Sua cidade" {...field} required />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="mt-8 flex justify-end">
+              <Button
+                type="submit"
+                className="bg-black hover:bg-black/90 button-hover"
+              >
+                Próxima
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Survey = () => {
   const [showContactForm, setShowContactForm] = useState(true);
   const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
@@ -148,7 +244,7 @@ const Survey = () => {
   const hasUnfilledFollowUp = () => {
     const currentQuestionObj = questions[currentQuestion];
     
-    if (currentQuestionObj?.followUp) {
+    if (showFollowUp && currentQuestionObj?.followUp) {
       const followUpData = followUpResponses[currentQuestion] || {};
       let hasErrors = false;
       const newErrors: {[key: string]: boolean} = {};
@@ -269,12 +365,15 @@ const Survey = () => {
         mensagem: surveyMessage,
       };
 
+      console.log("Enviando dados para Supabase:", contactData);
+
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .insert(contactData)
         .select();
 
       if (error) {
+        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
@@ -282,7 +381,7 @@ const Survey = () => {
         });
         return false;
       } else {
-        setEmailSubmitted(true);
+        console.log("Dados enviados com sucesso para Supabase:", data);
         toast({
           title: "Dados enviados com sucesso!",
           description: "Suas respostas foram salvas.",
@@ -290,6 +389,7 @@ const Survey = () => {
         return true;
       }
     } catch (error) {
+      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
@@ -300,6 +400,10 @@ const Survey = () => {
   };
 
   const handleSubmit = () => {
+    console.log("Contato:", contactInfo);
+    console.log("Respostas:", responses);
+    console.log("Respostas complementares:", followUpResponses);
+    
     submitToSupabase().then((success) => {
       setAnimation('fade-out');
       setTimeout(() => {
@@ -325,10 +429,12 @@ const Survey = () => {
       return;
     }
     
+    console.log("Final submission with email:", finalContactInfo);
     setIsSubmitting(true);
     
     try {
       if (!contactInfo) {
+        console.error("Erro: Informações de contato não encontradas");
         toast({
           title: "Erro ao enviar",
           description: "Dados de contato não encontrados. Por favor, tente novamente.",
@@ -338,6 +444,13 @@ const Survey = () => {
         setIsSubmitting(false);
         return;
       }
+      
+      console.log("Preparando envio para o Supabase com:", {
+        contactInfo,
+        responses,
+        followUpResponses,
+        finalContactInfo
+      });
       
       const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
         const questionObj = questions[parseInt(questionIndex)];
@@ -367,18 +480,22 @@ const Survey = () => {
         mensagem: surveyMessage,
       };
 
+      console.log("Enviando dados para Supabase:", contactData);
+
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .insert(contactData)
         .select();
 
       if (error) {
+        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
           variant: "destructive",
         });
       } else {
+        console.log("Dados enviados com sucesso para Supabase:", data);
         setEmailSubmitted(true);
         toast({
           title: "Obrigado pelo seu interesse!",
@@ -391,6 +508,7 @@ const Survey = () => {
         }, 3000);
       }
     } catch (error) {
+      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
@@ -400,6 +518,12 @@ const Survey = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePriceSubmit = () => {
+    console.log("Valor do preço inserido:", priceValue);
+    // You can add logic here to handle the price value
+    // For example, you could store it in the Supabase database
   };
 
   const currentQuestionObj = questions[currentQuestion];
@@ -674,8 +798,121 @@ const Survey = () => {
   }
 
   return (
-    <div>
-      {/* Render the survey questions here */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4 py-12">
+      {showContactForm ? (
+        <ContactInfoCard onComplete={handleContactFormComplete} />
+      ) : (
+        <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
+          <CardContent className="p-8">
+            <div className="mb-6 flex justify-between items-center">
+              <div className="text-xs text-muted-foreground">
+                Pesquisa {currentQuestion + 1} de {questions.length}
+              </div>
+              <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-black rounded-full transition-all duration-300" 
+                  style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
+            
+            {currentQuestionObj.type === "radio" && currentQuestionObj.options && (
+              <RadioGroup 
+                value={selectedOption || ""}
+                onValueChange={handleOptionChange}
+                className="space-y-3"
+              >
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option} id={option} />
+                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+            
+            {currentQuestionObj.type === "checkbox" && currentQuestionObj.options && (
+              <div className="space-y-3">
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={option} 
+                      checked={(responses[currentQuestion] || []).includes(option)}
+                      onCheckedChange={() => handleOptionChange(option)}
+                    />
+                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {currentQuestionObj.type === "textarea" && (
+              <Textarea 
+                placeholder="Digite sua resposta aqui..."
+                className="min-h-[120px]"
+                value={(responses[currentQuestion] || [""])[0]}
+                onChange={handleTextAreaChange}
+              />
+            )}
+            
+            {showFollowUp && (
+              <div className="mt-6 space-y-4 p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-medium">Informações adicionais:</h3>
+                {currentQuestionObj.followUp?.fields.map((field) => (
+                  <div key={field.label} className="space-y-2">
+                    <Label 
+                      htmlFor={`followup-${field.label}`} 
+                      className={followUpErrors[field.label] ? "text-red-500" : ""}
+                    >
+                      {field.label}
+                    </Label>
+                    <Input
+                      id={`followup-${field.label}`}
+                      type={field.type}
+                      className={followUpErrors[field.label] ? "border-red-500" : ""}
+                      value={followUpResponses[currentQuestion]?.[field.label] || ""}
+                      onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                    />
+                    {followUpErrors[field.label] && (
+                      <p className="text-sm text-red-500">Este campo é obrigatório</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="mt-8 flex justify-between">
+              <Button
+                variant="outline"
+                onClick={handlePrev}
+                className="border-gray-300"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Anterior
+              </Button>
+              
+              <Button
+                onClick={handleNext}
+                className="bg-black hover:bg-black/90"
+              >
+                {currentQuestion < questions.length - 1 ? (
+                  <>
+                    Próxima
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    Finalizar
+                    <Check className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
