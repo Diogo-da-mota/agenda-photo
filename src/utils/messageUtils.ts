@@ -11,34 +11,13 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
   
   try {
     // Check if tables exist
-    const contactMessagesExists = await checkTableExists('contact_messages');
     const mensagensDeContatoExists = await checkTableExists('mensagens_de_contato');
+    const contactMessagesExists = await checkTableExists('contact_messages');
     
-    const tableExists = contactMessagesExists || mensagensDeContatoExists;
+    const tableExists = mensagensDeContatoExists || contactMessagesExists;
     let allMessages: StandardizedMessage[] = [];
     
-    // Fetch messages from contact_messages if it exists
-    if (contactMessagesExists) {
-      // Using any type here to bypass type checking since contact_messages is not in the types
-      const { data: contactMessages, error: contactError } = await (supabase as any)
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (contactError) {
-        console.error('Error fetching contact_messages:', contactError);
-      } else if (contactMessages) {
-        // Map to standardized format
-        const standardizedContactMessages = contactMessages.map((msg: ContactMessage) => ({
-          ...msg,
-          original_table: 'contact_messages'
-        }));
-        
-        allMessages = [...allMessages, ...standardizedContactMessages];
-      }
-    }
-    
-    // Fetch messages from mensagens_de_contato if it exists
+    // Priorizar mensagens_de_contato se existir
     if (mensagensDeContatoExists) {
       const { data: mensagensDeContato, error: mensagensError } = await supabase
         .from('mensagens_de_contato')
@@ -63,6 +42,27 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
       }
     }
     
+    // Busca messages from contact_messages if it exists (for compatibility)
+    if (contactMessagesExists) {
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data: contactMessages, error: contactError } = await (supabase as any)
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (contactError) {
+        console.error('Error fetching contact_messages:', contactError);
+      } else if (contactMessages) {
+        // Map to standardized format
+        const standardizedContactMessages = contactMessages.map((msg: ContactMessage) => ({
+          ...msg,
+          original_table: 'contact_messages'
+        }));
+        
+        allMessages = [...allMessages, ...standardizedContactMessages];
+      }
+    }
+    
     return { messages: allMessages, tableExists };
   } catch (error) {
     console.error('Error fetching messages:', error);
@@ -79,10 +79,9 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
     console.log(`Checking if table '${tableName}' exists...`);
     
-    if (tableName === 'contact_messages') {
-      // Using any type here to bypass type checking since contact_messages is not in the types
-      const { data, error } = await (supabase as any)
-        .from('contact_messages')
+    if (tableName === 'mensagens_de_contato') {
+      const { data, error } = await supabase
+        .from('mensagens_de_contato')
         .select('*')
         .limit(1);
         
@@ -91,9 +90,10 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
       }
       return !error;
     } 
-    else if (tableName === 'mensagens_de_contato') {
-      const { data, error } = await supabase
-        .from('mensagens_de_contato')
+    else if (tableName === 'contact_messages') {
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data, error } = await (supabase as any)
+        .from('contact_messages')
         .select('*')
         .limit(1);
         
@@ -154,7 +154,7 @@ export const submitSurveyData = async (
       return `${questionText}: ${answerText}`;
     }).join("\n\n");
 
-    // Create data for Supabase - strictly match column names
+    // Create data for Supabase - strictly match column names para mensagens_de_contato
     const contactData = {
       nome: contactInfo.nome,
       e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
@@ -165,7 +165,7 @@ export const submitSurveyData = async (
 
     console.log("Enviando dados para o Supabase:", contactData);
 
-    // Using the supabase client directly to ensure proper submission
+    // Usando a tabela mensagens_de_contato
     const { data, error } = await supabase
       .from('mensagens_de_contato')
       .insert(contactData)

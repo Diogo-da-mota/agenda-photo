@@ -87,7 +87,7 @@ export async function testarEnvioSupabase() {
   registrarLog('requisicao', dadosTeste);
 
   try {
-    // Usando o cliente Supabase com headers explícitos para garantir autenticação
+    // Garantindo que estamos usando a tabela mensagens_de_contato
     const { data, error } = await supabase
       .from('mensagens_de_contato')
       .insert(dadosTeste)
@@ -123,7 +123,7 @@ export async function testarEnvioFormulario(formData: any) {
   console.log("📝 Dados do formulário capturados:", formData);
   registrarLog('requisicao', formData);
   
-  // Formatação dos dados para o formato esperado pelo Supabase
+  // Formatação dos dados para o formato esperado pela tabela mensagens_de_contato
   const dadosFormatados = {
     nome: formData.nome || "Nome não fornecido",
     e_mail: formData.email || formData.e_mail || "email@exemplo.com",
@@ -134,7 +134,7 @@ export async function testarEnvioFormulario(formData: any) {
   console.log("🔄 Dados formatados para envio:", dadosFormatados);
   registrarLog('requisicao', dadosFormatados, undefined, 'Dados formatados para envio');
   
-  // Tenta enviar os dados para o Supabase com headers explícitos
+  // Enviar para a tabela mensagens_de_contato
   try {
     const { data, error } = await supabase
       .from('mensagens_de_contato')

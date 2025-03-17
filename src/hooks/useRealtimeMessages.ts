@@ -19,34 +19,7 @@ export const useRealtimeMessages = (
 
   useEffect(() => {
     if (isAuthenticated && tableExists) {
-      // Listen for changes on contact_messages
-      const contactMessagesChannel = supabase
-        .channel('contact-messages-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'contact_messages'
-          },
-          (payload) => {
-            console.log('Nova mensagem em contact_messages recebida:', payload);
-            const newMessage = payload.new as ContactMessage;
-            const standardizedMessage: StandardizedMessage = {
-              ...newMessage,
-              original_table: 'contact_messages'
-            };
-            
-            onNewMessage(standardizedMessage);
-            toast({
-              title: "Nova mensagem recebida",
-              description: `Nova mensagem de ${newMessage.name}`,
-            });
-          }
-        )
-        .subscribe();
-
-      // Listen for changes on mensagens_de_contato
+      // Atualizado: Priorizar ouvir mudanças na tabela mensagens_de_contato
       const mensagensDeContatoChannel = supabase
         .channel('mensagens-contato-changes')
         .on(
@@ -80,9 +53,36 @@ export const useRealtimeMessages = (
         )
         .subscribe();
 
+      // Manter compatibilidade com contact_messages se existir
+      const contactMessagesChannel = supabase
+        .channel('contact-messages-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'contact_messages'
+          },
+          (payload) => {
+            console.log('Nova mensagem em contact_messages recebida:', payload);
+            const newMessage = payload.new as ContactMessage;
+            const standardizedMessage: StandardizedMessage = {
+              ...newMessage,
+              original_table: 'contact_messages'
+            };
+            
+            onNewMessage(standardizedMessage);
+            toast({
+              title: "Nova mensagem recebida",
+              description: `Nova mensagem de ${newMessage.name}`,
+            });
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(contactMessagesChannel);
         supabase.removeChannel(mensagensDeContatoChannel);
+        supabase.removeChannel(contactMessagesChannel);
       };
     }
   }, [isAuthenticated, tableExists, toast, onNewMessage]);

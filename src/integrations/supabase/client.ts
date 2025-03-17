@@ -20,43 +20,30 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
     console.log(`Checking if table '${tableName}' exists...`);
     
-    // For type safety, we need to check if the table name is one we expect
-    if (tableName === 'contact_messages') {
-      // Try to query the table to see if it exists and is accessible
-      // Using any type here to bypass type checking since we're just checking if the table exists
-      const { data, error } = await (supabase as any)
-        .from('contact_messages')
-        .select('*')
-        .limit(1);
-        
-      if (error) {
-        console.log(`Error querying table '${tableName}':`, error.message);
-        
-        // If the error is "relation does not exist", the table definitely doesn't exist
-        if (error.message.includes('relation') && error.message.includes('does not exist')) {
-          return false;
-        }
-      } else {
-        console.log(`Table '${tableName}' exists and is accessible.`);
-        return true;
-      }
-    } else if (tableName === 'mensagens_de_contato') {
-      // Try to query the table
+    // Para mensagens_de_contato, a tabela que queremos verificar
+    if (tableName === 'mensagens_de_contato') {
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .select('*')
         .limit(1);
         
-      if (error) {
-        console.log(`Error querying table '${tableName}':`, error.message);
-        
-        if (error.message.includes('relation') && error.message.includes('does not exist')) {
-          return false;
-        }
-      } else {
-        console.log(`Table '${tableName}' exists and is accessible.`);
-        return true;
+      if (error && error.message.includes('relation') && error.message.includes('does not exist')) {
+        return false;
       }
+      return !error;
+    } 
+    // Manter compatibilidade com outros nomes de tabela
+    else if (tableName === 'contact_messages') {
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data, error } = await (supabase as any)
+        .from('contact_messages')
+        .select('*')
+        .limit(1);
+        
+      if (error && error.message.includes('relation') && error.message.includes('does not exist')) {
+        return false;
+      }
+      return !error;
     }
     
     return false;
