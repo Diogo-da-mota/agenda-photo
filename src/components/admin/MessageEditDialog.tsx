@@ -61,13 +61,25 @@ export const MessageEditDialog: React.FC<MessageEditDialogProps> = ({
     setIsSaving(true);
     
     try {
-      // Make sure we're including all required fields, especially the message
+      // Prepare data for saving - include only non-empty fields
       const dataToSave: Partial<StandardizedMessage> = {
         name: formData.name || message.name,
-        email: formData.email || message.email,
-        phone: formData.phone || message.phone,
         message: formData.message || message.message
       };
+      
+      // Only include email if it's not empty
+      if (formData.email && formData.email.trim() !== '') {
+        dataToSave.email = formData.email;
+      } else if (message.email && message.email.trim() !== '') {
+        dataToSave.email = message.email;
+      }
+      
+      // Only include phone if it's not empty
+      if (formData.phone && formData.phone.trim() !== '') {
+        dataToSave.phone = formData.phone;
+      } else if (message.phone && message.phone.trim() !== '') {
+        dataToSave.phone = message.phone;
+      }
       
       console.log("Saving data:", dataToSave);
       await onSave(dataToSave);
@@ -110,6 +122,7 @@ export const MessageEditDialog: React.FC<MessageEditDialogProps> = ({
               value={formData.email}
               onChange={handleChange}
               className="col-span-3"
+              placeholder="Opcional"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -122,6 +135,7 @@ export const MessageEditDialog: React.FC<MessageEditDialogProps> = ({
               value={formData.phone || ''}
               onChange={handleChange}
               className="col-span-3"
+              placeholder="Opcional"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

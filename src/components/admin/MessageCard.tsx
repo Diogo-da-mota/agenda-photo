@@ -57,66 +57,66 @@ const MessageCard: React.FC<MessageCardProps> = ({
       </CardHeader>
       <Separator />
       <CardContent className="pt-4">
-        <dl className="grid gap-y-2 text-sm">
+        <dl className="grid gap-y-4 text-sm">
           {extractedData.evento && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Evento:</dt>
+              <dt className="font-bold">Qual o tipo de evento que você mais fotografa atualmente?:</dt>
               <dd>{extractedData.evento}</dd>
             </div>
           )}
           
           {extractedData.usaAgenda && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Usa agenda online:</dt>
+              <dt className="font-bold">Você utiliza uma agenda online para organizar seus compromissos?:</dt>
               <dd>{extractedData.usaAgenda}</dd>
             </div>
           )}
           
           {extractedData.gosta && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Gosta:</dt>
+              <dt className="font-bold">O que você mais gosta na agenda que usa?:</dt>
               <dd>{extractedData.gosta}</dd>
             </div>
           )}
           
           {extractedData.naoGosta && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Não gosta:</dt>
+              <dt className="font-bold">O que você não gosta na agenda que usa?:</dt>
               <dd>{extractedData.naoGosta}</dd>
             </div>
           )}
           
           {extractedData.valorMes && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Valor pago/mês:</dt>
+              <dt className="font-bold">Quanto você paga por mês por essa ferramenta?:</dt>
               <dd>{extractedData.valorMes}</dd>
             </div>
           )}
           
           {extractedData.portfolio && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Portfólio online:</dt>
+              <dt className="font-bold">Você tem um portfólio online em uma plataforma de terceiros?:</dt>
               <dd>{extractedData.portfolio}</dd>
             </div>
           )}
           
           {extractedData.outrasFerramentas && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Outras ferramentas:</dt>
+              <dt className="font-bold">Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho?:</dt>
               <dd>{extractedData.outrasFerramentas}</dd>
             </div>
           )}
           
           {extractedData.siteIdeal && (
             <div className="flex flex-col">
-              <dt className="font-semibold">Site ideal:</dt>
+              <dt className="font-bold">Se você pudesse ter um único site que integrasse todas as ferramentas que usa hoje para trabalhar, como ele seria?:</dt>
               <dd>{extractedData.siteIdeal}</dd>
             </div>
           )}
           
           {extractedData.valorSugerido && (
             <div className="flex flex-col mt-2">
-              <dt className="font-semibold">Valor sugerido:</dt>
+              <dt className="font-bold">Valor sugerido:</dt>
               <dd className="font-medium text-green-600">{extractedData.valorSugerido}</dd>
             </div>
           )}
