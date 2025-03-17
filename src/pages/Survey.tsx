@@ -14,7 +14,6 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { submitSurveyData } from "@/utils/messageUtils";
 
 // Define survey questions
 const questions = [
@@ -53,11 +52,9 @@ const Survey = () => {
     name: "",
     email: "",
     phone: "",
-    contactConsent: false,
-    sugestedValue: "" // Adicionar um campo para valor sugerido
+    contactConsent: false
   });
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Calculate progress percentage
   const progress = Math.round((currentQuestionIndex / questions.length) * 100);
@@ -122,65 +119,26 @@ const Survey = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
+  const handleSubmit = () => {
+    // Here you would typically send the data to your backend
+    console.log("Survey answers:", answers);
+    console.log("Contact info:", contactInfo);
     
-    try {
-      // Preparar dados para submissão
-      const initialContactInfo = {
-        nome: contactInfo.name,
-        e_mail: contactInfo.email,
-        telefone: contactInfo.phone,
-      };
-      
-      // Converter as respostas para o formato esperado pela função submitSurveyData
-      const formattedResponses: Record<number, string[]> = {};
-      Object.entries(answers).forEach(([questionId, answer]) => {
-        formattedResponses[parseInt(questionId)] = [answer];
-      });
-      
-      // Enviar dados para o Supabase através da função utilitária
-      const success = await submitSurveyData(
-        initialContactInfo,
-        formattedResponses,
-        {}, // Não temos follow-up responses aqui
-        contactInfo // Passar contactInfo completo para incluir sugestedValue
-      );
-      
-      if (success) {
-        toast({
-          title: "Thank you for your feedback!",
-          description: "Your responses have been submitted successfully.",
-        });
-        
-        // Reset form
-        setAnswers({});
-        setCurrentQuestionIndex(0);
-        setIsCompleted(false);
-        setContactInfo({
-          name: "",
-          email: "",
-          phone: "",
-          contactConsent: false,
-          sugestedValue: ""
-        });
-      } else {
-        toast({
-          title: "Error submitting feedback",
-          description: "There was a problem submitting your responses. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error("Error submitting survey:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while submitting your feedback.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast({
+      title: "Thank you for your feedback!",
+      description: "Your responses have been submitted successfully.",
+    });
+    
+    // Reset form
+    setAnswers({});
+    setCurrentQuestionIndex(0);
+    setIsCompleted(false);
+    setContactInfo({
+      name: "",
+      email: "",
+      phone: "",
+      contactConsent: false
+    });
   };
 
   // Current question
@@ -300,19 +258,6 @@ const Survey = () => {
               />
             </div>
             
-            {/* Campo adicional para valor sugerido */}
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="sugestedValue">Suggested Value (optional)</Label>
-              <input
-                id="sugestedValue"
-                name="sugestedValue"
-                type="text"
-                value={contactInfo.sugestedValue}
-                onChange={handleContactInfoChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-            
             <div className="flex items-center space-x-2 py-2">
               <Switch
                 id="contact-consent"
@@ -333,16 +278,10 @@ const Survey = () => {
               setIsCompleted(false);
               setCurrentQuestionIndex(questions.length - 1);
             }}
-            disabled={isSubmitting}
           >
             Back to Survey
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </Button>
+          <Button onClick={handleSubmit}>Submit</Button>
         </div>
       </div>
     );

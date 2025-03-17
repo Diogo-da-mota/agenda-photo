@@ -111,55 +111,6 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
 };
 
 /**
- * Check if a user already exists in database by email or phone
- * @param email Email to check
- * @param phone Phone to check
- * @returns Existing record or null if not found
- */
-export const checkExistingUser = async (email: string, phone: string): Promise<MensagemDeContato | null> => {
-  if (!email && !phone) return null;
-  
-  try {
-    // Primeiro busca por email se disponível
-    if (email) {
-      const { data: emailMatch, error: emailError } = await supabase
-        .from('mensagens_de_contato')
-        .select('*')
-        .eq('e_mail', email)
-        .maybeSingle();
-      
-      if (emailError) {
-        console.error('Error checking existing user by email:', emailError);
-      } else if (emailMatch) {
-        console.log('Found existing user by email:', emailMatch);
-        return emailMatch;
-      }
-    }
-    
-    // Se não encontrou por email, busca por telefone se disponível
-    if (phone) {
-      const { data: phoneMatch, error: phoneError } = await supabase
-        .from('mensagens_de_contato')
-        .select('*')
-        .eq('telefone', phone)
-        .maybeSingle();
-      
-      if (phoneError) {
-        console.error('Error checking existing user by phone:', phoneError);
-      } else if (phoneMatch) {
-        console.log('Found existing user by phone:', phoneMatch);
-        return phoneMatch;
-      }
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error checking existing user:', error);
-    return null;
-  }
-};
-
-/**
  * Submit survey data to Supabase
  * @param contactInfo Basic contact information
  * @param responses Survey question responses
@@ -171,7 +122,7 @@ export const submitSurveyData = async (
   contactInfo: any,
   responses: {[key: number]: string[]},
   followUpResponses: {[key: number]: {[key: string]: string}},
-  finalContactInfo: any
+  finalContactInfo: string
 ): Promise<boolean> => {
   console.log('Submitting survey data to Supabase...');
   console.log('Contact info:', contactInfo);
@@ -185,15 +136,6 @@ export const submitSurveyData = async (
   }
   
   try {
-    // Extrair informações de contato consolidadas
-    const nome = contactInfo.nome || contactInfo.name || "";
-    const email = finalContactInfo?.email || contactInfo.e_mail || contactInfo.email || "";
-    const telefone = finalContactInfo?.phone || contactInfo.telefone || contactInfo.phone || "";
-    const valorSugerido = finalContactInfo?.sugestedValue || "";
-    
-    // Verificar se o usuário já existe no banco de dados
-    const existingUser = await checkExistingUser(email, telefone);
-    
     // Convert survey responses to a string message
     const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
       const questionNum = parseInt(questionIndex);
@@ -211,68 +153,31 @@ export const submitSurveyData = async (
       
       return `${questionText}: ${answerText}`;
     }).join("\n\n");
-    
-    // Anexando valor sugerido à mensagem se existir
-    const fullMessage = valorSugerido 
-      ? `${surveyMessage}\n\nValor sugerido: ${valorSugerido}`
-      : surveyMessage;
 
-    if (existingUser) {
-      console.log("Usuário existente encontrado, atualizando registro:", existingUser.id);
-      
-      // Combinar mensagem antiga com a nova
-      const combinedMessage = existingUser.mensagem 
-        ? `${existingUser.mensagem}\n\n--- Nova resposta (${new Date().toLocaleDateString()}) ---\n${fullMessage}`
-        : fullMessage;
-      
-      // Atualizar registro existente
-      const { data, error } = await supabase
-        .from('mensagens_de_contato')
-        .update({
-          mensagem: combinedMessage,
-          // Atualizar outros campos apenas se estiverem vazios no registro existente
-          nome: existingUser.nome || nome,
-          e_mail: existingUser.e_mail || email,
-          telefone: existingUser.telefone || telefone
-        })
-        .eq('id', existingUser.id)
-        .select();
+    // Create data for Supabase - strictly match column names para mensagens_de_contato
+    const contactData = {
+      nome: contactInfo.nome,
+      e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
+      telefone: contactInfo.telefone || contactInfo.phone || "",
+      mensagem: surveyMessage,
+      // Note: criado_em is automatically set by DEFAULT now()
+    };
 
-      if (error) {
-        console.error("Erro ao atualizar dados para Supabase:", error);
-        return false;
-      }
-      
-      console.log("Dados atualizados com sucesso para Supabase:", data);
-      return true;
-    } else {
-      console.log("Criando novo registro para o usuário");
-      
-      // Create data for Supabase - strictly match column names para mensagens_de_contato
-      const contactData = {
-        nome: nome,
-        e_mail: email,
-        telefone: telefone,
-        mensagem: fullMessage,
-        // Note: criado_em is automatically set by DEFAULT now()
-      };
+    console.log("Enviando dados para o Supabase:", contactData);
 
-      console.log("Enviando dados para o Supabase:", contactData);
+    // Usando a tabela mensagens_de_contato
+    const { data, error } = await supabase
+      .from('mensagens_de_contato')
+      .insert(contactData)
+      .select();
 
-      // Usando a tabela mensagens_de_contato
-      const { data, error } = await supabase
-        .from('mensagens_de_contato')
-        .insert(contactData)
-        .select();
-
-      if (error) {
-        console.error("Erro ao enviar dados para Supabase:", error);
-        return false;
-      }
-      
-      console.log("Dados enviados com sucesso para Supabase:", data);
-      return true;
+    if (error) {
+      console.error("Erro ao enviar dados para Supabase:", error);
+      return false;
     }
+    
+    console.log("Dados enviados com sucesso para Supabase:", data);
+    return true;
   } catch (error) {
     console.error("Exceção ao enviar dados para Supabase:", error);
     return false;
@@ -298,70 +203,29 @@ export const submitContactForm = async (formData: {
   
   try {
     // Map form data to match the table column names exactly
-    const nome = formData.nome;
-    const email = formData.e_mail || formData.email || "";
-    const telefone = formData.telefone || formData.phone || "";
-    const mensagem = formData.mensagem || formData.message || "";
-    
-    // Verificar se o usuário já existe no banco de dados
-    const existingUser = await checkExistingUser(email, telefone);
-    
-    if (existingUser) {
-      console.log("Usuário existente encontrado, atualizando registro:", existingUser.id);
-      
-      // Combinar mensagem antiga com a nova
-      const combinedMessage = existingUser.mensagem 
-        ? `${existingUser.mensagem}\n\n--- Nova mensagem (${new Date().toLocaleDateString()}) ---\n${mensagem}`
-        : mensagem;
-      
-      // Atualizar registro existente
-      const { data, error } = await supabase
-        .from('mensagens_de_contato')
-        .update({
-          mensagem: combinedMessage,
-          // Atualizar outros campos apenas se estiverem vazios no registro existente
-          nome: existingUser.nome || nome,
-          e_mail: existingUser.e_mail || email,
-          telefone: existingUser.telefone || telefone
-        })
-        .eq('id', existingUser.id)
-        .select();
+    const contactData = {
+      nome: formData.nome,
+      e_mail: formData.e_mail || formData.email || "",
+      telefone: formData.telefone || formData.phone || "",
+      mensagem: formData.mensagem || formData.message || "",
+      // criado_em is set automatically by Supabase
+    };
 
-      if (error) {
-        console.error("Erro ao atualizar dados para Supabase:", error);
-        return false;
-      }
-      
-      console.log("Dados atualizados com sucesso para Supabase:", data);
-      return true;
-    } else {
-      console.log("Criando novo registro para o usuário");
-      
-      // Map form data to match the table column names exactly
-      const contactData = {
-        nome: nome,
-        e_mail: email,
-        telefone: telefone,
-        mensagem: mensagem,
-        // criado_em is set automatically by Supabase
-      };
+    console.log("Enviando dados para o Supabase:", contactData);
 
-      console.log("Enviando dados para o Supabase:", contactData);
+    // Insert into mensagens_de_contato table
+    const { data, error } = await supabase
+      .from('mensagens_de_contato')
+      .insert(contactData)
+      .select();
 
-      // Insert into mensagens_de_contato table
-      const { data, error } = await supabase
-        .from('mensagens_de_contato')
-        .insert(contactData)
-        .select();
-
-      if (error) {
-        console.error("Erro ao enviar dados para Supabase:", error);
-        return false;
-      }
-      
-      console.log("Dados enviados com sucesso para Supabase:", data);
-      return true;
+    if (error) {
+      console.error("Erro ao enviar dados para Supabase:", error);
+      return false;
     }
+    
+    console.log("Dados enviados com sucesso para Supabase:", data);
+    return true;
   } catch (error) {
     console.error("Exceção ao enviar dados para Supabase:", error);
     return false;
