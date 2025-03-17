@@ -21,6 +21,9 @@ const MessageCard: React.FC<MessageCardProps> = ({
   onEdit,
   extractedData
 }) => {
+  // Check if the email is the default placeholder or non-existent
+  const shouldShowEmail = message.email && message.email !== 'sem-email@exemplo.com';
+  
   return (
     <Card key={message.id} className="overflow-hidden">
       <CardHeader className="pb-3">
@@ -28,7 +31,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
           <div>
             <CardTitle className="text-lg">{message.name}</CardTitle>
             <CardDescription className="mt-1">
-              {message.email && <div>E-mail: {message.email}</div>}
+              {shouldShowEmail && <div>E-mail: {message.email}</div>}
               {message.phone && <div>Telefone: {message.phone}</div>}
             </CardDescription>
           </div>
@@ -60,63 +63,63 @@ const MessageCard: React.FC<MessageCardProps> = ({
         <dl className="grid gap-y-4 text-sm">
           {extractedData.evento && (
             <div className="flex flex-col">
-              <dt className="font-bold">Qual o tipo de evento que você mais fotografa atualmente?:</dt>
+              <dt className="font-bold">Qual o tipo de evento que você mais fotografa atualmente</dt>
               <dd>{extractedData.evento}</dd>
             </div>
           )}
           
           {extractedData.usaAgenda && (
             <div className="flex flex-col">
-              <dt className="font-bold">Você utiliza uma agenda online para organizar seus compromissos?:</dt>
+              <dt className="font-bold">Você utiliza uma agenda online para organizar seus compromissos</dt>
               <dd>{extractedData.usaAgenda}</dd>
             </div>
           )}
           
           {extractedData.gosta && (
             <div className="flex flex-col">
-              <dt className="font-bold">O que você mais gosta na agenda que usa?:</dt>
+              <dt className="font-bold">O que você mais gosta na agenda que usa</dt>
               <dd>{extractedData.gosta}</dd>
             </div>
           )}
           
           {extractedData.naoGosta && (
             <div className="flex flex-col">
-              <dt className="font-bold">O que você não gosta na agenda que usa?:</dt>
+              <dt className="font-bold">O que você não gosta na agenda que usa</dt>
               <dd>{extractedData.naoGosta}</dd>
             </div>
           )}
           
           {extractedData.valorMes && (
             <div className="flex flex-col">
-              <dt className="font-bold">Quanto você paga por mês por essa ferramenta?:</dt>
+              <dt className="font-bold">Quanto você paga por mês por essa ferramenta</dt>
               <dd>{extractedData.valorMes}</dd>
             </div>
           )}
           
           {extractedData.portfolio && (
             <div className="flex flex-col">
-              <dt className="font-bold">Você tem um portfólio online em uma plataforma de terceiros?:</dt>
+              <dt className="font-bold">Você tem um portfólio online em uma plataforma de terceiros</dt>
               <dd>{extractedData.portfolio}</dd>
             </div>
           )}
           
           {extractedData.outrasFerramentas && (
             <div className="flex flex-col">
-              <dt className="font-bold">Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho?:</dt>
+              <dt className="font-bold">Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho</dt>
               <dd>{extractedData.outrasFerramentas}</dd>
             </div>
           )}
           
           {extractedData.siteIdeal && (
             <div className="flex flex-col">
-              <dt className="font-bold">Se você pudesse ter um único site que integrasse todas as ferramentas que usa hoje para trabalhar, como ele seria?:</dt>
+              <dt className="font-bold">Se você pudesse ter um único site que integrasse todas as ferramentas que usa hoje para trabalhar, como ele seria</dt>
               <dd>{extractedData.siteIdeal}</dd>
             </div>
           )}
           
           {extractedData.valorSugerido && (
             <div className="flex flex-col mt-2">
-              <dt className="font-bold">Valor sugerido:</dt>
+              <dt className="font-bold">Valor sugerido</dt>
               <dd className="font-medium text-green-600">{extractedData.valorSugerido}</dd>
             </div>
           )}
