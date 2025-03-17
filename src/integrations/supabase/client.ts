@@ -20,7 +20,7 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
     console.log(`Checking if table '${tableName}' exists...`);
     
-    // Para mensagens_de_contato, a tabela que queremos verificar
+    // Para mensagens_de_contato, a tabela que queremos verificar primariamente
     if (tableName === 'mensagens_de_contato') {
       const { data, error } = await supabase
         .from('mensagens_de_contato')
@@ -28,8 +28,11 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
         .limit(1);
         
       if (error && error.message.includes('relation') && error.message.includes('does not exist')) {
+        console.error(`Tabela ${tableName} não existe:`, error.message);
         return false;
       }
+      
+      console.log(`Tabela ${tableName} existe, resultado:`, !error);
       return !error;
     } 
     // Manter compatibilidade com outros nomes de tabela
@@ -41,8 +44,11 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
         .limit(1);
         
       if (error && error.message.includes('relation') && error.message.includes('does not exist')) {
+        console.error(`Tabela ${tableName} não existe:`, error.message);
         return false;
       }
+      
+      console.log(`Tabela ${tableName} existe, resultado:`, !error);
       return !error;
     }
     

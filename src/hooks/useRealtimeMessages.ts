@@ -19,7 +19,9 @@ export const useRealtimeMessages = (
 
   useEffect(() => {
     if (isAuthenticated && tableExists) {
-      // Atualizado: Priorizar ouvir mudanças na tabela mensagens_de_contato
+      console.log('Iniciando escuta de mensagens em tempo real...');
+      
+      // Escutar mudanças na tabela mensagens_de_contato (nossa tabela principal)
       const mensagensDeContatoChannel = supabase
         .channel('mensagens-contato-changes')
         .on(
@@ -51,7 +53,9 @@ export const useRealtimeMessages = (
             });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status da inscrição mensagens_de_contato:', status);
+        });
 
       // Manter compatibilidade com contact_messages se existir
       const contactMessagesChannel = supabase
@@ -78,9 +82,12 @@ export const useRealtimeMessages = (
             });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status da inscrição contact_messages:', status);
+        });
 
       return () => {
+        console.log('Removendo canais de escuta...');
         supabase.removeChannel(mensagensDeContatoChannel);
         supabase.removeChannel(contactMessagesChannel);
       };

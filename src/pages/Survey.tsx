@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -250,6 +249,48 @@ const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValue
   );
 };
 
+// Componente para o cartão de preço/valor que o usuário pagaria
+const PriceCard = ({ 
+  priceValue, 
+  setPriceValue, 
+  onPriceSubmit 
+}: { 
+  priceValue: string; 
+  setPriceValue: React.Dispatch<React.SetStateAction<string>>; 
+  onPriceSubmit: () => void; 
+}) => {
+  return (
+    <div className="mt-10 bg-gradient-to-r from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100 shadow-sm">
+      <h3 className="text-xl font-semibold text-center mb-4">💰 Quanto você investiria nesta solução?</h3>
+      <p className="text-gray-600 text-center mb-6">
+        Baseado em todas as funcionalidades descritas, qual seria um valor justo mensal 
+        que você estaria disposto a pagar por esta plataforma?
+      </p>
+      
+      <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+          <Input 
+            type="number" 
+            min="0"
+            placeholder="Valor mensal" 
+            className="pl-10 flex-1" 
+            value={priceValue}
+            onChange={(e) => setPriceValue(e.target.value)}
+          />
+        </div>
+        <Button 
+          onClick={onPriceSubmit}
+          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+        >
+          Confirmar valor
+          <ArrowRightIcon className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const Survey = () => {
   const [showContactForm, setShowContactForm] = useState(true);
   const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
@@ -263,6 +304,11 @@ const Survey = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followUpErrors, setFollowUpErrors] = useState<{[key: string]: boolean}>({});
+  
+  // Novos estados para o componente de preço
+  const [priceValue, setPriceValue] = useState("");
+  const [showPriceCard, setShowPriceCard] = useState(true);
+  const [priceSubmitted, setPriceSubmitted] = useState(false);
 
   const handleContactFormComplete = (values: ContactFormValues) => {
     setContactInfo(values);
@@ -490,6 +536,26 @@ const Survey = () => {
     });
   };
 
+  const handlePriceSubmit = () => {
+    if (!priceValue || isNaN(Number(priceValue)) || Number(priceValue) < 0) {
+      toast({
+        title: "Valor inválido",
+        description: "Por favor, informe um valor válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setPriceSubmitted(true);
+    setShowPriceCard(false);
+    
+    toast({
+      title: "Valor registrado!",
+      description: `Obrigado por informar quanto investiria: ${formatCurrency(priceValue)}`,
+      duration: 3000,
+    });
+  };
+
   const handleFinalSubmit = async () => {
     if (!finalContactInfo) {
       toast({
@@ -520,16 +586,17 @@ const Survey = () => {
         contactInfo,
         responses,
         followUpResponses,
-        finalContactInfo
+        finalContactInfo,
+        priceValue
       });
       
-      // Convert survey responses to a string message
+      // Converter respostas da pesquisa para uma string de mensagem
       const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
         const questionObj = questions[parseInt(questionIndex)];
         const questionText = questionObj.question;
         let answerText = answers.join(", ");
         
-        // Add follow-up responses if they exist
+        // Adicionar respostas de follow-up se existirem
         if (followUpResponses[parseInt(questionIndex)]) {
           const followUpData = followUpResponses[parseInt(questionIndex)];
           const followUpText = Object.entries(followUpData)
@@ -547,37 +614,47 @@ const Survey = () => {
         return `${questionText}: ${answerText}`;
       }).join("\n\n");
 
-      // Create data for Supabase - match column names exactly
+      // Adicionar a informação de preço à mensagem
+      const completeMessage = priceSubmitted 
+        ? `${surveyMessage}\n\n💰 Valor que estaria disposto a pagar: ${formatCurrency(priceValue)}`
+        : surveyMessage;
+
+      // Dados para o Supabase - corresponder nomes de colunas exatamente
       const contactData = {
         nome: contactInfo.nome,
-        e_mail: finalContactInfo, // Use the final contact info as email
+        e_mail: finalContactInfo, // Usar o email final como e_mail
         telefone: contactInfo.telefone || "",
-        mensagem: surveyMessage,
-        // criado_em is automatically set by DEFAULT now()
+        mensagem: completeMessage,
+        // criado_em é definido automaticamente por DEFAULT now()
       };
 
-      console.log("Enviando dados para Supabase (direto):", contactData);
+      console.log("Enviando dados para Supabase:", contactData);
 
-      // Direct Supabase insertion for debugging
+      // Inserção direta no Supabase
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .insert(contactData)
         .select();
 
       if (error) {
-        console.error("Erro ao enviar dados para Supabase (direto):", error);
+        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
           variant: "destructive",
         });
       } else {
-        console.log("Dados enviados com sucesso para Supabase (direto):", data);
+        console.log("Dados enviados com sucesso para Supabase:", data);
         toast({
           title: "Obrigado pelo seu interesse!",
           description: "Entraremos em contato em breve.",
           duration: 5000,
         });
+        
+        // Após envio bem-sucedido, redirecionamos para a página inicial após um delay
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 3000);
       }
     } catch (error) {
       console.error("Exceção ao enviar dados para Supabase:", error);
@@ -771,219 +848,3 @@ const Survey = () => {
                   <FeatureCard 
                     icon={<MessageSquare className="h-6 w-6 text-white" />}
                     color="bg-green-500"
-                    title="Chatbot para Clientes"
-                    description="Responda perguntas frequentes automaticamente e agende sessões mesmo enquanto você dorme"
-                  />
-                  
-                  <FeatureCard 
-                    icon={<Calendar className="h-6 w-6 text-white" />}
-                    color="bg-orange-500"
-                    title="Calendário Inteligente"
-                    description="Sistema de agendamento que se adapta ao seu horário preferido de trabalho"
-                  />
-                  
-                  <FeatureCard 
-                    icon={<DollarSign className="h-6 w-6 text-white" />}
-                    color="bg-yellow-500"
-                    title="Cálculo de Preços"
-                    description="Assistente de precificação que ajuda você a calcular o valor justo para suas sessões"
-                  />
-                  
-                  <FeatureCard 
-                    icon={<Globe className="h-6 w-6 text-white" />}
-                    color="bg-pink-500"
-                    title="SEO para Fotógrafos"
-                    description="Otimização para mecanismos de busca específica para atrair mais clientes através do Google"
-                  />
-                  
-                  <FeatureCard 
-                    icon={<Award className="h-6 w-6 text-white" />}
-                    color="bg-violet-500"
-                    title="Clube de Benefícios"
-                    description="Acesso a descontos exclusivos em cursos, equipamentos e softwares para fotógrafos"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-10 bg-gradient-to-r from-purple-50 to-blue-50 p-8 rounded-2xl border border-purple-100 shadow-sm">
-                <h3 className="text-xl font-medium mb-4 text-center">💡 Quer ser um dos primeiros a testar essa solução?</h3>
-                <p className="text-gray-600 text-center mb-6">
-                  Você está interessado na plataforma? Deixe seu contato abaixo e seja um dos primeiros 
-                  fotógrafos a testar nossa solução!
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-                  <Input 
-                    placeholder="Digite seu e-mail *" 
-                    className="flex-1" 
-                    value={finalContactInfo}
-                    onChange={handleFinalContactInfoChange}
-                    required
-                  />
-                  <Button 
-                    onClick={handleFinalSubmit}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white button-hover"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="mr-2">Enviando...</span>
-                        <span className="animate-spin">↻</span>
-                      </>
-                    ) : (
-                      <>
-                        Quero participar
-                        <ArrowRightIcon className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (showContactForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
-        <ContactInfoCard onComplete={handleContactFormComplete} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
-      <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
-        <CardContent className="p-8">
-          <div className="mb-6 flex justify-between items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrev}
-              className="h-8 px-3"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Anterior
-            </Button>
-            <div className="text-xs text-muted-foreground">
-              Pergunta {currentQuestion + 1} de {questions.length}
-            </div>
-            <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-black rounded-full"
-                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
-
-          {currentQuestionObj.type === 'radio' && currentQuestionObj.options && (
-            <RadioGroup
-              value={selectedOption || ''}
-              onValueChange={handleOptionChange}
-              className="space-y-3"
-            >
-              {currentQuestionObj.options.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={option} />
-                  <Label htmlFor={option} className="cursor-pointer">{option}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
-
-          {currentQuestionObj.type === 'checkbox' && currentQuestionObj.options && (
-            <div className="space-y-3">
-              {currentQuestionObj.options.map((option) => (
-                <div key={option} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={option}
-                    checked={(responses[currentQuestion] || []).includes(option)}
-                    onCheckedChange={() => handleOptionChange(option)}
-                  />
-                  <Label htmlFor={option} className="cursor-pointer">{option}</Label>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {currentQuestionObj.type === 'textarea' && (
-            <Textarea
-              placeholder="Digite sua resposta aqui..."
-              value={(responses[currentQuestion] || [''])[0]}
-              onChange={handleTextAreaChange}
-              className="min-h-[120px]"
-            />
-          )}
-
-          {showFollowUp && (
-            <div className="mt-6 border-t pt-4 border-gray-200">
-              <h3 className="text-lg font-medium mb-4">Informações adicionais</h3>
-              <div className="space-y-4">
-                {currentQuestionObj.followUp?.fields.map((field) => (
-                  <div key={field.label}>
-                    <Label htmlFor={field.label} className="mb-2 block">
-                      {field.label}
-                    </Label>
-                    {field.type === 'text' && (
-                      <Input
-                        id={field.label}
-                        value={(followUpResponses[currentQuestion] && followUpResponses[currentQuestion][field.label]) || ''}
-                        onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                        className={followUpErrors[field.label] ? "border-red-500" : ""}
-                      />
-                    )}
-                    {field.type === 'number' && (
-                      <Input
-                        id={field.label}
-                        type="number"
-                        value={(followUpResponses[currentQuestion] && followUpResponses[currentQuestion][field.label]) || ''}
-                        onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                        className={followUpErrors[field.label] ? "border-red-500" : ""}
-                      />
-                    )}
-                    {followUpErrors[field.label] && (
-                      <p className="mt-1 text-sm text-red-500">Este campo é obrigatório</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-8 flex justify-end">
-            <Button
-              onClick={handleNext}
-              className="bg-black hover:bg-black/90 button-hover"
-              disabled={
-                (currentQuestionObj.type === 'radio' && !selectedOption) ||
-                (currentQuestionObj.type === 'checkbox' && 
-                 (!responses[currentQuestion] || responses[currentQuestion].length === 0)) ||
-                (currentQuestionObj.type === 'textarea' && 
-                 (!responses[currentQuestion] || !responses[currentQuestion][0]))
-              }
-            >
-              {currentQuestion < questions.length - 1 ? (
-                <>
-                  Próxima
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Finalizar
-                  <Send className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-export default Survey;

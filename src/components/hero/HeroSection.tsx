@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleSurveyClick = () => {
+    // Navegação direta para a página de pesquisa
+    navigate('/survey');
+  };
+
   return (
     <div className="relative z-10 text-white text-center px-4 max-w-4xl">
       <h2 className="text-sm sm:text-lg uppercase tracking-wider mb-2">AGENDA PRO</h2>
@@ -16,7 +21,7 @@ const HeroSection: React.FC = () => {
         Gerencie sua agenda, clientes, finanças e presença online em um único lugar
       </p>
       <Button 
-        onClick={() => navigate('/survey')}
+        onClick={handleSurveyClick}
         size="lg"
         className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg sm:text-xl py-5 sm:py-6 px-8 sm:px-10 rounded-full shadow-lg hover:shadow-xl transition-all"
       >
