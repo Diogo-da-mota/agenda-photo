@@ -36,7 +36,10 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent form submission
+              onConfirm();
+            }}
             disabled={isDeleting}
             className="bg-red-500 hover:bg-red-600"
           >

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ContactMessage, MensagemDeContato, StandardizedMessage } from "@/types/messages";
@@ -17,13 +16,27 @@ export const useRealtimeMessages = (
 ) => {
   const { toast } = useToast();
   const [subscribed, setSubscribed] = useState(false);
+  const channelsRef = useRef<any[]>([]);
+  
+  // Cleanup function to remove channels
+  const cleanupChannels = () => {
+    if (channelsRef.current.length > 0) {
+      console.log('Removendo canais de escuta...');
+      channelsRef.current.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+      channelsRef.current = [];
+      setSubscribed(false);
+    }
+  };
 
   useEffect(() => {
+    // Only set up listeners if authenticated, table exists, and not already subscribed
     if (isAuthenticated && tableExists && !subscribed) {
       console.log('Iniciando escuta de mensagens em tempo real...');
       setSubscribed(true);
       
-      // Escutar mudanças na tabela mensagens_de_contato (nossa tabela principal)
+      // Listen for changes to mensagens_de_contato (our main table)
       const mensagensDeContatoChannel = supabase
         .channel('mensagens-contato-changes')
         .on(
@@ -55,8 +68,9 @@ export const useRealtimeMessages = (
         .subscribe((status) => {
           console.log('Status da inscrição mensagens_de_contato:', status);
         });
+      channelsRef.current.push(mensagensDeContatoChannel);
 
-      // Também escutar atualizações (para casos de usuário existente sendo atualizado)
+      // Also listen for updates (for cases of existing user being updated)
       const mensagensUpdateChannel = supabase
         .channel('mensagens-contato-updates')
         .on(
@@ -93,8 +107,9 @@ export const useRealtimeMessages = (
         .subscribe((status) => {
           console.log('Status da inscrição mensagens_de_contato (updates):', status);
         });
+      channelsRef.current.push(mensagensUpdateChannel);
 
-      // Manter compatibilidade com contact_messages se existir
+      // Keep compatibility with contact_messages if it exists
       const contactMessagesChannel = supabase
         .channel('contact-messages-changes')
         .on(
@@ -119,23 +134,25 @@ export const useRealtimeMessages = (
         .subscribe((status) => {
           console.log('Status da inscrição contact_messages:', status);
         });
+      channelsRef.current.push(contactMessagesChannel);
 
-      return () => {
-        console.log('Removendo canais de escuta...');
-        supabase.removeChannel(mensagensDeContatoChannel);
-        supabase.removeChannel(mensagensUpdateChannel);
-        supabase.removeChannel(contactMessagesChannel);
-        setSubscribed(false);
-      };
+      return cleanupChannels;
     }
+    
+    // If conditions aren't met but we were previously subscribed, clean up
+    if (!isAuthenticated || !tableExists) {
+      cleanupChannels();
+    }
+    
+    return cleanupChannels;
   }, [isAuthenticated, tableExists, toast, onNewMessage, subscribed]);
   
-  // Função auxiliar para verificar duplicatas antes de notificar
+  // Helper function to check for duplicates before notifying
   const checkForDuplicateAndNotify = async (
     newMessage: StandardizedMessage, 
     callback: (message: StandardizedMessage) => void
   ) => {
-    // Só notificar se for um novo usuário (checando email ou telefone)
+    // Only notify if it's a new user (checking email or phone)
     if (newMessage.email || newMessage.phone) {
       try {
         const { data: existingMessages } = await supabase
@@ -145,7 +162,7 @@ export const useRealtimeMessages = (
           .not('id', 'eq', newMessage.id);
           
         if (!existingMessages || existingMessages.length === 0) {
-          // Este é o primeiro registro deste usuário, notificar
+          // This is the first record for this user, notify
           callback(newMessage);
           toast({
             title: "Nova mensagem recebida",
@@ -153,12 +170,12 @@ export const useRealtimeMessages = (
           });
         } else {
           console.log(`Mensagem duplicada de ${newMessage.name} não notificada (usuário já existe)`);
-          // Ainda é uma atualização, mas não vamos mostrar toast
+          // Still an update, but we won't show toast
           callback({...newMessage, isUpdate: true});
         }
       } catch (error) {
         console.error('Erro ao verificar duplicatas:', error);
-        // Em caso de erro, notificar de qualquer forma
+        // In case of error, notify anyway
         callback(newMessage);
         toast({
           title: "Nova mensagem recebida",
@@ -166,7 +183,7 @@ export const useRealtimeMessages = (
         });
       }
     } else {
-      // Se não temos email ou telefone, notificar normalmente
+      // If we don't have email or phone, notify normally
       callback(newMessage);
       toast({
         title: "Nova mensagem recebida",

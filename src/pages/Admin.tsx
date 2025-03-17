@@ -1,9 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/utils/formatDate";
-import { useMessageData } from "@/hooks/useMessageData";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
 import MessagesWrapper from "@/components/admin/MessagesWrapper";
@@ -43,13 +40,20 @@ const Admin = () => {
     localStorage.removeItem("adminAuthenticated");
   };
 
+  // Create refresh callback for header
+  const handleRefresh = () => {
+    // Force re-render of the MessagesWrapper component
+    setIsAuthenticated(false);
+    setTimeout(() => setIsAuthenticated(true), 100);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <AdminHeader 
           isAuthenticated={isAuthenticated}
           isRefreshing={false}
-          handleRefresh={() => {}}
+          handleRefresh={handleRefresh}
           handleLogout={handleLogout}
         />
         

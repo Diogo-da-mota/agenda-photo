@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import CustomerMessagesList from './CustomerMessagesList';
 import { useMessageData } from '@/hooks/useMessageData';
-import { StandardizedMessage } from '@/types/messages';
 
 interface MessagesWrapperProps {
   isAuthenticated: boolean;
@@ -33,17 +32,23 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
     }
   };
 
+  // Remove the direct rendering of CustomerMessagesList from here
+  // and use a wrapper div with a key to force remounting when authentication changes
   return (
-    <CustomerMessagesList
-      tableExists={tableExists}
-      mensagens={mensagens}
-      formatDate={formatDate}
-      checkTables={handleRefresh}
-      createTable={createTable}
-      isCreatingTable={isCreatingTable}
-      deleteMessage={deleteMessage}
-      updateMessage={updateMessage}
-    />
+    <div key={`message-wrapper-${isAuthenticated ? 'auth' : 'unauth'}`}>
+      {isAuthenticated && (
+        <CustomerMessagesList
+          tableExists={tableExists}
+          mensagens={mensagens}
+          formatDate={formatDate}
+          checkTables={handleRefresh}
+          createTable={createTable}
+          isCreatingTable={isCreatingTable}
+          deleteMessage={deleteMessage}
+          updateMessage={updateMessage}
+        />
+      )}
+    </div>
   );
 };
 

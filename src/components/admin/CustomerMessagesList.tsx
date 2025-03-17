@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StandardizedMessage } from "@/types/messages";
 import EmptyMessageState from './EmptyMessageState';
 import MessageCard from './MessageCard';
@@ -32,7 +32,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [messageToEdit, setMessageToEdit] = useState<StandardizedMessage | null>(null);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!messageToDelete || !deleteMessage) return;
     
     setIsDeleting(true);
@@ -44,20 +44,20 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
       setIsDeleting(false);
       setMessageToDelete(null);
     }
-  };
+  }, [messageToDelete, deleteMessage]);
 
   // Handle message editing
-  const handleEdit = (message: StandardizedMessage) => {
+  const handleEdit = useCallback((message: StandardizedMessage) => {
     setMessageToEdit(message);
-  };
+  }, []);
 
   // Handle message saving
-  const handleSave = async (updatedMessage: Partial<StandardizedMessage>) => {
+  const handleSave = useCallback(async (updatedMessage: Partial<StandardizedMessage>) => {
     if (messageToEdit && updateMessage) {
       await updateMessage(messageToEdit.id, updatedMessage);
       setMessageToEdit(null);
     }
-  };
+  }, [messageToEdit, updateMessage]);
 
   return (
     <div>
