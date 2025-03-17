@@ -9,6 +9,7 @@ const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const Admin = () => {
     if (storedAuth === "true") {
       setIsAuthenticated(true);
     }
+    setIsInitializing(false);
   }, []);
 
   const handleLogin = () => {
@@ -38,14 +40,20 @@ const Admin = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("adminAuthenticated");
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado com sucesso."
+    });
   };
 
-  // Create refresh callback for header
-  const handleRefresh = () => {
-    // Force re-render of the MessagesWrapper component
-    setIsAuthenticated(false);
-    setTimeout(() => setIsAuthenticated(true), 100);
-  };
+  // Show loading state during initialization
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex justify-center items-center">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -53,7 +61,11 @@ const Admin = () => {
         <AdminHeader 
           isAuthenticated={isAuthenticated}
           isRefreshing={false}
-          handleRefresh={handleRefresh}
+          handleRefresh={() => {
+            // We're not going to reset authentication state on refresh anymore
+            // Just reload the MessagesWrapper component with key change
+            window.location.reload();
+          }}
           handleLogout={handleLogout}
         />
         
@@ -67,7 +79,10 @@ const Admin = () => {
           />
         ) : (
           <div className="space-y-8">
-            <MessagesWrapper isAuthenticated={isAuthenticated} />
+            <MessagesWrapper 
+              key={`messages-wrapper-${Date.now()}`} 
+              isAuthenticated={isAuthenticated} 
+            />
           </div>
         )}
       </div>

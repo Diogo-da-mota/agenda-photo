@@ -14,6 +14,7 @@ interface CustomerMessagesListProps {
   checkTables: () => void;
   createTable: () => Promise<void>;
   isCreatingTable: boolean;
+  isLoading?: boolean;
   deleteMessage?: (id: string) => Promise<void>;
   updateMessage?: (id: string, data: Partial<StandardizedMessage>) => Promise<void>;
 }
@@ -25,6 +26,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   checkTables,
   createTable,
   isCreatingTable,
+  isLoading = false,
   deleteMessage,
   updateMessage
 }) => {
@@ -48,16 +50,29 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
 
   // Handle message editing
   const handleEdit = useCallback((message: StandardizedMessage) => {
+    console.log("Editing message:", message);
     setMessageToEdit(message);
   }, []);
 
   // Handle message saving
   const handleSave = useCallback(async (updatedMessage: Partial<StandardizedMessage>) => {
     if (messageToEdit && updateMessage) {
+      console.log("Saving message:", updatedMessage);
       await updateMessage(messageToEdit.id, updatedMessage);
       setMessageToEdit(null);
     }
   }, [messageToEdit, updateMessage]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Mensagens de Contato</h2>
+        <div className="flex justify-center items-center min-h-[200px]">
+          <p>Carregando mensagens...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -75,6 +90,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
         <div className="grid gap-6">
           {mensagens.map((message) => {
             const extractedData = extractMessageData(message.message);
+            console.log("Message data:", { id: message.id, extractedData });
             
             return (
               <MessageCard

@@ -122,9 +122,17 @@ const MessageCard: React.FC<MessageCardProps> = ({
           )}
         </dl>
 
-        {/* If no structured data was parsed, show the raw message */}
-        {!Object.values(extractedData).some(val => val !== null) && (
+        {/* If no structured data was parsed, always show the raw message */}
+        {Object.values(extractedData).every(val => val === null) && message.message && (
           <div className="whitespace-pre-line mt-2">{message.message}</div>
+        )}
+        
+        {/* Always show the raw message if it exists and doesn't match the extracted data */}
+        {message.message && !Object.values(extractedData).every(val => val === null) && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="font-bold mb-2">Mensagem original:</h4>
+            <div className="whitespace-pre-line">{message.message}</div>
+          </div>
         )}
       </CardContent>
     </Card>

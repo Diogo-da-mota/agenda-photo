@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import CustomerMessagesList from './CustomerMessagesList';
@@ -10,6 +10,8 @@ interface MessagesWrapperProps {
 }
 
 const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   const { 
     mensagens, 
     isLoading, 
@@ -22,6 +24,13 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
     updateMessage
   } = useMessageData(isAuthenticated);
 
+  // Set initialized after first load to prevent flickering
+  useEffect(() => {
+    if (!isLoading && !isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isLoading, isInitialized]);
+
   // Function to format date strings to local format
   const formatDate = (dateString: string) => {
     try {
@@ -32,23 +41,32 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
     }
   };
 
-  // Remove the direct rendering of CustomerMessagesList from here
-  // and use a wrapper div with a key to force remounting when authentication changes
+  // Only render when authenticated and initialized
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Show loading state while initializing
+  if (!isInitialized && isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <p>Carregando mensagens...</p>
+      </div>
+    );
+  }
+
   return (
-    <div key={`message-wrapper-${isAuthenticated ? 'auth' : 'unauth'}`}>
-      {isAuthenticated && (
-        <CustomerMessagesList
-          tableExists={tableExists}
-          mensagens={mensagens}
-          formatDate={formatDate}
-          checkTables={handleRefresh}
-          createTable={createTable}
-          isCreatingTable={isCreatingTable}
-          deleteMessage={deleteMessage}
-          updateMessage={updateMessage}
-        />
-      )}
-    </div>
+    <CustomerMessagesList
+      tableExists={tableExists}
+      mensagens={mensagens}
+      formatDate={formatDate}
+      checkTables={handleRefresh}
+      createTable={createTable}
+      isCreatingTable={isCreatingTable}
+      deleteMessage={deleteMessage}
+      updateMessage={updateMessage}
+      isLoading={isLoading}
+    />
   );
 };
 
