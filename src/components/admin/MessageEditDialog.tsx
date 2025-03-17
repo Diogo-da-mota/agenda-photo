@@ -33,13 +33,15 @@ export const MessageEditDialog: React.FC<MessageEditDialogProps> = ({
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reset form data when a new message is selected for editing
   useEffect(() => {
     if (message) {
+      console.log("Setting form data from message:", message);
       setFormData({
-        name: message.name,
-        email: message.email,
+        name: message.name || '',
+        email: message.email || '',
         phone: message.phone || '',
-        message: message.message
+        message: message.message || ''
       });
     }
   }, [message]);
@@ -48,17 +50,32 @@ export const MessageEditDialog: React.FC<MessageEditDialogProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    console.log(`Field ${name} changed to: ${value.substring(0, 20)}${value.length > 20 ? '...' : ''}`);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    if (!message) return;
+    
+    console.log("Submitting form data:", formData);
     setIsSaving(true);
+    
     try {
-      await onSave(formData);
+      // Make sure we're including all required fields, especially the message
+      const dataToSave: Partial<StandardizedMessage> = {
+        name: formData.name || message.name,
+        email: formData.email || message.email,
+        phone: formData.phone || message.phone,
+        message: formData.message || message.message
+      };
+      
+      console.log("Saving data:", dataToSave);
+      await onSave(dataToSave);
     } catch (error) {
       console.error("Error saving message:", error);
     } finally {
       setIsSaving(false);
+      onClose();
     }
   };
 
