@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -250,48 +249,6 @@ const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValue
   );
 };
 
-// Componente para o cartão de preço/valor que o usuário pagaria
-const PriceCard = ({ 
-  priceValue, 
-  setPriceValue, 
-  onPriceSubmit 
-}: { 
-  priceValue: string; 
-  setPriceValue: React.Dispatch<React.SetStateAction<string>>; 
-  onPriceSubmit: () => void; 
-}) => {
-  return (
-    <div className="mt-10 bg-gradient-to-r from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100 shadow-sm">
-      <h3 className="text-xl font-semibold text-center mb-4">💰 Quanto você investiria nesta solução?</h3>
-      <p className="text-gray-600 text-center mb-6">
-        Baseado em todas as funcionalidades descritas, qual seria um valor justo mensal 
-        que você estaria disposto a pagar por esta plataforma?
-      </p>
-      
-      <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
-          <Input 
-            type="number" 
-            min="0"
-            placeholder="Valor mensal" 
-            className="pl-10 flex-1" 
-            value={priceValue}
-            onChange={(e) => setPriceValue(e.target.value)}
-          />
-        </div>
-        <Button 
-          onClick={onPriceSubmit}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-        >
-          Confirmar valor
-          <ArrowRightIcon className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
-};
-
 const Survey = () => {
   const [showContactForm, setShowContactForm] = useState(true);
   const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
@@ -302,14 +259,10 @@ const Survey = () => {
   const [showThankYou, setShowThankYou] = useState(false);
   const [animation, setAnimation] = useState('fade-in');
   const [finalContactInfo, setFinalContactInfo] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followUpErrors, setFollowUpErrors] = useState<{[key: string]: boolean}>({});
-  
-  // Novos estados para o componente de preço
-  const [priceValue, setPriceValue] = useState("");
-  const [showPriceCard, setShowPriceCard] = useState(true);
-  const [priceSubmitted, setPriceSubmitted] = useState(false);
 
   const handleContactFormComplete = (values: ContactFormValues) => {
     setContactInfo(values);
@@ -537,26 +490,6 @@ const Survey = () => {
     });
   };
 
-  const handlePriceSubmit = () => {
-    if (!priceValue || isNaN(Number(priceValue)) || Number(priceValue) < 0) {
-      toast({
-        title: "Valor inválido",
-        description: "Por favor, informe um valor válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setPriceSubmitted(true);
-    setShowPriceCard(false);
-    
-    toast({
-      title: "Valor registrado!",
-      description: `Obrigado por informar quanto investiria: ${formatCurrency(priceValue)}`,
-      duration: 3000,
-    });
-  };
-
   const handleFinalSubmit = async () => {
     if (!finalContactInfo) {
       toast({
@@ -587,8 +520,7 @@ const Survey = () => {
         contactInfo,
         responses,
         followUpResponses,
-        finalContactInfo,
-        priceValue
+        finalContactInfo
       });
       
       // Converter respostas da pesquisa para uma string de mensagem
@@ -615,17 +547,12 @@ const Survey = () => {
         return `${questionText}: ${answerText}`;
       }).join("\n\n");
 
-      // Adicionar a informação de preço à mensagem
-      const completeMessage = priceSubmitted 
-        ? `${surveyMessage}\n\n💰 Valor que estaria disposto a pagar: ${formatCurrency(priceValue)}`
-        : surveyMessage;
-
       // Dados para o Supabase - corresponder nomes de colunas exatamente
       const contactData = {
         nome: contactInfo.nome,
         e_mail: finalContactInfo, // Usar o email final como e_mail
         telefone: contactInfo.telefone || "",
-        mensagem: completeMessage,
+        mensagem: surveyMessage,
         // criado_em é definido automaticamente por DEFAULT now()
       };
 
@@ -646,6 +573,7 @@ const Survey = () => {
         });
       } else {
         console.log("Dados enviados com sucesso para Supabase:", data);
+        setEmailSubmitted(true);
         toast({
           title: "Obrigado pelo seu interesse!",
           description: "Entraremos em contato em breve.",
@@ -862,6 +790,33 @@ const Survey = () => {
                 </div>
               </div>
               
+              {/* Novo card com background de imagem antes do formulário de email */}
+              <div className="mt-10 bg-gradient-to-r from-orange-100 to-amber-100 p-8 rounded-2xl border border-orange-200 relative overflow-hidden">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-semibold text-center mb-4">
+                    🔥 Acesso Antecipado à Plataforma!
+                  </h3>
+                  <p className="text-gray-700 text-center mb-4">
+                    Estamos selecionando um grupo exclusivo de fotógrafos para testar nossa plataforma antes do lançamento oficial.
+                    Ao participar, você terá:
+                  </p>
+                  <ul className="space-y-2 max-w-xl mx-auto mb-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                      <span className="text-gray-700">Acesso gratuito durante todo o período de testes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                      <span className="text-gray-700">Prioridade para solicitar novas funcionalidades</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                      <span className="text-gray-700">Descontos exclusivos após o lançamento oficial</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
               {/* Informações para contato e teste */}
               <div className="mt-10 bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl border border-purple-200">
                 <h3 className="text-xl font-semibold text-center mb-6">
@@ -871,163 +826,8 @@ const Survey = () => {
                   Deixe seu e-mail abaixo e entraremos em contato assim que iniciarmos o período de testes. Vagas limitadas!
                 </p>
                 
-                <div className="flex flex-col sm:flex-row max-w-xl mx-auto gap-3">
-                  <Input 
-                    type="email" 
-                    placeholder="Seu melhor e-mail" 
-                    className="flex-1" 
-                    value={finalContactInfo}
-                    onChange={handleFinalContactInfoChange}
-                  />
-                  <Button 
-                    onClick={handleFinalSubmit}
-                    disabled={isSubmitting}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                  >
-                    {isSubmitting ? "Enviando..." : "Quero participar"}
-                    <Send className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 flex flex-col items-center justify-center p-4 py-12">
-      {showContactForm ? (
-        <ContactInfoCard onComplete={handleContactFormComplete} />
-      ) : (
-        <>
-          <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
-            <CardContent className="p-8">
-              <div className="mb-6 flex justify-between items-center">
-                <button 
-                  onClick={handlePrev} 
-                  className="flex items-center text-sm text-gray-500 hover:text-gray-700"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Voltar
-                </button>
-                <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-black rounded-full" 
-                    style={{ width: `${((currentQuestion + 1) / (questions.length + 1)) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
-
-              {currentQuestionObj.type === 'radio' && (
-                <RadioGroup 
-                  value={responses[currentQuestion]?.[0] || ''} 
-                  onValueChange={(value) => handleOptionChange(value)}
-                  className="space-y-3"
-                >
-                  {currentQuestionObj.options?.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option} id={option} />
-                      <Label htmlFor={option}>{option}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
-
-              {currentQuestionObj.type === 'checkbox' && (
-                <div className="space-y-3">
-                  {currentQuestionObj.options?.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={option} 
-                        checked={(responses[currentQuestion] || []).includes(option)}
-                        onCheckedChange={() => handleOptionChange(option)}
-                      />
-                      <Label htmlFor={option}>{option}</Label>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {currentQuestionObj.type === 'textarea' && (
-                <Textarea 
-                  placeholder="Digite sua resposta aqui..." 
-                  value={responses[currentQuestion]?.[0] || ''} 
-                  onChange={handleTextAreaChange}
-                  className="min-h-32 w-full"
-                />
-              )}
-
-              {showFollowUp && (
-                <div className="mt-6 space-y-4 border-t pt-4 border-gray-200">
-                  <h3 className="text-md font-medium">Informações adicionais:</h3>
-                  {currentQuestionObj.followUp?.fields.map((field) => (
-                    <div key={field.label} className="space-y-2">
-                      <Label htmlFor={field.label} className={followUpErrors[field.label] ? 'text-red-500' : ''}>
-                        {field.label} *
-                      </Label>
-                      {field.type === 'text' && (
-                        <Input 
-                          id={field.label}
-                          value={(followUpResponses[currentQuestion]?.[field.label] || '')} 
-                          onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                          className={followUpErrors[field.label] ? 'border-red-500' : ''}
-                        />
-                      )}
-                      {field.type === 'number' && (
-                        <Input 
-                          id={field.label}
-                          type="number"
-                          min="0"
-                          value={(followUpResponses[currentQuestion]?.[field.label] || '')} 
-                          onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                          className={followUpErrors[field.label] ? 'border-red-500' : ''}
-                        />
-                      )}
-                      {followUpErrors[field.label] && (
-                        <p className="text-sm text-red-500">Este campo é obrigatório</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-8 flex justify-end">
-                <Button
-                  onClick={handleNext}
-                  className="bg-black hover:bg-black/90 button-hover"
-                >
-                  {currentQuestion < questions.length - 1 ? (
-                    <>
-                      Próxima
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      Finalizar
-                      <Check className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Exibir componente de preço após a última pergunta */}
-          {currentQuestion === questions.length - 1 && showPriceCard && (
-            <PriceCard 
-              priceValue={priceValue}
-              setPriceValue={setPriceValue}
-              onPriceSubmit={handlePriceSubmit}
-            />
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
-export default Survey;
+                {!emailSubmitted ? (
+                  <div className="flex flex-col sm:flex-row max-w-xl mx-auto gap-3">
+                    <Input 
+                      type="email" 
+                      placeholder="Seu
