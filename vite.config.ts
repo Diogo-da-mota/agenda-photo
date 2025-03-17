@@ -11,13 +11,14 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   build: {
-    // Otimizações para o build
+    // Target modern browsers to improve build performance
     target: "esnext",
-    minify: mode === 'production' ? 'esbuild' : false, // Substituir Terser pelo esbuild
-    // Remove as opções terserOptions
-    // Disable source maps in production to improve performance
+    // Use esbuild for minification instead of terser
+    minify: mode === 'production' ? 'esbuild' : false,
+    // Only generate sourcemaps in development
     sourcemap: mode !== 'production',
-    chunkSizeWarningLimit: 1000, // Aumenta o limite de aviso de tamanho de chunk
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -41,8 +42,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -51,5 +51,9 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+  },
+  // Add esbuild options to ensure compatibility
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 }));
