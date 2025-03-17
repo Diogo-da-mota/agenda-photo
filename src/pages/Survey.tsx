@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -210,7 +209,50 @@ const Survey = () => {
     setShowContactForm(false);
   };
 
+  // Modified to check if all questions have answers
+  const hasUnfilledQuestions = () => {
+    // Check current question responses if not in thank you page
+    if (!showThankYou) {
+      const currentQuestionObj = questions[currentQuestion];
+      
+      // For the current question being displayed
+      if (!responses[currentQuestion] || 
+          (responses[currentQuestion].length === 0) || 
+          (currentQuestionObj.type === 'textarea' && (!responses[currentQuestion][0] || responses[currentQuestion][0].trim() === ''))) {
+        return true;
+      }
+      
+      // Check follow-up fields if applicable
+      if (showFollowUp && currentQuestionObj?.followUp) {
+        const followUpData = followUpResponses[currentQuestion] || {};
+        let hasErrors = false;
+        
+        currentQuestionObj.followUp.fields.forEach(field => {
+          const value = followUpData[field.label] || '';
+          if (!value.trim()) {
+            hasErrors = true;
+          }
+        });
+        
+        return hasErrors;
+      }
+    }
+    
+    return false;
+  };
+
+  // Updated to validate current question before proceeding
   const handleNext = () => {
+    // Check if the current question is filled
+    if (hasUnfilledQuestions()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, responda a pergunta antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (currentQuestion < questions.length - 1) {
       if (hasUnfilledFollowUp()) {
         toast({
@@ -521,9 +563,61 @@ const Survey = () => {
   };
 
   const handlePriceSubmit = () => {
+    if (!priceValue || priceValue.trim() === '') {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, informe um valor antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     console.log("Valor do preço inserido:", priceValue);
-    // You can add logic here to handle the price value
-    // For example, you could store it in the Supabase database
+    
+    // Prepare price data to submit with contact info
+    const priceData = {
+      nome: contactInfo?.nome || "Visitante",
+      e_mail: finalContactInfo || "sem-email@exemplo.com",
+      telefone: contactInfo?.telefone || "",
+      mensagem: `Valor sugerido para a solução: ${formatCurrency(priceValue)}. ${contactInfo ? `Dados do cliente: Nome: ${contactInfo.nome}, Telefone: ${contactInfo.telefone}, Cidade: ${contactInfo.cidade}` : ''}`,
+    };
+    
+    // Submit price data to Supabase
+    setIsSubmitting(true);
+    
+    supabase
+      .from('mensagens_de_contato')
+      .insert(priceData)
+      .select()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Erro ao enviar valor:", error);
+          toast({
+            title: "Erro ao enviar valor",
+            description: "Não foi possível salvar sua sugestão de preço. Por favor, tente novamente.",
+            variant: "destructive",
+          });
+        } else {
+          console.log("Valor enviado com sucesso:", data);
+          toast({
+            title: "Valor enviado com sucesso!",
+            description: "Obrigado pela sua sugestão.",
+            duration: 3000,
+          });
+          
+          // Clear the price input after successful submission
+          setPriceValue('');
+          
+          // Scroll to the email section
+          const emailSection = document.getElementById('email-section');
+          if (emailSection) {
+            emailSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const currentQuestionObj = questions[currentQuestion];
@@ -718,7 +812,7 @@ const Survey = () => {
                 </div>
               </div>
               
-              {/* Novo card para coletar o valor que o usuário investiria */}
+              {/* Updated price collection card */}
               <div className="mt-10 bg-gradient-to-r from-amber-100 to-orange-100 p-8 rounded-2xl border border-amber-200 relative overflow-hidden">
                 <div className="relative z-10 text-center">
                   <h3 className="text-xl font-semibold mb-4">
@@ -738,20 +832,22 @@ const Survey = () => {
                         className="pl-10 bg-white/80 border-amber-200"
                         value={priceValue}
                         onChange={(e) => setPriceValue(e.target.value)}
+                        required
                       />
                     </div>
                     <Button 
                       onClick={handlePriceSubmit}
                       className="bg-amber-500 hover:bg-amber-600 text-white"
+                      disabled={isSubmitting}
                     >
-                      Continuar
+                      {isSubmitting ? "Enviando..." : "Continuar"}
                     </Button>
                   </div>
                 </div>
               </div>
               
-              {/* Informações para contato e teste */}
-              <div className="mt-10 bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl border border-purple-200">
+              {/* Email section with ID for scrolling */}
+              <div id="email-section" className="mt-10 bg-gradient-to-r from-purple-100 to-blue-100 p-8 rounded-2xl border border-purple-200">
                 <h3 className="text-xl font-semibold text-center mb-6">
                   💡 Quer ser um dos primeiros a testar essa solução?
                 </h3>
@@ -818,15 +914,17 @@ const Survey = () => {
             
             <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
             
+            {/* Form elements with required attribute added */}
             {currentQuestionObj.type === "radio" && currentQuestionObj.options && (
               <RadioGroup 
                 value={selectedOption || ""}
                 onValueChange={handleOptionChange}
                 className="space-y-3"
+                required
               >
                 {currentQuestionObj.options.map((option) => (
                   <div key={option} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option} id={option} />
+                    <RadioGroupItem value={option} id={option} required />
                     <Label htmlFor={option} className="cursor-pointer">{option}</Label>
                   </div>
                 ))}
@@ -841,6 +939,7 @@ const Survey = () => {
                       id={option} 
                       checked={(responses[currentQuestion] || []).includes(option)}
                       onCheckedChange={() => handleOptionChange(option)}
+                      required={(responses[currentQuestion] || []).length === 0}
                     />
                     <Label htmlFor={option} className="cursor-pointer">{option}</Label>
                   </div>
@@ -854,6 +953,7 @@ const Survey = () => {
                 className="min-h-[120px]"
                 value={(responses[currentQuestion] || [""])[0]}
                 onChange={handleTextAreaChange}
+                required
               />
             )}
             
