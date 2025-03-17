@@ -847,4 +847,4 @@ const Survey = () => {
 
   if (showContactForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6
