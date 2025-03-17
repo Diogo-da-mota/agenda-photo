@@ -1,20 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import TestSupabaseForm from '@/components/TestSupabaseForm';
-import { submitSurveyData } from '@/utils/messageUtils';
+import { Card, CardContent } from '@/components/ui/card';
+import { FeatureSection, FeatureCard } from '@/components/FeatureComponents'; // Assuming these are in a separate file
 
 interface FollowUpField {
   label: string;
@@ -33,21 +27,6 @@ interface Question {
   followUp?: FollowUp;
 }
 
-// Define interfaces for component props
-interface FeatureSectionProps {
-  icon: React.ReactNode;
-  title: string;
-  features: string[];
-}
-
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  color: string;
-  title: string;
-  description: string;
-}
-
-// Contact info form schema
 const contactFormSchema = z.object({
   nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   telefone: z.string().min(8, { message: "Telefone deve ter pelo menos 8 caracteres" }),
@@ -114,141 +93,6 @@ const questions: Question[] = [
   },
 ];
 
-// Componente para a seção de recursos
-const FeatureSection = ({ icon, title, features }: FeatureSectionProps) => (
-  <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-    <div className="flex items-center gap-3 mb-3">
-      {icon}
-      <h3 className="font-medium text-lg">{title}</h3>
-    </div>
-    <ul className="space-y-2">
-      {features.map((feature, index) => (
-        <li key={index} className="flex items-start gap-2 text-gray-700">
-          <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-          <span>{feature}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
-
-// Componente para o novo formato de card de recursos
-const FeatureCard = ({ icon, color, title, description }: FeatureCardProps) => (
-  <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col items-center text-center">
-    <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center mb-4`}>
-      {icon}
-    </div>
-    <h3 className="font-semibold text-lg mb-2">{title}</h3>
-    <p className="text-gray-600 text-sm">{description}</p>
-  </div>
-);
-
-// Função para formatar valores monetários em Reais (R$)
-const formatCurrency = (value: string | number): string => {
-  // Converte para número se for uma string
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  
-  // Verifica se é um número válido
-  if (isNaN(numValue)) return 'R$ 0,00';
-  
-  // Formata o número como moeda brasileira
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(numValue);
-};
-
-// Contact information card component
-const ContactInfoCard = ({ onComplete }: { onComplete: (values: ContactFormValues) => void }) => {
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
-    defaultValues: {
-      nome: "",
-      telefone: "",
-      cidade: "",
-    },
-  });
-
-  const onSubmit = (values: ContactFormValues) => {
-    onComplete(values);
-  };
-
-  return (
-    <Card className="w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-fade-in">
-      <CardContent className="p-8">
-        <div className="mb-6 flex justify-between items-center">
-          <div className="text-xs text-muted-foreground">
-            Informações de contato
-          </div>
-          <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-black rounded-full" style={{ width: '10%' }}></div>
-          </div>
-        </div>
-
-        <h2 className="text-xl font-medium mb-6">Vamos começar com algumas informações básicas</h2>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu nome completo" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="telefone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telefone *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu número de telefone" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="cidade"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cidade *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Sua cidade" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="mt-8 flex justify-end">
-              <Button
-                type="submit"
-                className="bg-black hover:bg-black/90 button-hover"
-              >
-                Próxima
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-};
-
 const Survey = () => {
   const [showContactForm, setShowContactForm] = useState(true);
   const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
@@ -272,7 +116,6 @@ const Survey = () => {
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
-      // Verificar se os campos follow-up obrigatórios estão preenchidos
       if (hasUnfilledFollowUp()) {
         toast({
           title: "Campos obrigatórios",
@@ -289,7 +132,6 @@ const Survey = () => {
         setAnimation('fade-in');
       }, 300);
     } else {
-      // Verificar se os campos follow-up obrigatórios estão preenchidos antes de enviar
       if (hasUnfilledFollowUp()) {
         toast({
           title: "Campos obrigatórios",
@@ -306,12 +148,11 @@ const Survey = () => {
   const hasUnfilledFollowUp = () => {
     const currentQuestionObj = questions[currentQuestion];
     
-    if (showFollowUp && currentQuestionObj?.followUp) {
+    if (currentQuestionObj?.followUp) {
       const followUpData = followUpResponses[currentQuestion] || {};
       let hasErrors = false;
       const newErrors: {[key: string]: boolean} = {};
       
-      // Verificar cada campo do follow-up
       currentQuestionObj.followUp.fields.forEach(field => {
         const value = followUpData[field.label] || '';
         if (!value.trim()) {
@@ -338,7 +179,6 @@ const Survey = () => {
         setAnimation('fade-in');
       }, 300);
     } else {
-      // If we're at the first question, go back to contact form
       setAnimation('fade-out');
       setTimeout(() => {
         setShowContactForm(true);
@@ -385,7 +225,6 @@ const Survey = () => {
       }
     });
     
-    // Limpar o erro quando o usuário digitar algo
     if (value.trim()) {
       setFollowUpErrors({
         ...followUpErrors,
@@ -402,18 +241,15 @@ const Survey = () => {
     if (!contactInfo) return false;
     
     try {
-      // Convert survey responses to a string message
       const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
         const questionObj = questions[parseInt(questionIndex)];
         const questionText = questionObj.question;
         let answerText = answers.join(", ");
         
-        // Add follow-up responses if they exist
         if (followUpResponses[parseInt(questionIndex)]) {
           const followUpData = followUpResponses[parseInt(questionIndex)];
           const followUpText = Object.entries(followUpData)
             .map(([label, value]) => {
-              // Formatar valores monetários
               if (label.toLowerCase().includes("quanto") || label.toLowerCase().includes("paga") || label.toLowerCase().includes("gasta")) {
                 return `${label}: ${formatCurrency(value)}`;
               }
@@ -426,24 +262,19 @@ const Survey = () => {
         return `${questionText}: ${answerText}`;
       }).join("\n\n");
 
-      // Create data for Supabase
       const contactData = {
         nome: contactInfo.nome,
         telefone: contactInfo.telefone,
-        e_mail: finalContactInfo || "sem-email@exemplo.com", // Use the final contact info as email
+        e_mail: finalContactInfo || "sem-email@exemplo.com",
         mensagem: surveyMessage,
       };
 
-      console.log("Enviando dados para Supabase:", contactData);
-
-      // Using the supabase client directly to ensure proper submission
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .insert(contactData)
         .select();
 
       if (error) {
-        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
@@ -451,7 +282,7 @@ const Survey = () => {
         });
         return false;
       } else {
-        console.log("Dados enviados com sucesso para Supabase:", data);
+        setEmailSubmitted(true);
         toast({
           title: "Dados enviados com sucesso!",
           description: "Suas respostas foram salvas.",
@@ -459,10 +290,9 @@ const Survey = () => {
         return true;
       }
     } catch (error) {
-      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
-        title: "Erro ao enviar dados",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
         variant: "destructive",
       });
       return false;
@@ -470,12 +300,6 @@ const Survey = () => {
   };
 
   const handleSubmit = () => {
-    // Log collected data for debugging
-    console.log("Contato:", contactInfo);
-    console.log("Respostas:", responses);
-    console.log("Respostas complementares:", followUpResponses);
-    
-    // First, try to submit to Supabase before showing the thank you page
     submitToSupabase().then((success) => {
       setAnimation('fade-out');
       setTimeout(() => {
@@ -501,12 +325,10 @@ const Survey = () => {
       return;
     }
     
-    console.log("Final submission with email:", finalContactInfo);
     setIsSubmitting(true);
     
     try {
       if (!contactInfo) {
-        console.error("Erro: Informações de contato não encontradas");
         toast({
           title: "Erro ao enviar",
           description: "Dados de contato não encontrados. Por favor, tente novamente.",
@@ -517,25 +339,15 @@ const Survey = () => {
         return;
       }
       
-      console.log("Preparando envio para o Supabase com:", {
-        contactInfo,
-        responses,
-        followUpResponses,
-        finalContactInfo
-      });
-      
-      // Converter respostas da pesquisa para uma string de mensagem
       const surveyMessage = Object.entries(responses).map(([questionIndex, answers]) => {
         const questionObj = questions[parseInt(questionIndex)];
         const questionText = questionObj.question;
         let answerText = answers.join(", ");
         
-        // Adicionar respostas de follow-up se existirem
         if (followUpResponses[parseInt(questionIndex)]) {
           const followUpData = followUpResponses[parseInt(questionIndex)];
           const followUpText = Object.entries(followUpData)
             .map(([label, value]) => {
-              // Formatar valores monetários
               if (label.toLowerCase().includes("quanto") || label.toLowerCase().includes("paga") || label.toLowerCase().includes("gasta")) {
                 return `${label}: ${formatCurrency(value)}`;
               }
@@ -548,32 +360,25 @@ const Survey = () => {
         return `${questionText}: ${answerText}`;
       }).join("\n\n");
 
-      // Dados para o Supabase - corresponder nomes de colunas exatamente
       const contactData = {
         nome: contactInfo.nome,
-        e_mail: finalContactInfo, // Usar o email final como e_mail
+        e_mail: finalContactInfo,
         telefone: contactInfo.telefone || "",
         mensagem: surveyMessage,
-        // criado_em é definido automaticamente por DEFAULT now()
       };
 
-      console.log("Enviando dados para Supabase:", contactData);
-
-      // Inserção direta no Supabase
       const { data, error } = await supabase
         .from('mensagens_de_contato')
         .insert(contactData)
         .select();
 
       if (error) {
-        console.error("Erro ao enviar dados para Supabase:", error);
         toast({
           title: "Erro ao enviar dados",
           description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
           variant: "destructive",
         });
       } else {
-        console.log("Dados enviados com sucesso para Supabase:", data);
         setEmailSubmitted(true);
         toast({
           title: "Obrigado pelo seu interesse!",
@@ -581,13 +386,11 @@ const Survey = () => {
           duration: 5000,
         });
         
-        // Após envio bem-sucedido, redirecionamos para a página inicial após um delay
         setTimeout(() => {
           window.location.href = "/";
         }, 3000);
       }
     } catch (error) {
-      console.error("Exceção ao enviar dados para Supabase:", error);
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.",
@@ -599,15 +402,8 @@ const Survey = () => {
     }
   };
 
-  const handlePriceSubmit = () => {
-    // Aqui você pode adicionar a lógica para lidar com o valor do preço
-    console.log("Valor do preço inserido:", priceValue);
-    // Por exemplo, você pode enviar esse valor para o Supabase ou fazer algo mais
-  };
-
   const currentQuestionObj = questions[currentQuestion];
   
-  // For checkbox type questions, we need to check if the specific option that has a follow-up is selected
   const showFollowUp = currentQuestionObj?.followUp && 
                       (currentQuestionObj.type === 'radio' ? 
                         (selectedOption && currentQuestionObj.followUp.condition.includes(selectedOption)) : 
@@ -839,4 +635,49 @@ const Survey = () => {
                   Deixe seu e-mail abaixo e entraremos em contato assim que iniciarmos o período de testes. Vagas limitadas!
                 </p>
                 
-                {!emailSubmitted ?
+                {!emailSubmitted ? (
+                  <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+                    <Input
+                      type="email"
+                      placeholder="Seu e-mail para contato"
+                      value={finalContactInfo}
+                      onChange={handleFinalContactInfoChange}
+                      className="bg-white/60 border-purple-200"
+                    />
+                    <Button
+                      onClick={handleFinalSubmit}
+                      disabled={isSubmitting}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      {isSubmitting ? "Enviando..." : "Quero participar"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="bg-white/20 backdrop-blur-sm p-6 rounded-xl max-w-xl mx-auto">
+                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-center">Obrigado pelo seu interesse!</h3>
+                    <p className="text-gray-700 text-center mb-0">
+                      Entraremos em contato em breve com mais informações sobre a Agenda Pro.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Render the survey questions here */}
+    </div>
+  );
+};
+
+export default Survey;
