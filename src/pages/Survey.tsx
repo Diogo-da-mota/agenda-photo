@@ -825,10 +825,10 @@ const Survey = () => {
               <div className="mt-10 bg-gradient-to-r from-amber-100 to-orange-100 p-8 rounded-2xl border border-amber-200 relative overflow-hidden">
                 <div className="relative z-10 text-center">
                   <h3 className="text-xl font-semibold mb-4">
-                    💰 Quanto você investiria nesta solução?
+                    💰 Quanto você investiria nesta solução?\n
                   </h3>
                   <p className="text-gray-700 mb-6">
-                    Com base em todas as funcionalidades descritas, qual seria um valor justo mensal que você pagaria?
+                    Com base em todas as funcionalidades descritas, qual seria um valor justo mensal que você pagaria?\n
                   </p>
                   
                   <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
@@ -865,4 +865,4 @@ const Survey = () => {
                 </p>
                 
                 {!emailSubmitted ? (
-                  <div className="flex flex-col sm:flex-row
+                  <div className="flex flex-col
