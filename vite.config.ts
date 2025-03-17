@@ -11,17 +11,40 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   build: {
-    // Ensure we have sufficient memory for the build process
+    // Otimizações para o build
     target: "esnext",
     minify: "terser",
     terserOptions: {
+      compress: {
+        drop_console: mode === 'production', // Remove console logs em produção
+        drop_debugger: mode === 'production'
+      },
       output: {
         comments: false,
       },
     },
     // Disable source maps in production to improve performance
     sourcemap: mode !== 'production',
-    // Specify the browser compatibility target
+    chunkSizeWarningLimit: 1000, // Aumenta o limite de aviso de tamanho de chunk
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            'react', 
+            'react-dom', 
+            'react-router-dom',
+            '@supabase/supabase-js'
+          ],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-toast',
+            'lucide-react'
+          ]
+        }
+      }
+    },
+    // Improve build speed
+    emptyOutDir: true,
     outDir: "dist"
   },
   plugins: [
@@ -34,4 +57,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+  }
 }));
