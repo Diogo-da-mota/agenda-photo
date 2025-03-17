@@ -865,4 +865,4 @@ const Survey = () => {
                 </p>
                 
                 {!emailSubmitted ? (
-                  <div className="flex flex-col sm:flex-
+                  <div className="flex flex-col sm:flex-row gap-
