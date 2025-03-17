@@ -29,7 +29,7 @@ export const createMessagesTable = async (
     } else {
       toast({
         title: "Erro",
-        description: "Não foi possível criar a tabela. Tente novamente mais tarde.",
+        description: "Não foi possível criar a tabela. Verifique o console para mais detalhes.",
         variant: "destructive",
       });
       return false;
