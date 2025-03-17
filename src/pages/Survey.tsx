@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -790,28 +791,27 @@ const Survey = () => {
                 </div>
               </div>
               
-              {/* Novo card com background de imagem antes do formulário de email */}
-              <div className="mt-10 bg-gradient-to-r from-orange-100 to-amber-100 p-8 rounded-2xl border border-orange-200 relative overflow-hidden">
+              {/* Novo card com acesso antecipado antes do formulário de email */}
+              <div className="mt-10 bg-gradient-to-r from-green-100 to-emerald-100 p-8 rounded-2xl border border-green-200 relative overflow-hidden">
                 <div className="relative z-10">
                   <h3 className="text-xl font-semibold text-center mb-4">
-                    🔥 Acesso Antecipado à Plataforma!
+                    🚀 Seja um dos primeiros a testar!
                   </h3>
                   <p className="text-gray-700 text-center mb-4">
-                    Estamos selecionando um grupo exclusivo de fotógrafos para testar nossa plataforma antes do lançamento oficial.
-                    Ao participar, você terá:
+                    Estamos oferecendo acesso antecipado e gratuito para um grupo seleto de profissionais.
                   </p>
                   <ul className="space-y-2 max-w-xl mx-auto mb-4">
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Acesso gratuito durante todo o período de testes</span>
+                      <span className="text-gray-700">Seja o primeiro a experimentar todas as funcionalidades</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Prioridade para solicitar novas funcionalidades</span>
+                      <span className="text-gray-700">Ajude a moldar o futuro da plataforma com seu feedback</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Descontos exclusivos após o lançamento oficial</span>
+                      <span className="text-gray-700">Ganhe benefícios exclusivos como membro pioneiro</span>
                     </li>
                   </ul>
                 </div>
@@ -830,4 +830,176 @@ const Survey = () => {
                   <div className="flex flex-col sm:flex-row max-w-xl mx-auto gap-3">
                     <Input 
                       type="email" 
-                      placeholder="Seu
+                      placeholder="Seu melhor e-mail" 
+                      className="flex-1" 
+                      value={finalContactInfo}
+                      onChange={handleFinalContactInfoChange}
+                    />
+                    <Button 
+                      onClick={handleFinalSubmit}
+                      disabled={isSubmitting}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white whitespace-nowrap"
+                    >
+                      {isSubmitting ? (
+                        "Enviando..."
+                      ) : (
+                        <>
+                          Quero participar
+                          <ArrowRightIcon className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
+                    <Check className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                    <p className="text-gray-700 font-medium">Obrigado pelo seu interesse!</p>
+                    <p className="text-gray-600 text-sm">Entraremos em contato em breve com mais informações.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4 py-12">
+      <div className="w-full max-w-2xl">
+        {showContactForm ? (
+          <ContactInfoCard onComplete={handleContactFormComplete} />
+        ) : (
+          <Card className={`w-full shadow-lg border-0 overflow-hidden animate-${animation}`}>
+            <CardContent className="p-8">
+              <div className="mb-6 flex justify-between items-center">
+                <div className="text-xs text-muted-foreground">
+                  Questão {currentQuestion + 1} de {questions.length}
+                </div>
+                <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-black rounded-full" 
+                    style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
+
+              {currentQuestionObj.type === 'radio' && currentQuestionObj.options && (
+                <RadioGroup 
+                  value={responses[currentQuestion]?.[0] || ''}
+                  className="space-y-3"
+                >
+                  {currentQuestionObj.options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value={option} 
+                        id={option} 
+                        checked={responses[currentQuestion]?.includes(option)}
+                        onClick={() => handleOptionChange(option)}
+                      />
+                      <Label htmlFor={option}>{option}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
+
+              {currentQuestionObj.type === 'checkbox' && currentQuestionObj.options && (
+                <div className="space-y-3">
+                  {currentQuestionObj.options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={option} 
+                        checked={responses[currentQuestion]?.includes(option)}
+                        onCheckedChange={() => handleOptionChange(option)}
+                      />
+                      <Label htmlFor={option}>{option}</Label>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {currentQuestionObj.type === 'textarea' && (
+                <Textarea 
+                  placeholder="Digite sua resposta aqui..." 
+                  className="h-32"
+                  value={responses[currentQuestion]?.[0] || ''}
+                  onChange={handleTextAreaChange}
+                />
+              )}
+
+              {showFollowUp && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="text-sm font-medium mb-4">Informações adicionais:</h3>
+                  <div className="space-y-4">
+                    {currentQuestionObj.followUp?.fields.map((field) => (
+                      <div key={field.label}>
+                        <Label 
+                          htmlFor={field.label} 
+                          className={followUpErrors[field.label] ? "text-red-500" : ""}
+                        >
+                          {field.label} {followUpErrors[field.label] && "*"}
+                        </Label>
+                        {field.type === 'text' && (
+                          <Input 
+                            id={field.label} 
+                            type="text" 
+                            className={followUpErrors[field.label] ? "border-red-500" : ""}
+                            value={followUpResponses[currentQuestion]?.[field.label] || ''}
+                            onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                          />
+                        )}
+                        {field.type === 'number' && (
+                          <Input 
+                            id={field.label} 
+                            type="number" 
+                            className={followUpErrors[field.label] ? "border-red-500" : ""}
+                            value={followUpResponses[currentQuestion]?.[field.label] || ''}
+                            onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                          />
+                        )}
+                        {followUpErrors[field.label] && (
+                          <p className="text-xs text-red-500 mt-1">Este campo é obrigatório</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handlePrev}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  className="bg-black hover:bg-black/90 button-hover"
+                  onClick={handleNext}
+                >
+                  {currentQuestion < questions.length - 1 ? (
+                    <>
+                      Próxima
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Finalizar
+                      <Check className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Survey;
