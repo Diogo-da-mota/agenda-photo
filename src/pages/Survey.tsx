@@ -642,6 +642,7 @@ const Survey = () => {
                   que vai integrar tudo o que você precisa em um só lugar!</p>
               </div>
 
+              {/* Feature sections */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FeatureSection
                   icon={<Calendar className="h-6 w-6 text-purple-600" />}
@@ -838,5 +839,4 @@ const Survey = () => {
                   Deixe seu e-mail abaixo e entraremos em contato assim que iniciarmos o período de testes. Vagas limitadas!
                 </p>
                 
-                {!emailSubmitted ? (
-                  <div className="
+                {!emailSubmitted ?
