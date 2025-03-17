@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ContactMessage, MensagemDeContato, StandardizedMessage } from "@/types/messages";
 
@@ -38,7 +37,19 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
           original_table: 'mensagens_de_contato'
         }));
         
-        allMessages = [...allMessages, ...standardizedMensagens];
+        // Remove duplicate entries - keep only the latest entry for each user (by email or phone)
+        const uniqueMessages: {[key: string]: StandardizedMessage} = {};
+        
+        standardizedMensagens.forEach(msg => {
+          const userKey = msg.email || msg.phone || msg.id;
+          
+          // If we don't have this user yet OR this message is newer than what we have
+          if (!uniqueMessages[userKey] || new Date(msg.created_at) > new Date(uniqueMessages[userKey].created_at)) {
+            uniqueMessages[userKey] = msg;
+          }
+        });
+        
+        allMessages = [...allMessages, ...Object.values(uniqueMessages)];
       }
     }
     
@@ -59,9 +70,20 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
           original_table: 'contact_messages'
         }));
         
-        allMessages = [...allMessages, ...standardizedContactMessages];
+        // Deduplicate based on email/phone, merging with messages we already have
+        const existingKeys = new Set(allMessages.map(msg => msg.email || msg.phone || msg.id));
+        
+        const newUniqueMessages = standardizedContactMessages.filter(msg => {
+          const userKey = msg.email || msg.phone || msg.id;
+          return !existingKeys.has(userKey);
+        });
+        
+        allMessages = [...allMessages, ...newUniqueMessages];
       }
     }
+    
+    // Final sort to ensure newest messages are first
+    allMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     
     return { messages: allMessages, tableExists };
   } catch (error) {
@@ -154,22 +176,54 @@ export const submitSurveyData = async (
       return `${questionText}: ${answerText}`;
     }).join("\n\n");
 
-    // Create data for Supabase - strictly match column names para mensagens_de_contato
-    const contactData = {
-      nome: contactInfo.nome,
-      e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
-      telefone: contactInfo.telefone || contactInfo.phone || "",
-      mensagem: surveyMessage,
-      // Note: criado_em is automatically set by DEFAULT now()
-    };
-
-    console.log("Enviando dados para o Supabase:", contactData);
-
-    // Usando a tabela mensagens_de_contato
-    const { data, error } = await supabase
+    // Email for lookup
+    const userEmail = finalContactInfo || contactInfo.email || "sem-email@exemplo.com";
+    
+    // Verificar se usuário já existe
+    const { data: existingUsers, error: searchError } = await supabase
       .from('mensagens_de_contato')
-      .insert(contactData)
-      .select();
+      .select('*')
+      .or(`e_mail.eq.${userEmail},telefone.eq.${contactInfo.telefone || ""}`);
+      
+    if (searchError) {
+      console.error("Erro ao buscar usuário existente:", searchError);
+    }
+    
+    let result;
+    
+    if (existingUsers && existingUsers.length > 0) {
+      // Atualizar registro existente
+      console.log("Usuário já existe, atualizando registro:", existingUsers[0]);
+      const existingMessage = existingUsers[0].mensagem || "";
+      
+      result = await supabase
+        .from('mensagens_de_contato')
+        .update({
+          mensagem: `${existingMessage}\n\n--- ATUALIZAÇÃO DO QUESTIONÁRIO ---\n\n${surveyMessage}`,
+          e_mail: userEmail // Atualizar o email caso tenha mudado
+        })
+        .eq('id', existingUsers[0].id)
+        .select();
+    } else {
+      // Create data for Supabase - strictly match column names para mensagens_de_contato
+      const contactData = {
+        nome: contactInfo.nome,
+        e_mail: userEmail,
+        telefone: contactInfo.telefone || contactInfo.phone || "",
+        mensagem: surveyMessage,
+        // Note: criado_em is automatically set by DEFAULT now()
+      };
+
+      console.log("Enviando dados para o Supabase:", contactData);
+
+      // Usando a tabela mensagens_de_contato
+      result = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData)
+        .select();
+    }
+
+    const { data, error } = result;
 
     if (error) {
       console.error("Erro ao enviar dados para Supabase:", error);
@@ -213,11 +267,40 @@ export const submitContactForm = async (formData: {
 
     console.log("Enviando dados para o Supabase:", contactData);
 
-    // Insert into mensagens_de_contato table
-    const { data, error } = await supabase
+    // Check if user already exists
+    const { data: existingUsers, error: searchError } = await supabase
       .from('mensagens_de_contato')
-      .insert(contactData)
-      .select();
+      .select('*')
+      .or(`e_mail.eq.${contactData.e_mail},telefone.eq.${contactData.telefone}`);
+      
+    if (searchError) {
+      console.error("Erro ao buscar usuário existente:", searchError);
+    }
+    
+    let result;
+    
+    if (existingUsers && existingUsers.length > 0) {
+      // Atualizar registro existente
+      console.log("Usuário já existe, atualizando registro:", existingUsers[0]);
+      const existingMessage = existingUsers[0].mensagem || "";
+      
+      result = await supabase
+        .from('mensagens_de_contato')
+        .update({
+          mensagem: `${existingMessage}\n\n--- NOVA MENSAGEM ---\n\n${contactData.mensagem}`,
+          e_mail: contactData.e_mail // Atualizar o email caso tenha mudado
+        })
+        .eq('id', existingUsers[0].id)
+        .select();
+    } else {
+      // Insert into mensagens_de_contato table
+      result = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData)
+        .select();
+    }
+
+    const { data, error } = result;
 
     if (error) {
       console.error("Erro ao enviar dados para Supabase:", error);

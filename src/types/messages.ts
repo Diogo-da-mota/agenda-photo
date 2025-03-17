@@ -1,9 +1,7 @@
 
-/**
- * Types for different message formats in the application
- */
+// Remember to extend the StandardizedMessage type to include the isUpdate flag
+// This will help us identify updated messages in the UI
 
-// Standard contact message format
 export interface ContactMessage {
   id: string;
   created_at: string;
@@ -13,7 +11,6 @@ export interface ContactMessage {
   message: string;
 }
 
-// Portuguese contact message format
 export interface MensagemDeContato {
   id: string;
   criado_em: string;
@@ -23,7 +20,6 @@ export interface MensagemDeContato {
   mensagem: string;
 }
 
-// Standardized message type that both tables can be mapped to
 export interface StandardizedMessage {
   id: string;
   created_at: string;
@@ -31,5 +27,6 @@ export interface StandardizedMessage {
   email: string;
   phone: string | null;
   message: string;
-  original_table?: string; // Track which table the message came from
+  original_table?: string;
+  isUpdate?: boolean; // Flag to indicate if this is an update to an existing message
 }

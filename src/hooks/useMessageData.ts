@@ -86,7 +86,34 @@ export const useMessageData = (isAuthenticated: boolean) => {
 
   // Handle new message callback for realtime updates
   const handleNewMessage = useCallback((newMessage: StandardizedMessage) => {
-    setMensagens(prevMessages => [newMessage, ...prevMessages]);
+    setMensagens(prevMessages => {
+      // Verificar se a mensagem é uma atualização ou nova
+      if (newMessage.isUpdate) {
+        // Para atualizações, substituir a mensagem existente
+        return prevMessages.map(msg => 
+          (msg.id === newMessage.id) ? newMessage : 
+          // Ou se tiver o mesmo email/telefone, remover (será substituído)
+          ((newMessage.email && msg.email === newMessage.email) || 
+           (newMessage.phone && msg.phone === newMessage.phone)) ? null : msg
+        ).filter(Boolean) as StandardizedMessage[]; // Remove nulls
+      }
+      
+      // Para mensagens novas, verificar se já existe um registro com mesmo email ou telefone
+      const existingIndex = prevMessages.findIndex(msg => 
+        (newMessage.email && msg.email === newMessage.email) || 
+        (newMessage.phone && msg.phone === newMessage.phone)
+      );
+      
+      if (existingIndex !== -1) {
+        // Se existir, substituir o registro existente
+        const updatedMessages = [...prevMessages];
+        updatedMessages[existingIndex] = newMessage;
+        return updatedMessages;
+      }
+      
+      // Se não existir, adicionar no início
+      return [newMessage, ...prevMessages];
+    });
   }, []);
 
   // Configure real-time listeners for both tables

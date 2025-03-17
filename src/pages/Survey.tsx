@@ -523,12 +523,42 @@ const Survey = () => {
         mensagem: surveyMessage,
       };
 
-      console.log("Enviando dados para Supabase:", contactData);
-
-      const { data, error } = await supabase
+      console.log("Verificando se usuário já existe antes de enviar para Supabase");
+      
+      // Checar se o usuário já existe (pelo email ou telefone)
+      const { data: existingUsers, error: searchError } = await supabase
         .from('mensagens_de_contato')
-        .insert(contactData)
-        .select();
+        .select('*')
+        .or(`e_mail.eq.${finalContactInfo},telefone.eq.${contactData.telefone}`);
+        
+      if (searchError) {
+        console.error("Erro ao buscar usuário existente:", searchError);
+      }
+      
+      let result;
+      if (existingUsers && existingUsers.length > 0) {
+        // Atualizar registro existente
+        console.log("Usuário já existe, atualizando registro:", existingUsers[0]);
+        const existingMessage = existingUsers[0].mensagem || "";
+        
+        result = await supabase
+          .from('mensagens_de_contato')
+          .update({
+            mensagem: `${existingMessage}\n\n--- ATUALIZAÇÃO DO QUESTIONÁRIO ---\n\n${surveyMessage}`,
+            e_mail: finalContactInfo // Atualizar o email caso tenha mudado
+          })
+          .eq('id', existingUsers[0].id)
+          .select();
+      } else {
+        // Criar novo registro
+        console.log("Criando novo registro para o usuário");
+        result = await supabase
+          .from('mensagens_de_contato')
+          .insert(contactData)
+          .select();
+      }
+      
+      const { data, error } = result;
 
       if (error) {
         console.error("Erro ao enviar dados para Supabase:", error);
@@ -575,25 +605,58 @@ const Survey = () => {
     
     console.log("Valor do preço inserido:", priceValue);
     
-    // Prepare price data to submit with contact info
-    const priceData = {
-      nome: contactInfo?.nome || "Visitante",
-      e_mail: finalContactInfo || "sem-email@exemplo.com",
-      telefone: contactInfo?.telefone || "",
-      mensagem: `Valor sugerido para a solução: ${formatCurrency(priceValue)}. ${contactInfo ? `Dados do cliente: Nome: ${contactInfo.nome}, Telefone: ${contactInfo.telefone}, Cidade: ${contactInfo.cidade}` : ''}`,
-    };
-    
     // Submit price data to Supabase
     setIsSubmitting(true);
     
-    // Fix: Use async/await pattern with try/catch instead of Promise chain to fix the TypeScript error
+    // Use async/await pattern with try/catch
     (async () => {
       try {
-        const { data, error } = await supabase
+        // Buscar usuário pelo email ou telefone
+        const userEmail = finalContactInfo || "sem-email@exemplo.com";
+        const userPhone = contactInfo?.telefone || "";
+        
+        // Verificar se o usuário já existe
+        const { data: existingUsers, error: searchError } = await supabase
           .from('mensagens_de_contato')
-          .insert(priceData)
-          .select();
+          .select('*')
+          .or(`e_mail.eq.${userEmail}${userPhone ? `,telefone.eq.${userPhone}` : ''}`);
           
+        if (searchError) {
+          console.error("Erro ao buscar usuário existente:", searchError);
+        }
+        
+        const valorMessage = `Valor sugerido para a solução: ${formatCurrency(priceValue)}`;
+        let result;
+        
+        if (existingUsers && existingUsers.length > 0) {
+          // Atualizar o registro existente
+          console.log("Usuário já existe, atualizando com valor sugerido:", existingUsers[0]);
+          const existingMessage = existingUsers[0].mensagem || "";
+          
+          result = await supabase
+            .from('mensagens_de_contato')
+            .update({
+              mensagem: `${existingMessage}\n\n--- VALOR SUGERIDO ---\n${valorMessage}`
+            })
+            .eq('id', existingUsers[0].id)
+            .select();
+        } else {
+          // Criar um novo registro
+          const priceData = {
+            nome: contactInfo?.nome || "Visitante",
+            e_mail: userEmail,
+            telefone: userPhone,
+            mensagem: `${valorMessage}. ${contactInfo ? `Dados do cliente: Nome: ${contactInfo.nome}, Telefone: ${contactInfo.telefone}, Cidade: ${contactInfo.cidade}` : ''}`,
+          };
+          
+          result = await supabase
+            .from('mensagens_de_contato')
+            .insert(priceData)
+            .select();
+        }
+        
+        const { data, error } = result;
+        
         if (error) {
           console.error("Erro ao enviar valor:", error);
           toast({
