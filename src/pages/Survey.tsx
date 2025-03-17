@@ -11,23 +11,35 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { submitContactForm } from "@/utils/messageUtils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 // Define survey questions
 const questions = [
   {
     id: 1,
-    text: "How satisfied are you with our product/service?",
-    options: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"]
+    text: "Qual o tipo de evento que você mais fotografa atualmente?",
+    options: ["Casamentos", "Ensaios (gestante, newborn, família)", "Eventos corporativos", "Moda", "Outros"]
   },
   {
     id: 2,
-    text: "How likely are you to recommend our product/service to others?",
-    options: ["Very Likely", "Likely", "Neutral", "Unlikely", "Very Unlikely"]
+    text: "Com que frequência você realiza sessões fotográficas?",
+    options: ["Semanalmente", "Mensalmente", "Algumas vezes por ano", "Raramente", "Estou começando agora"]
   },
   {
     id: 3,
-    text: "How would you rate the quality of our customer service?",
-    options: ["Excellent", "Good", "Average", "Poor", "Very Poor"]
+    text: "Qual equipamento você mais utiliza para fotografar?",
+    options: ["DSLR profissional", "Câmera mirrorless", "Smartphone", "Câmera compacta", "Outro"]
+  },
+  {
+    id: 4,
+    text: "Quais áreas da fotografia você gostaria de aprender mais?",
+    options: ["Iluminação", "Edição de fotos", "Composição", "Direção de modelos", "Gestão do negócio"]
+  },
+  {
+    id: 5,
+    text: "Qual seria sua disponibilidade para um workshop de fotografia?",
+    options: ["Dias de semana", "Finais de semana", "Noites", "Online sob demanda", "Não tenho interesse"]
   }
 ];
 
@@ -44,7 +56,7 @@ const Survey = () => {
   const { toast } = useToast();
 
   // Calculate progress percentage
-  const progress = Math.round((currentQuestionIndex / questions.length) * 100);
+  const progress = Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
   
   // Handle option selection
   const handleOptionSelect = (answer: string) => {
@@ -57,6 +69,30 @@ const Survey = () => {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       setIsCompleted(true);
+    }
+  };
+
+  // Handle previous button click
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  // Handle next button click
+  const handleNext = () => {
+    if (answers[questions[currentQuestionIndex].id]) {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+      } else {
+        setIsCompleted(true);
+      }
+    } else {
+      toast({
+        title: "Selecione uma opção",
+        description: "Por favor, selecione uma resposta para continuar.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -136,20 +172,44 @@ const Survey = () => {
     if (!currentQuestion) return null;
     
     return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">{currentQuestion.text}</h3>
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <h3 className="text-lg font-medium">Pergunta {currentQuestionIndex + 1} de {questions.length}</h3>
+          <h2 className="text-xl font-semibold mt-2">{currentQuestion.text}</h2>
+        </div>
         
-        <div className="space-y-2">
+        <RadioGroup 
+          value={answers[currentQuestion.id] || ""} 
+          className="space-y-3"
+          onValueChange={(value) => setAnswers(prev => ({
+            ...prev,
+            [currentQuestion.id]: value
+          }))}
+        >
           {currentQuestion.options?.map((option, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="w-full justify-start text-left h-auto py-3 px-4"
-              onClick={() => handleOptionSelect(option)}
-            >
-              {option}
-            </Button>
+            <div key={index} className="flex items-center space-x-2 border p-3 rounded-md">
+              <RadioGroupItem value={option} id={`option-${index}`} />
+              <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
+                {option}
+              </Label>
+            </div>
           ))}
+        </RadioGroup>
+        
+        <div className="flex justify-between pt-6">
+          <Button 
+            variant="outline" 
+            onClick={handlePrevious}
+            disabled={currentQuestionIndex === 0}
+          >
+            Anterior
+          </Button>
+          <Button 
+            onClick={handleNext}
+            disabled={!answers[currentQuestion.id]}
+          >
+            Próxima
+          </Button>
         </div>
       </div>
     );
@@ -231,17 +291,15 @@ const Survey = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-center">
-            Customer Feedback Survey
+            Questionário para Fotógrafos
           </CardTitle>
-          {!isCompleted && (
-            <Progress value={progress} className="h-2 mt-2" />
-          )}
+          <Progress value={progress} className="h-2 mt-2" />
         </CardHeader>
         <CardContent>
           {isCompleted ? renderThankYou() : renderQuestion()}
         </CardContent>
-        <CardFooter className="text-sm text-muted-foreground">
-          Your feedback helps us improve our products and services.
+        <CardFooter className="text-sm text-muted-foreground text-center">
+          Suas respostas nos ajudam a melhorar nossos produtos e serviços.
         </CardFooter>
       </Card>
     </div>
