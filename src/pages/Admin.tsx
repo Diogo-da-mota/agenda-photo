@@ -6,7 +6,7 @@ import { formatDate } from "@/utils/formatDate";
 import { useMessageData } from "@/hooks/useMessageData";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLogin from "@/components/admin/AdminLogin";
-import CustomerMessagesList from "@/components/admin/CustomerMessagesList";
+import MessagesWrapper from "@/components/admin/MessagesWrapper";
 
 const ADMIN_PASSWORD = "agenda123"; // Simple password for protection
 
@@ -16,16 +16,6 @@ const Admin = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
-  const { 
-    mensagens, 
-    isLoading, 
-    isRefreshing, 
-    isCreatingTable,
-    tableExists, 
-    handleRefresh,
-    createTable
-  } = useMessageData(isAuthenticated);
-
   useEffect(() => {
     // Check if user is already authenticated from previous session
     const storedAuth = localStorage.getItem("adminAuthenticated");
@@ -58,8 +48,8 @@ const Admin = () => {
       <div className="max-w-6xl mx-auto">
         <AdminHeader 
           isAuthenticated={isAuthenticated}
-          isRefreshing={isRefreshing}
-          handleRefresh={handleRefresh}
+          isRefreshing={false}
+          handleRefresh={() => {}}
           handleLogout={handleLogout}
         />
         
@@ -71,21 +61,9 @@ const Admin = () => {
             error={error}
             isLoading={false}
           />
-        ) : isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2">Carregando mensagens...</span>
-          </div>
         ) : (
           <div className="space-y-8">
-            <CustomerMessagesList 
-              tableExists={tableExists}
-              mensagens={mensagens}
-              formatDate={formatDate}
-              checkTables={handleRefresh}
-              createTable={createTable}
-              isCreatingTable={isCreatingTable}
-            />
+            <MessagesWrapper isAuthenticated={isAuthenticated} />
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ContactMessage, MensagemDeContato, StandardizedMessage } from "@/types/messages";
 
@@ -358,5 +359,126 @@ export const deleteMessage = async (id: string): Promise<boolean> => {
   } catch (error) {
     console.error('Error deleting message:', error);
     return false;
+  }
+};
+
+/**
+ * Update a message in Supabase
+ * @param id ID of the message to update
+ * @param data Data to update
+ * @returns Object with success flag and updated message
+ */
+export const updateMessage = async (
+  id: string, 
+  data: Partial<StandardizedMessage>
+): Promise<{success: boolean, updatedMessage: StandardizedMessage | null}> => {
+  console.log('Updating message with ID:', id, 'Data:', data);
+  
+  try {
+    // First, determine which table contains this message
+    // Try to get the message from mensagens_de_contato
+    const { data: existingMessages, error: fetchError } = await supabase
+      .from('mensagens_de_contato')
+      .select('*')
+      .eq('id', id);
+      
+    if (fetchError) {
+      console.error('Error fetching message:', fetchError);
+      return { success: false, updatedMessage: null };
+    }
+    
+    if (existingMessages && existingMessages.length > 0) {
+      // Message exists in mensagens_de_contato, update it
+      const updateData = {
+        nome: data.name,
+        e_mail: data.email,
+        telefone: data.phone || '',
+        mensagem: data.message
+      };
+      
+      const { data: updatedData, error: updateError } = await supabase
+        .from('mensagens_de_contato')
+        .update(updateData)
+        .eq('id', id)
+        .select();
+        
+      if (updateError) {
+        console.error('Error updating message in mensagens_de_contato:', updateError);
+        return { success: false, updatedMessage: null };
+      }
+      
+      if (updatedData && updatedData.length > 0) {
+        console.log('Message updated successfully in mensagens_de_contato');
+        
+        // Map updated data to standardized format
+        const updatedMessage: StandardizedMessage = {
+          id: updatedData[0].id,
+          created_at: updatedData[0].criado_em,
+          name: updatedData[0].nome,
+          email: updatedData[0].e_mail,
+          phone: updatedData[0].telefone,
+          message: updatedData[0].mensagem,
+          original_table: 'mensagens_de_contato'
+        };
+        
+        return { success: true, updatedMessage };
+      }
+    } else {
+      // Try to get the message from contact_messages (for backward compatibility)
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const { data: existingContactMessages, error: fetchContactError } = await (supabase as any)
+        .from('contact_messages')
+        .select('*')
+        .eq('id', id);
+        
+      if (fetchContactError) {
+        console.error('Error fetching message from contact_messages:', fetchContactError);
+        return { success: false, updatedMessage: null };
+      }
+      
+      if (existingContactMessages && existingContactMessages.length > 0) {
+        // Message exists in contact_messages, update it
+        const updateData = {
+          name: data.name,
+          email: data.email,
+          phone: data.phone || null,
+          message: data.message
+        };
+        
+        const result = await (supabase as any)
+          .from('contact_messages')
+          .update(updateData)
+          .eq('id', id)
+          .select();
+          
+        if (result.error) {
+          console.error('Error updating message in contact_messages:', result.error);
+          return { success: false, updatedMessage: null };
+        }
+        
+        if (result.data && result.data.length > 0) {
+          console.log('Message updated successfully in contact_messages');
+          
+          // Map updated data to standardized format
+          const updatedMessage: StandardizedMessage = {
+            id: result.data[0].id,
+            created_at: result.data[0].created_at,
+            name: result.data[0].name,
+            email: result.data[0].email,
+            phone: result.data[0].phone,
+            message: result.data[0].message,
+            original_table: 'contact_messages'
+          };
+          
+          return { success: true, updatedMessage };
+        }
+      }
+    }
+    
+    console.error('Message not found in any table');
+    return { success: false, updatedMessage: null };
+  } catch (error) {
+    console.error('Error updating message:', error);
+    return { success: false, updatedMessage: null };
   }
 };

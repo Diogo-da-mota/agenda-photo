@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw, Database, Loader2, Trash2 } from "lucide-react";
+import { AlertCircle, RefreshCw, Database, Loader2, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { StandardizedMessage } from "@/types/messages";
+import { MessageEditDialog } from "./MessageEditDialog";
 
 interface CustomerMessagesListProps {
   tableExists: boolean;
@@ -26,6 +27,7 @@ interface CustomerMessagesListProps {
   createTable: () => Promise<void>;
   isCreatingTable: boolean;
   deleteMessage?: (id: string) => Promise<void>;
+  updateMessage?: (id: string, data: Partial<StandardizedMessage>) => Promise<void>;
 }
 
 const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
@@ -35,10 +37,12 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   checkTables,
   createTable,
   isCreatingTable,
-  deleteMessage
+  deleteMessage,
+  updateMessage
 }) => {
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [messageToEdit, setMessageToEdit] = useState<StandardizedMessage | null>(null);
 
   const handleDelete = async () => {
     if (!messageToDelete || !deleteMessage) return;
@@ -54,31 +58,20 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
     }
   };
 
-  // Helper function to format message content
-  const formatMessageContent = (message: string): { [key: string]: string | null } => {
-    const data: { [key: string]: string | null } = {
-      evento: null,
-      usaAgenda: null,
-      gosta: null,
-      naoGosta: null,
-      valorMes: null,
-      portfolio: null,
-      outrasFerramentas: null,
-      siteIdeal: null,
-      valorSugerido: null
-    };
+  // Function to extract structured data from message content
+  const extractMessageData = (message: string): Record<string, string | null> => {
+    const data: Record<string, string | null> = {};
     
-    // Extract structured data from the message
-    if (message.includes("Qual o tipo de evento que você mais fotografa atualmente?")) {
-      const match = message.match(/Qual o tipo de evento que você mais fotografa atualmente\?:\s*(.*?)(?:\n|$)/);
-      if (match) data.evento = match[1];
-    }
+    // Extract event type
+    const eventoMatch = message.match(/Qual o tipo de evento que você mais fotografa atualmente\?:\s*(.*?)(?:\n|$)/);
+    if (eventoMatch) data.evento = eventoMatch[1];
     
-    if (message.includes("Você utiliza uma agenda online para organizar seus compromissos?")) {
-      const match = message.match(/Você utiliza uma agenda online para organizar seus compromissos\?:\s*(.*?)(?:\n|$)/);
-      if (match) data.usaAgenda = match[1];
+    // Extract agenda usage
+    const agendaMatch = message.match(/Você utiliza uma agenda online para organizar seus compromissos\?:\s*(.*?)(?:\n|$)/);
+    if (agendaMatch) {
+      data.usaAgenda = agendaMatch[1];
       
-      // If user uses agenda, get additional details
+      // Get agenda details if user uses one
       if (data.usaAgenda === "Sim") {
         const qualAgendaMatch = message.match(/Qual agenda online você usa\?:\s*(.*?)(?:;|\n|$)/);
         if (qualAgendaMatch) data.usaAgenda = `Sim, ${qualAgendaMatch[1]}`;
@@ -94,25 +87,21 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
       }
     }
     
-    if (message.includes("Você tem um portfólio online em uma plataforma de terceiros?")) {
-      const match = message.match(/Você tem um portfólio online em uma plataforma de terceiros\?:\s*(.*?)(?:\n|$)/);
-      if (match) data.portfolio = match[1];
-    }
+    // Extract portfolio info
+    const portfolioMatch = message.match(/Você tem um portfólio online em uma plataforma de terceiros\?:\s*(.*?)(?:\n|$)/);
+    if (portfolioMatch) data.portfolio = portfolioMatch[1];
     
-    if (message.includes("Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho?")) {
-      const match = message.match(/Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho\?:\s*(.*?)(?:\n|$)/);
-      if (match) data.outrasFerramentas = match[1];
-    }
+    // Extract other tools info
+    const toolsMatch = message.match(/Além da agenda e do site, você usa outros aplicativos ou ferramentas online pagas para o seu trabalho\?:\s*(.*?)(?:\n|$)/);
+    if (toolsMatch) data.outrasFerramentas = toolsMatch[1];
     
-    if (message.includes("Se você pudesse ter um único site que integrasse todas as ferramentas")) {
-      const match = message.match(/Se você pudesse ter um único site que integrasse todas as ferramentas.*?:\s*(.*?)(?:\n|$)/s);
-      if (match) data.siteIdeal = match[1].substring(0, 100) + (match[1].length > 100 ? "..." : "");
-    }
+    // Extract ideal site description
+    const siteIdealMatch = message.match(/Se você pudesse ter um único site que integrasse todas as ferramentas.*?:\s*(.*?)(?:\n|$)/s);
+    if (siteIdealMatch) data.siteIdeal = siteIdealMatch[1].substring(0, 100) + (siteIdealMatch[1].length > 100 ? "..." : "");
     
-    if (message.includes("Valor sugerido para a solução:")) {
-      const match = message.match(/Valor sugerido para a solução:\s*(R\$\s*[\d.,]+)/);
-      if (match) data.valorSugerido = match[1];
-    }
+    // Extract suggested value
+    const valorSugeridoMatch = message.match(/Valor sugerido para a solução:\s*(R\$\s*[\d.,]+)/);
+    if (valorSugeridoMatch) data.valorSugerido = valorSugeridoMatch[1];
     
     return data;
   };
@@ -180,7 +169,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
       ) : (
         <div className="grid gap-6">
           {mensagens.map((message) => {
-            const formattedData = formatMessageContent(message.message);
+            const extractedData = extractMessageData(message.message);
             
             return (
               <Card key={message.id} className="overflow-hidden">
@@ -197,6 +186,16 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
                       <span className="text-xs text-muted-foreground">
                         {formatDate(message.created_at)}
                       </span>
+                      {updateMessage && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => setMessageToEdit(message)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
                       {deleteMessage && (
                         <Button 
                           variant="ghost" 
@@ -212,73 +211,73 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
                 </CardHeader>
                 <Separator />
                 <CardContent className="pt-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                    {formattedData.evento && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Evento:</span>
-                        <span>{formattedData.evento}</span>
+                  <dl className="grid gap-y-2 text-sm">
+                    {extractedData.evento && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Evento:</dt>
+                        <dd>{extractedData.evento}</dd>
                       </div>
                     )}
                     
-                    {formattedData.usaAgenda && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Agenda:</span>
-                        <span>{formattedData.usaAgenda}</span>
+                    {extractedData.usaAgenda && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Usa agenda online:</dt>
+                        <dd>{extractedData.usaAgenda}</dd>
                       </div>
                     )}
                     
-                    {formattedData.gosta && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Gosta:</span>
-                        <span>{formattedData.gosta}</span>
+                    {extractedData.gosta && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Gosta:</dt>
+                        <dd>{extractedData.gosta}</dd>
                       </div>
                     )}
                     
-                    {formattedData.naoGosta && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Não gosta:</span>
-                        <span>{formattedData.naoGosta}</span>
+                    {extractedData.naoGosta && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Não gosta:</dt>
+                        <dd>{extractedData.naoGosta}</dd>
                       </div>
                     )}
                     
-                    {formattedData.valorMes && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Valor/mês:</span>
-                        <span>{formattedData.valorMes}</span>
+                    {extractedData.valorMes && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Valor pago/mês:</dt>
+                        <dd>{extractedData.valorMes}</dd>
                       </div>
                     )}
                     
-                    {formattedData.portfolio && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Portfólio:</span>
-                        <span>{formattedData.portfolio}</span>
+                    {extractedData.portfolio && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Portfólio online:</dt>
+                        <dd>{extractedData.portfolio}</dd>
                       </div>
                     )}
                     
-                    {formattedData.outrasFerramentas && (
-                      <div className="flex items-start">
-                        <span className="font-semibold w-24">Outras:</span>
-                        <span>{formattedData.outrasFerramentas}</span>
+                    {extractedData.outrasFerramentas && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Outras ferramentas:</dt>
+                        <dd>{extractedData.outrasFerramentas}</dd>
                       </div>
                     )}
                     
-                    {formattedData.siteIdeal && (
-                      <div className="flex items-start sm:col-span-2">
-                        <span className="font-semibold w-24">Site ideal:</span>
-                        <span>{formattedData.siteIdeal}</span>
+                    {extractedData.siteIdeal && (
+                      <div className="flex flex-col">
+                        <dt className="font-semibold">Site ideal:</dt>
+                        <dd>{extractedData.siteIdeal}</dd>
                       </div>
                     )}
                     
-                    {formattedData.valorSugerido && (
-                      <div className="flex items-start mt-2">
-                        <span className="font-semibold w-24">Valor sugerido:</span>
-                        <span className="font-medium text-green-600">{formattedData.valorSugerido}</span>
+                    {extractedData.valorSugerido && (
+                      <div className="flex flex-col mt-2">
+                        <dt className="font-semibold">Valor sugerido:</dt>
+                        <dd className="font-medium text-green-600">{extractedData.valorSugerido}</dd>
                       </div>
                     )}
-                  </div>
+                  </dl>
 
                   {/* If no structured data was parsed, show the raw message */}
-                  {!Object.values(formattedData).some(val => val !== null) && (
+                  {!Object.values(extractedData).some(val => val !== null) && (
                     <div className="whitespace-pre-line mt-2">{message.message}</div>
                   )}
                 </CardContent>
@@ -309,6 +308,20 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit message dialog */}
+      {updateMessage && (
+        <MessageEditDialog 
+          message={messageToEdit} 
+          onClose={() => setMessageToEdit(null)}
+          onSave={async (updatedMessage) => {
+            if (messageToEdit && updateMessage) {
+              await updateMessage(messageToEdit.id, updatedMessage);
+              setMessageToEdit(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import CustomerMessagesList from './CustomerMessagesList';
 import { useMessageData } from '@/hooks/useMessageData';
+import { StandardizedMessage } from '@/types/messages';
 
 interface MessagesWrapperProps {
   isAuthenticated: boolean;
@@ -18,7 +19,8 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
     isCreatingTable, 
     createTable, 
     handleRefresh,
-    deleteMessage
+    deleteMessage,
+    updateMessage
   } = useMessageData(isAuthenticated);
 
   // Function to format date strings to local format
@@ -40,6 +42,7 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
       createTable={createTable}
       isCreatingTable={isCreatingTable}
       deleteMessage={deleteMessage}
+      updateMessage={updateMessage}
     />
   );
 };

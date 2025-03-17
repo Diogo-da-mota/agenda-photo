@@ -3,7 +3,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { checkTableExists } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { StandardizedMessage } from "@/types/messages";
-import { fetchAllMessagesFromTables, deleteMessage as deleteMessageFromSupabase } from "@/utils/messageUtils";
+import { 
+  fetchAllMessagesFromTables, 
+  deleteMessage as deleteMessageFromSupabase,
+  updateMessage as updateMessageInSupabase
+} from "@/utils/messageUtils";
 import { createMessagesTable } from "@/utils/tableManagement";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 
@@ -147,6 +151,39 @@ export const useMessageData = (isAuthenticated: boolean) => {
     }
   }, [toast]);
 
+  // Function to update a message
+  const updateMessage = useCallback(async (id: string, data: Partial<StandardizedMessage>) => {
+    try {
+      // Call the function to update the message in Supabase
+      const { success, updatedMessage } = await updateMessageInSupabase(id, data);
+      
+      if (success && updatedMessage) {
+        // Update the UI by replacing the message in the state
+        setMensagens(prevMessages => 
+          prevMessages.map(msg => msg.id === id ? updatedMessage : msg)
+        );
+        
+        toast({
+          title: "Mensagem atualizada",
+          description: "A mensagem foi atualizada com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível atualizar a mensagem. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating message:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao atualizar a mensagem.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   // Configure real-time listeners for both tables
   useRealtimeMessages(isAuthenticated, tableExists, handleNewMessage);
 
@@ -172,6 +209,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
     tableExists,
     handleRefresh,
     createTable,
-    deleteMessage
+    deleteMessage,
+    updateMessage
   };
 };
