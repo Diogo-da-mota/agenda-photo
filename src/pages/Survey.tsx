@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, ArrowRight as ArrowRightIcon, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -847,4 +848,142 @@ const Survey = () => {
 
   if (showContactForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+        <ContactInfoCard onComplete={handleContactFormComplete} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-6">
+      <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
+        <CardContent className="p-8">
+          <div className="mb-6 flex justify-between items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrev}
+              className="h-8 px-3"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Anterior
+            </Button>
+            <div className="text-xs text-muted-foreground">
+              Pergunta {currentQuestion + 1} de {questions.length}
+            </div>
+            <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-black rounded-full"
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+
+          <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
+
+          {currentQuestionObj.type === 'radio' && currentQuestionObj.options && (
+            <RadioGroup
+              value={selectedOption || ''}
+              onValueChange={handleOptionChange}
+              className="space-y-3"
+            >
+              {currentQuestionObj.options.map((option) => (
+                <div key={option} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={option} />
+                  <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+
+          {currentQuestionObj.type === 'checkbox' && currentQuestionObj.options && (
+            <div className="space-y-3">
+              {currentQuestionObj.options.map((option) => (
+                <div key={option} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={option}
+                    checked={(responses[currentQuestion] || []).includes(option)}
+                    onCheckedChange={() => handleOptionChange(option)}
+                  />
+                  <Label htmlFor={option} className="cursor-pointer">{option}</Label>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {currentQuestionObj.type === 'textarea' && (
+            <Textarea
+              placeholder="Digite sua resposta aqui..."
+              value={(responses[currentQuestion] || [''])[0]}
+              onChange={handleTextAreaChange}
+              className="min-h-[120px]"
+            />
+          )}
+
+          {showFollowUp && (
+            <div className="mt-6 border-t pt-4 border-gray-200">
+              <h3 className="text-lg font-medium mb-4">Informações adicionais</h3>
+              <div className="space-y-4">
+                {currentQuestionObj.followUp?.fields.map((field) => (
+                  <div key={field.label}>
+                    <Label htmlFor={field.label} className="mb-2 block">
+                      {field.label}
+                    </Label>
+                    {field.type === 'text' && (
+                      <Input
+                        id={field.label}
+                        value={(followUpResponses[currentQuestion] && followUpResponses[currentQuestion][field.label]) || ''}
+                        onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                        className={followUpErrors[field.label] ? "border-red-500" : ""}
+                      />
+                    )}
+                    {field.type === 'number' && (
+                      <Input
+                        id={field.label}
+                        type="number"
+                        value={(followUpResponses[currentQuestion] && followUpResponses[currentQuestion][field.label]) || ''}
+                        onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                        className={followUpErrors[field.label] ? "border-red-500" : ""}
+                      />
+                    )}
+                    {followUpErrors[field.label] && (
+                      <p className="mt-1 text-sm text-red-500">Este campo é obrigatório</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 flex justify-end">
+            <Button
+              onClick={handleNext}
+              className="bg-black hover:bg-black/90 button-hover"
+              disabled={
+                (currentQuestionObj.type === 'radio' && !selectedOption) ||
+                (currentQuestionObj.type === 'checkbox' && 
+                 (!responses[currentQuestion] || responses[currentQuestion].length === 0)) ||
+                (currentQuestionObj.type === 'textarea' && 
+                 (!responses[currentQuestion] || !responses[currentQuestion][0]))
+              }
+            >
+              {currentQuestion < questions.length - 1 ? (
+                <>
+                  Próxima
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Finalizar
+                  <Send className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Survey;
