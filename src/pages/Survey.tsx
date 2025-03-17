@@ -615,6 +615,14 @@ const Survey = () => {
           }
         }
       })
+      .catch((error) => {
+        console.error("Erro ao enviar valor:", error);
+        toast({
+          title: "Erro ao enviar valor",
+          description: "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      })
       .finally(() => {
         setIsSubmitting(false);
       });
@@ -857,164 +865,3 @@ const Survey = () => {
                 
                 {!emailSubmitted ? (
                   <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-                    <Input
-                      type="email"
-                      placeholder="Seu e-mail para contato"
-                      value={finalContactInfo}
-                      onChange={handleFinalContactInfoChange}
-                      className="bg-white/60 border-purple-200"
-                    />
-                    <Button
-                      onClick={handleFinalSubmit}
-                      disabled={isSubmitting}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      {isSubmitting ? "Enviando..." : "Quero participar"}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="bg-white/20 backdrop-blur-sm p-6 rounded-xl max-w-xl mx-auto">
-                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-center">Obrigado pelo seu interesse!</h3>
-                    <p className="text-gray-700 text-center mb-0">
-                      Entraremos em contato em breve com mais informações sobre a Agenda Pro.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4 py-12">
-      {showContactForm ? (
-        <ContactInfoCard onComplete={handleContactFormComplete} />
-      ) : (
-        <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
-          <CardContent className="p-8">
-            <div className="mb-6 flex justify-between items-center">
-              <div className="text-xs text-muted-foreground">
-                Pesquisa {currentQuestion + 1} de {questions.length}
-              </div>
-              <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-black rounded-full transition-all duration-300" 
-                  style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
-            
-            {/* Form elements with required attribute added */}
-            {currentQuestionObj.type === "radio" && currentQuestionObj.options && (
-              <RadioGroup 
-                value={selectedOption || ""}
-                onValueChange={handleOptionChange}
-                className="space-y-3"
-                required
-              >
-                {currentQuestionObj.options.map((option) => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option} id={option} required />
-                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            )}
-            
-            {currentQuestionObj.type === "checkbox" && currentQuestionObj.options && (
-              <div className="space-y-3">
-                {currentQuestionObj.options.map((option) => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={option} 
-                      checked={(responses[currentQuestion] || []).includes(option)}
-                      onCheckedChange={() => handleOptionChange(option)}
-                      required={(responses[currentQuestion] || []).length === 0}
-                    />
-                    <Label htmlFor={option} className="cursor-pointer">{option}</Label>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {currentQuestionObj.type === "textarea" && (
-              <Textarea 
-                placeholder="Digite sua resposta aqui..."
-                className="min-h-[120px]"
-                value={(responses[currentQuestion] || [""])[0]}
-                onChange={handleTextAreaChange}
-                required
-              />
-            )}
-            
-            {showFollowUp && (
-              <div className="mt-6 space-y-4 p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-medium">Informações adicionais:</h3>
-                {currentQuestionObj.followUp?.fields.map((field) => (
-                  <div key={field.label} className="space-y-2">
-                    <Label 
-                      htmlFor={`followup-${field.label}`} 
-                      className={followUpErrors[field.label] ? "text-red-500" : ""}
-                    >
-                      {field.label}
-                    </Label>
-                    <Input
-                      id={`followup-${field.label}`}
-                      type={field.type}
-                      className={followUpErrors[field.label] ? "border-red-500" : ""}
-                      value={followUpResponses[currentQuestion]?.[field.label] || ""}
-                      onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
-                    />
-                    {followUpErrors[field.label] && (
-                      <p className="text-sm text-red-500">Este campo é obrigatório</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div className="mt-8 flex justify-between">
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                className="border-gray-300"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Anterior
-              </Button>
-              
-              <Button
-                onClick={handleNext}
-                className="bg-black hover:bg-black/90"
-              >
-                {currentQuestion < questions.length - 1 ? (
-                  <>
-                    Próxima
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    Finalizar
-                    <Check className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-};
-
-export default Survey;
