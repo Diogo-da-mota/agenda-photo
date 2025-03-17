@@ -585,6 +585,7 @@ const Survey = () => {
     // Submit price data to Supabase
     setIsSubmitting(true);
     
+    // Fix for the Promise chain by using a proper Promise chain
     supabase
       .from('mensagens_de_contato')
       .insert(priceData)
@@ -864,4 +865,4 @@ const Survey = () => {
                 </p>
                 
                 {!emailSubmitted ? (
-                  <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+                  <div className="flex flex-col sm:
