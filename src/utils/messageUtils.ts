@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ContactMessage, MensagemDeContato, StandardizedMessage } from "@/types/messages";
 
@@ -111,6 +110,50 @@ export const checkTableExists = async (tableName: string): Promise<boolean> => {
 };
 
 /**
+ * Check if a user already exists by email or phone
+ * @param email User's email
+ * @param phone User's phone
+ * @returns Object with exists flag and the existing message if found
+ */
+export const checkExistingUser = async (
+  email?: string,
+  phone?: string
+): Promise<{ exists: boolean, message?: MensagemDeContato }> => {
+  if (!email && !phone) {
+    return { exists: false };
+  }
+
+  try {
+    console.log('Verificando se o usuário já existe por e-mail ou telefone...');
+    
+    let query = supabase.from('mensagens_de_contato').select('*');
+    
+    if (email) {
+      query = query.eq('e_mail', email);
+    } else if (phone) {
+      query = query.eq('telefone', phone);
+    }
+    
+    const { data, error } = await query.limit(1);
+    
+    if (error) {
+      console.error('Erro ao verificar usuário existente:', error);
+      return { exists: false };
+    }
+    
+    if (data && data.length > 0) {
+      console.log('Usuário existente encontrado:', data[0]);
+      return { exists: true, message: data[0] as MensagemDeContato };
+    }
+    
+    return { exists: false };
+  } catch (error) {
+    console.error('Exceção ao verificar usuário existente:', error);
+    return { exists: false };
+  }
+};
+
+/**
  * Submit survey data to Supabase
  * @param contactInfo Basic contact information
  * @param responses Survey question responses
@@ -154,10 +197,10 @@ export const submitSurveyData = async (
       return `${questionText}: ${answerText}`;
     }).join("\n\n");
 
-    // Create data for Supabase - strictly match column names para mensagens_de_contato
+    // Create data for Supabase
     const contactData = {
       nome: contactInfo.nome,
-      e_mail: finalContactInfo || contactInfo.email || "sem-email@exemplo.com",
+      e_mail: finalContactInfo || contactInfo.email || contactInfo.e_mail || "sem-email@exemplo.com",
       telefone: contactInfo.telefone || contactInfo.phone || "",
       mensagem: surveyMessage,
       // Note: criado_em is automatically set by DEFAULT now()
@@ -165,18 +208,47 @@ export const submitSurveyData = async (
 
     console.log("Enviando dados para o Supabase:", contactData);
 
-    // Usando a tabela mensagens_de_contato
-    const { data, error } = await supabase
-      .from('mensagens_de_contato')
-      .insert(contactData)
-      .select();
+    // Check if user already exists by email or phone
+    const { exists, message: existingMessage } = await checkExistingUser(
+      contactData.e_mail,
+      contactData.telefone
+    );
 
-    if (error) {
-      console.error("Erro ao enviar dados para Supabase:", error);
+    let result;
+    
+    if (exists && existingMessage) {
+      // Update existing record with combined messages
+      const updatedMessage = existingMessage.mensagem 
+        ? `${existingMessage.mensagem}\n\n--- NOVA SUBMISSÃO ---\n\n${contactData.mensagem}`
+        : contactData.mensagem;
+        
+      result = await supabase
+        .from('mensagens_de_contato')
+        .update({ 
+          mensagem: updatedMessage,
+          // Update timestamp
+          criado_em: new Date().toISOString()
+        })
+        .eq('id', existingMessage.id)
+        .select();
+        
+      console.log("Registro existente atualizado:", result);
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData)
+        .select();
+        
+      console.log("Novo registro criado:", result);
+    }
+
+    if (result.error) {
+      console.error("Erro ao enviar dados para Supabase:", result.error);
       return false;
     }
     
-    console.log("Dados enviados com sucesso para Supabase:", data);
+    console.log("Dados enviados com sucesso para Supabase:", result.data);
     return true;
   } catch (error) {
     console.error("Exceção ao enviar dados para Supabase:", error);
@@ -213,18 +285,45 @@ export const submitContactForm = async (formData: {
 
     console.log("Enviando dados para o Supabase:", contactData);
 
-    // Insert into mensagens_de_contato table
-    const { data, error } = await supabase
-      .from('mensagens_de_contato')
-      .insert(contactData)
-      .select();
+    // Check if user already exists by email or phone
+    const { exists, message: existingMessage } = await checkExistingUser(
+      contactData.e_mail,
+      contactData.telefone
+    );
 
-    if (error) {
-      console.error("Erro ao enviar dados para Supabase:", error);
+    let result;
+    
+    if (exists && existingMessage) {
+      // Update existing record with combined messages
+      const updatedMessage = existingMessage.mensagem 
+        ? `${existingMessage.mensagem}\n\n--- NOVA SUBMISSÃO ---\n\n${contactData.mensagem}`
+        : contactData.mensagem;
+        
+      result = await supabase
+        .from('mensagens_de_contato')
+        .update({ 
+          mensagem: updatedMessage,
+          // Update timestamp
+          criado_em: new Date().toISOString()
+        })
+        .eq('id', existingMessage.id);
+        
+      console.log("Registro existente atualizado:", result);
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('mensagens_de_contato')
+        .insert(contactData);
+        
+      console.log("Novo registro criado:", result);
+    }
+
+    if (result.error) {
+      console.error("Erro ao enviar dados para Supabase:", result.error);
       return false;
     }
     
-    console.log("Dados enviados com sucesso para Supabase:", data);
+    console.log("Dados enviados com sucesso para Supabase:", result.data);
     return true;
   } catch (error) {
     console.error("Exceção ao enviar dados para Supabase:", error);
