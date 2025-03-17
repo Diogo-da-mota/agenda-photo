@@ -16,10 +16,12 @@ export const useRealtimeMessages = (
   onNewMessage: (message: StandardizedMessage) => void
 ) => {
   const { toast } = useToast();
+  const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && tableExists) {
+    if (isAuthenticated && tableExists && !subscribed) {
       console.log('Iniciando escuta de mensagens em tempo real...');
+      setSubscribed(true);
       
       // Escutar mudanças na tabela mensagens_de_contato (nossa tabela principal)
       const mensagensDeContatoChannel = supabase
@@ -90,7 +92,8 @@ export const useRealtimeMessages = (
         console.log('Removendo canais de escuta...');
         supabase.removeChannel(mensagensDeContatoChannel);
         supabase.removeChannel(contactMessagesChannel);
+        setSubscribed(false);
       };
     }
-  }, [isAuthenticated, tableExists, toast, onNewMessage]);
+  }, [isAuthenticated, tableExists, toast, onNewMessage, subscribed]);
 };
