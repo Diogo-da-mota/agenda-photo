@@ -6,6 +6,7 @@ import MessageCard from './MessageCard';
 import { MessageEditDialog } from "./MessageEditDialog";
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import { extractMessageData } from '@/utils/messageDataExtractor';
+import { Loader2 } from 'lucide-react';
 
 interface CustomerMessagesListProps {
   tableExists: boolean;
@@ -15,6 +16,7 @@ interface CustomerMessagesListProps {
   createTable: () => Promise<void>;
   isCreatingTable: boolean;
   isLoading?: boolean;
+  isRefreshing?: boolean;
   deleteMessage?: (id: string) => Promise<void>;
   updateMessage?: (id: string, data: Partial<StandardizedMessage>) => Promise<void>;
 }
@@ -27,6 +29,7 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
   createTable,
   isCreatingTable,
   isLoading = false,
+  isRefreshing = false,
   deleteMessage,
   updateMessage
 }) => {
@@ -63,12 +66,13 @@ const CustomerMessagesList: React.FC<CustomerMessagesListProps> = ({
     }
   }, [messageToEdit, updateMessage]);
 
-  if (isLoading) {
+  if (isLoading || isRefreshing) {
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4">Mensagens de Contato</h2>
-        <div className="flex justify-center items-center min-h-[200px]">
-          <p>Carregando mensagens...</p>
+        <div className="flex flex-col justify-center items-center min-h-[200px] space-y-4 border border-gray-200 rounded-lg p-8 bg-white">
+          <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+          <p className="text-gray-600">{isRefreshing ? "Atualizando mensagens..." : "Carregando mensagens..."}</p>
         </div>
       </div>
     );

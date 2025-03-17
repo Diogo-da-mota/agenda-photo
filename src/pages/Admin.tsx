@@ -12,6 +12,7 @@ const Admin = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -46,6 +47,16 @@ const Admin = () => {
     });
   };
 
+  const handleRefresh = () => {
+    // Ao invés de recarregar a página inteira, apenas incrementamos o contador
+    // para forçar o MessagesWrapper a ser remontado com uma nova key
+    setRefreshCounter(prev => prev + 1);
+    toast({
+      title: "Atualizando",
+      description: "Buscando mensagens mais recentes..."
+    });
+  };
+
   // Show loading state during initialization
   if (isInitializing) {
     return (
@@ -61,11 +72,7 @@ const Admin = () => {
         <AdminHeader 
           isAuthenticated={isAuthenticated}
           isRefreshing={false}
-          handleRefresh={() => {
-            // We're not going to reset authentication state on refresh anymore
-            // Just reload the MessagesWrapper component with key change
-            window.location.reload();
-          }}
+          handleRefresh={handleRefresh}
           handleLogout={handleLogout}
         />
         
@@ -80,7 +87,7 @@ const Admin = () => {
         ) : (
           <div className="space-y-8">
             <MessagesWrapper 
-              key={`messages-wrapper-${Date.now()}`} 
+              key={`messages-wrapper-${refreshCounter}`} 
               isAuthenticated={isAuthenticated} 
             />
           </div>
