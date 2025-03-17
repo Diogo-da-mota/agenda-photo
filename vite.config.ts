@@ -13,16 +13,8 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Otimizações para o build
     target: "esnext",
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production', // Remove console logs em produção
-        drop_debugger: mode === 'production'
-      },
-      output: {
-        comments: false,
-      },
-    },
+    minify: mode === 'production' ? 'esbuild' : false, // Substituir Terser pelo esbuild
+    // Remove as opções terserOptions
     // Disable source maps in production to improve performance
     sourcemap: mode !== 'production',
     chunkSizeWarningLimit: 1000, // Aumenta o limite de aviso de tamanho de chunk
