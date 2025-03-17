@@ -314,3 +314,49 @@ export const submitContactForm = async (formData: {
     return false;
   }
 };
+
+/**
+ * Delete a message from Supabase
+ * @param id ID of the message to delete
+ * @returns Boolean indicating success of deletion
+ */
+export const deleteMessage = async (id: string): Promise<boolean> => {
+  console.log('Deleting message with ID:', id);
+  
+  try {
+    // First, try to delete from mensagens_de_contato
+    let { error } = await supabase
+      .from('mensagens_de_contato')
+      .delete()
+      .eq('id', id);
+    
+    if (!error) {
+      console.log('Message deleted successfully from mensagens_de_contato');
+      return true;
+    }
+    
+    // If that fails, try to delete from contact_messages (for backward compatibility)
+    if (error) {
+      console.log('Message not found in mensagens_de_contato, trying contact_messages...');
+      
+      // Using any type here to bypass type checking since contact_messages is not in the types
+      const result = await (supabase as any)
+        .from('contact_messages')
+        .delete()
+        .eq('id', id);
+      
+      if (result.error) {
+        console.error('Error deleting message from contact_messages:', result.error);
+        return false;
+      }
+      
+      console.log('Message deleted successfully from contact_messages');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    return false;
+  }
+};

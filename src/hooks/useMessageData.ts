@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { checkTableExists } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { StandardizedMessage } from "@/types/messages";
-import { fetchAllMessagesFromTables } from "@/utils/messageUtils";
+import { fetchAllMessagesFromTables, deleteMessage as deleteMessageFromSupabase } from "@/utils/messageUtils";
 import { createMessagesTable } from "@/utils/tableManagement";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 
@@ -116,6 +116,37 @@ export const useMessageData = (isAuthenticated: boolean) => {
     });
   }, []);
 
+  // Function to delete a message
+  const deleteMessage = useCallback(async (id: string) => {
+    try {
+      // Call the function to delete the message from Supabase
+      const success = await deleteMessageFromSupabase(id);
+      
+      if (success) {
+        // Update the UI by removing the message from the state
+        setMensagens(prevMessages => prevMessages.filter(msg => msg.id !== id));
+        
+        toast({
+          title: "Mensagem excluída",
+          description: "A mensagem foi excluída com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a mensagem. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao excluir a mensagem.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   // Configure real-time listeners for both tables
   useRealtimeMessages(isAuthenticated, tableExists, handleNewMessage);
 
@@ -140,6 +171,7 @@ export const useMessageData = (isAuthenticated: boolean) => {
     isCreatingTable,
     tableExists,
     handleRefresh,
-    createTable
+    createTable,
+    deleteMessage
   };
 };
