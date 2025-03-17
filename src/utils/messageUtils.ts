@@ -19,14 +19,18 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
     
     // Priorizar mensagens_de_contato se existir
     if (mensagensDeContatoExists) {
+      // Fetch with a large page size to get all messages
       const { data: mensagensDeContato, error: mensagensError } = await supabase
         .from('mensagens_de_contato')
         .select('*')
-        .order('criado_em', { ascending: false });
+        .order('criado_em', { ascending: false })
+        .limit(1000); // Set a higher limit to ensure we get all messages
       
       if (mensagensError) {
         console.error('Error fetching mensagens_de_contato:', mensagensError);
       } else if (mensagensDeContato) {
+        console.log(`Retrieved ${mensagensDeContato.length} messages from mensagens_de_contato`);
+        
         // Map to standardized format
         const standardizedMensagens = mensagensDeContato.map((msg: MensagemDeContato) => ({
           id: msg.id,
@@ -38,19 +42,8 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
           original_table: 'mensagens_de_contato'
         }));
         
-        // Remove duplicate entries - keep only the latest entry for each user (by email or phone)
-        const uniqueMessages: {[key: string]: StandardizedMessage} = {};
-        
-        standardizedMensagens.forEach(msg => {
-          const userKey = msg.email || msg.phone || msg.id;
-          
-          // If we don't have this user yet OR this message is newer than what we have
-          if (!uniqueMessages[userKey] || new Date(msg.created_at) > new Date(uniqueMessages[userKey].created_at)) {
-            uniqueMessages[userKey] = msg;
-          }
-        });
-        
-        allMessages = [...allMessages, ...Object.values(uniqueMessages)];
+        // Add all messages - we'll deduplicate later if needed
+        allMessages = [...allMessages, ...standardizedMensagens];
       }
     }
     
@@ -60,31 +53,52 @@ export const fetchAllMessagesFromTables = async (): Promise<{ messages: Standard
       const { data: contactMessages, error: contactError } = await (supabase as any)
         .from('contact_messages')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1000); // Set a higher limit
       
       if (contactError) {
         console.error('Error fetching contact_messages:', contactError);
       } else if (contactMessages) {
+        console.log(`Retrieved ${contactMessages.length} messages from contact_messages`);
+        
         // Map to standardized format
         const standardizedContactMessages = contactMessages.map((msg: ContactMessage) => ({
           ...msg,
           original_table: 'contact_messages'
         }));
         
-        // Deduplicate based on email/phone, merging with messages we already have
-        const existingKeys = new Set(allMessages.map(msg => msg.email || msg.phone || msg.id));
-        
-        const newUniqueMessages = standardizedContactMessages.filter(msg => {
-          const userKey = msg.email || msg.phone || msg.id;
-          return !existingKeys.has(userKey);
-        });
-        
-        allMessages = [...allMessages, ...newUniqueMessages];
+        // Add all messages
+        allMessages = [...allMessages, ...standardizedContactMessages];
       }
     }
     
-    // Final sort to ensure newest messages are first
-    allMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // If we retrieved messages but need to deduplicate
+    if (allMessages.length > 0) {
+      console.log(`Retrieved a total of ${allMessages.length} messages before deduplication`);
+      
+      // Optional deduplication - only if we have messages from multiple tables
+      if (mensagensDeContatoExists && contactMessagesExists) {
+        const uniqueMessages: {[key: string]: StandardizedMessage} = {};
+        
+        allMessages.forEach(msg => {
+          // Use ID as primary key since it's guaranteed unique within a table
+          // Only use email/phone as fallback if we're comparing across tables
+          const userKey = msg.id;
+          
+          if (!uniqueMessages[userKey]) {
+            uniqueMessages[userKey] = msg;
+          }
+        });
+        
+        allMessages = Object.values(uniqueMessages);
+        console.log(`After deduplication: ${allMessages.length} unique messages`);
+      }
+      
+      // Final sort to ensure newest messages are first
+      allMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else {
+      console.log('No messages retrieved from any table');
+    }
     
     return { messages: allMessages, tableExists };
   } catch (error) {

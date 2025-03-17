@@ -31,6 +31,14 @@ const MessagesWrapper: React.FC<MessagesWrapperProps> = ({ isAuthenticated }) =>
     }
   }, [isLoading, isInitialized]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Perform additional refresh when component mounts
+      console.log("Forcing initial refresh of messages");
+      handleRefresh();
+    }
+  }, [isAuthenticated]); // Only run when authentication status changes
+
   // Function to format date strings to local format
   const formatDate = (dateString: string) => {
     try {
