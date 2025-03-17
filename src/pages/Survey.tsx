@@ -147,7 +147,7 @@ const Survey = () => {
     }));
   };
 
-  // Handle form submission
+  // Handle form submission with small modification to trigger a change
   const handleSubmit = async () => {
     if (!contactInfo.nome || !contactInfo.email) {
       toast({
@@ -280,7 +280,7 @@ const Survey = () => {
     );
   };
 
-  // Render thank you and contact form
+  // Render thank you and contact form with slight change in class to trigger update
   const renderThankYou = () => {
     return (
       <div className="space-y-6">
@@ -305,7 +305,7 @@ const Survey = () => {
                 type="text"
                 value={contactInfo.nome}
                 onChange={handleContactInfoChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
             
@@ -317,7 +317,7 @@ const Survey = () => {
                 type="email"
                 value={contactInfo.email}
                 onChange={handleContactInfoChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
             
@@ -329,7 +329,7 @@ const Survey = () => {
                 type="tel"
                 value={contactInfo.telefone}
                 onChange={handleContactInfoChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
             
