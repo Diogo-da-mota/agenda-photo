@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Send, Calendar, MessageSquare, DollarSign, Globe, Link, Award, Palette, Heart, Zap, BarChart, Clock, Users, Headphones, Camera, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -866,3 +867,166 @@ const Survey = () => {
                 </p>
                 
                 {!emailSubmitted ? (
+                  <div className="max-w-md mx-auto">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Input
+                        type="email"
+                        placeholder="Seu melhor e-mail"
+                        className="flex-1 bg-white/80"
+                        value={finalContactInfo}
+                        onChange={handleFinalContactInfoChange}
+                        required
+                      />
+                      <Button
+                        onClick={handleFinalSubmit}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Enviando..." : "Enviar"}
+                        <Send className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <Check className="h-10 w-10 text-green-500 mx-auto mb-2" />
+                    <p className="text-lg font-medium text-green-700">E-mail enviado com sucesso!</p>
+                    <p className="text-sm text-gray-600">Entraremos em contato em breve. Redirecionando...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Handle regular survey questions view
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4 py-12">
+      {showContactForm ? (
+        <ContactInfoCard onComplete={handleContactFormComplete} />
+      ) : (
+        <Card className={`w-full max-w-2xl glass shadow-lg border-0 overflow-hidden animate-${animation}`}>
+          <CardContent className="p-8">
+            <div className="mb-6 flex justify-between items-center">
+              <div className="text-xs text-muted-foreground">
+                Pergunta {currentQuestion + 1} de {questions.length}
+              </div>
+              <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-black rounded-full" style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}></div>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-medium mb-6">{currentQuestionObj.question}</h2>
+
+            {currentQuestionObj.type === 'radio' && currentQuestionObj.options && (
+              <RadioGroup className="space-y-3" value={selectedOption || ''} onValueChange={handleOptionChange}>
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-2 p-3 rounded-md border border-gray-200 hover:border-black transition-colors">
+                    <RadioGroupItem value={option} id={option} />
+                    <Label htmlFor={option} className="flex-1 cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+
+            {currentQuestionObj.type === 'checkbox' && currentQuestionObj.options && (
+              <div className="space-y-3">
+                {currentQuestionObj.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-2 p-3 rounded-md border border-gray-200 hover:border-black transition-colors">
+                    <Checkbox
+                      id={option}
+                      checked={(responses[currentQuestion] || []).includes(option)}
+                      onCheckedChange={() => handleOptionChange(option)}
+                    />
+                    <Label htmlFor={option} className="flex-1 cursor-pointer">{option}</Label>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentQuestionObj.type === 'textarea' && (
+              <Textarea
+                placeholder="Digite sua resposta aqui..."
+                className="min-h-[150px]"
+                value={(responses[currentQuestion] && responses[currentQuestion][0]) || ''}
+                onChange={handleTextAreaChange}
+              />
+            )}
+
+            {/* Follow-up questions section */}
+            {showFollowUp && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h3 className="text-lg font-medium mb-4">Informações adicionais:</h3>
+                <div className="space-y-4">
+                  {currentQuestionObj.followUp?.fields.map((field, index) => (
+                    <div key={index}>
+                      <Label className="mb-2 block">{field.label}</Label>
+                      {field.type === 'text' && (
+                        <Input
+                          type="text"
+                          value={(followUpResponses[currentQuestion]?.[field.label]) || ''}
+                          onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                          className={followUpErrors[field.label] ? "border-red-500" : ""}
+                        />
+                      )}
+                      {field.type === 'number' && (
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={(followUpResponses[currentQuestion]?.[field.label]) || ''}
+                            onChange={(e) => handleFollowUpChange(field.label, e.target.value)}
+                            className={`pl-10 ${followUpErrors[field.label] ? "border-red-500" : ""}`}
+                          />
+                        </div>
+                      )}
+                      {followUpErrors[field.label] && (
+                        <p className="text-red-500 text-xs mt-1">Este campo é obrigatório</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrev}
+                className="border-black hover:bg-black hover:text-white transition-colors"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={handleNext}
+                className="bg-black hover:bg-black/90 button-hover"
+              >
+                {currentQuestion < questions.length - 1 ? (
+                  <>
+                    Próxima
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    Enviar
+                    <Send className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default Survey;
