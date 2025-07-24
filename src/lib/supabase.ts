@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Verificação mais robusta das variáveis de ambiente
+// Verificação das variáveis de ambiente
 if (!supabaseUrl) {
   console.error('❌ ERRO CRÍTICO: VITE_SUPABASE_URL não está definida no arquivo .env');
   console.error('📝 Verifique se o arquivo .env contém: VITE_SUPABASE_URL=sua_url_aqui');
