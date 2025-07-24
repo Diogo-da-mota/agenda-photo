@@ -47,32 +47,7 @@ export default defineConfig(({ mode }) => ({
         { from: /^\/r\/.*$/, to: '/index.html' }
       ]
     },
-    // N8N REMOVIDO - Sistema usa Amazon S3
-    // Proxy para resolver problema CORS com N8N
-    /* COMENTADO - INTEGRAÇÃO N8N REMOVIDA
-    proxy: {
-      '/api/n8n': {
-        target: 'https://webhook.n8n.agendaphoto.com.br',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api\/n8n/, ''),
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('🔧 Proxy N8N:', req.method, req.url);
-            proxyReq.removeHeader('origin');
-          });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log('📊 N8N Response:', proxyRes.statusCode);
-            proxyRes.headers['access-control-allow-origin'] = 'http://localhost:8080';
-            proxyRes.headers['access-control-allow-credentials'] = 'true';
-          });
-          proxy.on('error', (err, req, res) => {
-            console.error('❌ Proxy Error:', err.message);
-          });
-        }
-      }
-    }
-    */
+    
   },
   preview: {
     headers: securityHeaders
