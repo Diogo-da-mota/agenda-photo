@@ -1,6 +1,7 @@
 /**
  * Hook customizado para gerenciar downloads múltiplos
  * FASE 2 - Estratégias Inteligentes de Download
+ * ATUALIZADO: Compatibilidade com iOS
  */
 
 import { useState, useCallback, useRef } from 'react';
@@ -12,6 +13,8 @@ import {
   DownloadCallbacks,
   BulkDownloadResult 
 } from '@/types/download-multiple';
+import { downloadImageUniversal } from '@/utils/downloadImage';
+import { deviceDetection } from '@/utils/deviceDetection';
 
 export interface ImageDownloadData {
   id: string;
@@ -95,7 +98,7 @@ export const useBulkDownload = ({
     ...config
   };
 
-  // MELHORADO: Download de uma única imagem com retry inteligente
+  // MELHORADO: Download de uma única imagem com retry inteligente e compatibilidade iOS
   const downloadSingleImage = useCallback(async (
     imageData: ImageDownloadData,
     signal?: AbortSignal,
@@ -122,79 +125,20 @@ export const useBulkDownload = ({
 
       callbacks.onProgress?.(progress);
 
-      // MELHORADO: Timeout baseado na velocidade da conexão
-      const timeoutMs = connectionSpeedRef.current === 'slow' ? 30000 : 
-                      connectionSpeedRef.current === 'medium' ? 20000 : 10000;
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-      // Combinar sinais de abort
-      const combinedSignal = signal?.aborted ? signal : controller.signal;
-
-      // Fazer o download
-      const response = await fetch(imageData.url, { signal: combinedSignal });
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Verificar se foi cancelado
+      if (signal?.aborted) {
+        throw new Error('Download cancelado');
       }
 
-      progress.progress = 50;
+      progress.progress = 30;
       callbacks.onProgress?.(progress);
 
-      const blob = await response.blob();
-      progress.progress = 80;
-      callbacks.onProgress?.(progress);
-
-      // Detectar iOS Safari para usar abordagem específica
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      
-      if (isIOS || isSafari) {
-        // Solução específica para iOS/Safari: converter para base64 e usar data URL
-        const reader = new FileReader();
-        
-        await new Promise<void>((resolve, reject) => {
-          reader.onload = () => {
-            try {
-              const base64Data = reader.result as string;
-              // Remover o prefixo data:image/... e substituir por application/octet-stream
-              const base64Content = base64Data.split(',')[1];
-              const dataUrl = `data:application/octet-stream;base64,${base64Content}`;
-              
-              const link = document.createElement('a');
-              link.href = dataUrl;
-              link.download = imageData.fileName;
-              link.style.display = 'none';
-              
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          };
-          
-          reader.onerror = () => reject(new Error('Erro ao converter imagem para base64'));
-          reader.readAsDataURL(blob);
-        });
-      } else {
-        // Abordagem padrão para outros navegadores
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = imageData.fileName;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
+      // NOVO: Usar função universal compatível com iOS
+      await downloadImageUniversal(imageData.url, {
+        filename: imageData.fileName,
+        showInstructions: deviceDetection.isIOS(), // Mostrar instruções apenas no iOS
+        fallbackToNewTab: true
+      });
 
       // Finalizar com sucesso
       progress.status = 'completed';

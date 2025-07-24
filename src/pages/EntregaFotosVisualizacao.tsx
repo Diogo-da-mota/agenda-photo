@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { useImageSelection } from '@/hooks/useImageSelection';
 import { useBulkDownload, ImageDownloadData } from '@/hooks/useBulkDownload';
+import { downloadImageUniversal } from '@/utils/downloadImage';
+import { deviceDetection } from '@/utils/deviceDetection';
 import { MultipleDownloadActionBar, MultipleDownloadActionBarWrapper } from '@/components/MultipleDownloadActionBar';
 import { SelectableImageGrid } from '@/components/SelectableImageCard';
 import { ImprovedLightbox, LightboxImage } from '@/components/ImprovedLightbox';
@@ -300,7 +302,7 @@ const EntregaFotosVisualizacao = () => {
     }
   };
 
-  // Função para download individual (mantida para compatibilidade)
+  // Função para download individual (ATUALIZADA: compatível com iOS)
   const downloadImagem = async (url: string, nomeArquivo: string) => {
     if (!galeria?.permitir_download) {
       toast.error('Downloads não permitidos para esta galeria');
@@ -310,63 +312,17 @@ const EntregaFotosVisualizacao = () => {
     setDownloadingImage(url);
     
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Erro ao baixar imagem');
+      // NOVO: Usar função universal compatível com iOS
+      await downloadImageUniversal(url, {
+        filename: nomeArquivo,
+        showInstructions: deviceDetection.isIOS(),
+        fallbackToNewTab: true
+      });
       
-      const blob = await response.blob();
-      
-      // Detectar iOS Safari para usar abordagem específica
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      
-      if (isIOS || isSafari) {
-        // Solução específica para iOS/Safari: converter para base64 e usar data URL
-        const reader = new FileReader();
-        
-        await new Promise<void>((resolve, reject) => {
-          reader.onload = () => {
-            try {
-              const base64Data = reader.result as string;
-              // Remover o prefixo data:image/... e substituir por application/octet-stream
-              const base64Content = base64Data.split(',')[1];
-              const dataUrl = `data:application/octet-stream;base64,${base64Content}`;
-              
-              const link = document.createElement('a');
-              link.href = dataUrl;
-              link.download = nomeArquivo;
-              link.style.display = 'none';
-              
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          };
-          
-          reader.onerror = () => reject(new Error('Erro ao converter imagem para base64'));
-          reader.readAsDataURL(blob);
-        });
-      } else {
-        // Abordagem padrão para outros navegadores
-        const urlBlob = window.URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = urlBlob;
-        link.download = nomeArquivo;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        window.URL.revokeObjectURL(urlBlob);
+      // Não mostrar toast de sucesso para iOS (já é mostrado pela função universal)
+      if (!deviceDetection.isIOS()) {
+        toast.success('Imagem baixada com sucesso!');
       }
-      
-      toast.success('Imagem baixada com sucesso!');
       
     } catch (error) {
       console.error('Erro ao baixar imagem:', error);
