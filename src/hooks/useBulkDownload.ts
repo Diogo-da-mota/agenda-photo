@@ -147,17 +147,54 @@ export const useBulkDownload = ({
       progress.progress = 80;
       callbacks.onProgress?.(progress);
 
-      // Criar link de download
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = imageData.fileName;
-      link.style.display = 'none';
+      // Detectar iOS Safari para usar abordagem específica
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      if (isIOS || isSafari) {
+        // Solução específica para iOS/Safari: converter para base64 e usar data URL
+        const reader = new FileReader();
+        
+        await new Promise<void>((resolve, reject) => {
+          reader.onload = () => {
+            try {
+              const base64Data = reader.result as string;
+              // Remover o prefixo data:image/... e substituir por application/octet-stream
+              const base64Content = base64Data.split(',')[1];
+              const dataUrl = `data:application/octet-stream;base64,${base64Content}`;
+              
+              const link = document.createElement('a');
+              link.href = dataUrl;
+              link.download = imageData.fileName;
+              link.style.display = 'none';
+              
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+          
+          reader.onerror = () => reject(new Error('Erro ao converter imagem para base64'));
+          reader.readAsDataURL(blob);
+        });
+      } else {
+        // Abordagem padrão para outros navegadores
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = imageData.fileName;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
 
       // Finalizar com sucesso
       progress.status = 'completed';
