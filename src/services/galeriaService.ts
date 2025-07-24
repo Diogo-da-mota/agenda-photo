@@ -80,6 +80,84 @@ export const apagarGaleria = async (slug: string, titulo: string) => {
   return true;
 };
 
+export const apagarCardIndividual = async (slug: string, titulo: string) => {
+  // Confirmação antes de apagar
+  const confirmacao = window.confirm(
+    `Tem certeza que deseja apagar o card da galeria "${titulo}"?\n\nEsta ação não pode ser desfeita e irá remover:\n- Todas as fotos desta galeria específica\n- Todos os dados relacionados a este card\n- O link de acesso ficará inválido`
+  );
+
+  if (!confirmacao) return false;
+
+  try {
+    // Obter usuário atual para verificação de permissão
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    console.log(`🗑️ Iniciando remoção do card individual: ${slug}`);
+
+    // 1. Buscar todas as imagens da galeria específica para construir os caminhos do storage
+    const { data: imagens, error: imagensError } = await supabase
+      .from('entregar_imagens')
+      .select('nome_arquivo, user_id, id')
+      .eq('slug', slug)
+      .eq('user_id', user.id); // Garantir que só apague imagens do próprio usuário
+
+    if (imagensError) {
+      console.error('Erro ao buscar imagens:', imagensError);
+      throw new Error(`Erro ao buscar imagens: ${imagensError.message}`);
+    }
+
+    if (!imagens || imagens.length === 0) {
+      console.warn('Nenhuma imagem encontrada para esta galeria');
+      return true; // Considera sucesso se não há imagens para deletar
+    }
+
+    console.log(`📁 Encontradas ${imagens.length} imagens para remoção`);
+
+    // 2. Deletar arquivos do Storage
+    // Construir os caminhos corretos: user_id/slug/nome_arquivo
+    const caminhos = imagens.map(img => `${img.user_id}/${slug}/${img.nome_arquivo}`);
+    
+    console.log('🗂️ Removendo arquivos do storage:', caminhos);
+    
+    const { error: storageError } = await supabase.storage
+      .from('entregar-imagens')
+      .remove(caminhos);
+
+    if (storageError) {
+      console.warn('Erro ao deletar alguns arquivos do storage:', storageError);
+      // Não interrompe o processo, pois os registros do banco são mais críticos
+      // As políticas RLS garantem que só arquivos do usuário sejam removidos
+    } else {
+      console.log('✅ Arquivos removidos do storage com sucesso');
+    }
+
+    // 3. Deletar registros do banco de dados
+    // As políticas RLS garantem que só registros do próprio usuário sejam deletados
+    const { error: deleteError } = await supabase
+      .from('entregar_imagens')
+      .delete()
+      .eq('slug', slug)
+      .eq('user_id', user.id); // Dupla verificação de segurança
+
+    if (deleteError) {
+      console.error('Erro ao deletar registros:', deleteError);
+      throw new Error(`Erro ao deletar registros: ${deleteError.message}`);
+    }
+
+    console.log('✅ Registros removidos do banco de dados com sucesso');
+    console.log(`🎯 Card individual "${titulo}" removido completamente`);
+
+    return true;
+
+  } catch (error) {
+    console.error('❌ Erro ao apagar card individual:', error);
+    throw error;
+  }
+};
+
 export const criarGaleria = async (
   formData: EntregarFotosFormData,
   selectedImages: ImageFile[],

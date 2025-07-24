@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { carregarGalerias, apagarGaleria, criarGaleria } from '@/services/galeriaService';
+import { apagarGaleria, apagarCardIndividual, carregarGalerias, criarGaleria } from '@/services/galeriaService';
 import { processFiles, ImageFile } from '@/utils/galeriaUtils';
 import { EntregarFotosFormData, Galeria } from '@/types/entregar-fotos';
 import GaleriaForm from '@/components/EntregaFotos/GaleriaForm';
@@ -148,6 +148,44 @@ export default function EntregaFotos() {
     }
   };
 
+  // Função para visualizar galeria (abre em nova aba)
+  const handleVisualizar = (slug: string) => {
+    const galeriaUrl = `${window.location.origin}/entrega-fotos/${slug}`;
+    window.open(galeriaUrl, '_blank');
+  };
+
+  // Função para copiar link da galeria
+  const handleCopiarLink = async (slug: string) => {
+    try {
+      const galeriaUrl = `${window.location.origin}/entrega-fotos/${slug}`;
+      await navigator.clipboard.writeText(galeriaUrl);
+      toast.success('Link copiado para a área de transferência!');
+    } catch (error) {
+      console.error('Erro ao copiar link:', error);
+      toast.error('Erro ao copiar link. Tente novamente.');
+    }
+  };
+
+  // Função para recarregar galerias
+  const handleRecarregar = async () => {
+    setIsLoadingGalerias(true);
+    try {
+      const galeriasData = await carregarGalerias();
+      setGalerias(galeriasData);
+      toast.success('Galerias atualizadas!');
+    } catch (error) {
+      console.error('Erro ao recarregar galerias:', error);
+      toast.error('Erro ao recarregar galerias. Tente novamente.');
+    } finally {
+      setIsLoadingGalerias(false);
+    }
+  };
+
+  // Função para criar primeira galeria
+  const handleCriarPrimeira = () => {
+    setActiveTab('nova-galeria');
+  };
+
   // Função para apagar galeria com atualização otimista
   const handleApagarGaleria = async (slug: string, titulo: string) => {
     try {
@@ -155,10 +193,11 @@ export default function EntregaFotos() {
       const galeriaOriginal = galerias.find(g => g.slug === slug);
       setGalerias(prev => prev.filter(g => g.slug !== slug));
 
-      const success = await apagarGaleria(slug, titulo);
+      // Usar apagarCardIndividual para remover apenas o card específico
+      const success = await apagarCardIndividual(slug, titulo);
       
       if (success) {
-        toast.success(`Galeria "${titulo}" foi apagada com sucesso!`);
+        toast.success(`Card da galeria "${titulo}" foi apagado com sucesso!`);
       } else {
         // Reverter UI se cancelado
         if (galeriaOriginal) {
@@ -232,8 +271,12 @@ export default function EntregaFotos() {
           <TabsContent value="galeria-fotos" className="space-y-6">
             <GaleriasLista
               galerias={galerias}
-              isLoading={isLoadingGalerias}
-              onApagarGaleria={handleApagarGaleria}
+              loadingGalerias={isLoadingGalerias}
+              onRecarregar={handleRecarregar}
+              onVisualizar={handleVisualizar}
+              onCopiarLink={handleCopiarLink}
+              onApagar={handleApagarGaleria}
+              onCriarPrimeira={handleCriarPrimeira}
             />
           </TabsContent>
         </Tabs>
