@@ -12,10 +12,10 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(229, 57, 53, 0.6));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(59, 130, 246, 0.6));
 }
 
 @keyframes logo-spin {
@@ -40,3 +40,29 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Estilo personalizado para gradientes */
+.bg-gradient-card {
+  @apply bg-gradient-to-br from-[#1A1F2E] to-[#252A3A];
+}
+
+.bg-gradient-card-selected {
+  @apply bg-gradient-to-br from-[#2A1F1F] to-[#2A1A1A];
+}
+
+.bg-gradient-success {
+  @apply bg-gradient-to-br from-[#1E2822] to-[#1A2119];
+}
+
+.bg-gradient-highlight {
+  @apply bg-gradient-to-br from-[#242038] to-[#2D2A4A];
+}
+
+/* Remover ou comentar os estilos antigos */
+/* .landing-login-btn {
+  ...
+}
+
+.landing-signup-btn {
+  ...
+} */

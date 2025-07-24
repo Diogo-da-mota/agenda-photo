@@ -1,0 +1,20 @@
+{
+  "short_name": "AgendaPRO",
+  "name": "AgendaPRO - Gestão Profissional",
+  "icons": [
+    {
+      "src": "/lovable-uploads/7f19ef7b-a1e8-4647-a6fa-e7743474e649.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/lovable-uploads/7f19ef7b-a1e8-4647-a6fa-e7743474e649.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

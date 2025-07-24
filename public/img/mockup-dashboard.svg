@@ -1,0 +1,201 @@
+<svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definições para animações reutilizáveis -->
+  <defs>
+    <linearGradient id="statsGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563EB">
+        <animate attributeName="stop-color" values="#2563EB; #8B5CF6; #2563EB" dur="8s" repeatCount="indefinite" />
+      </stop>
+      <stop offset="100%" stop-color="#8B5CF6">
+        <animate attributeName="stop-color" values="#8B5CF6; #EC4899; #8B5CF6" dur="8s" repeatCount="indefinite" />
+      </stop>
+    </linearGradient>
+    
+    <!-- Filtros para glow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" fill="#151823" rx="8">
+    <animate attributeName="opacity" values="0.95;1;0.95" dur="10s" repeatCount="indefinite" />
+  </rect>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="200" height="500" fill="#0F1218" rx="8" />
+  
+  <!-- Sidebar Logo -->
+  <rect x="30" y="30" width="140" height="40" rx="8" fill="url(#statsGradient)" opacity="0.8" />
+  <text x="55" y="55" font-family="Arial" font-size="16" font-weight="bold" fill="white">AgendaPRO</text>
+  
+  <!-- Sidebar Menu Items -->
+  <rect x="20" y="100" width="160" height="40" rx="6" fill="#1E293B" />
+  <text x="60" y="125" font-family="Arial" font-size="14" fill="white">Dashboard</text>
+  <circle cx="40" cy="120" r="6" fill="#2563EB">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
+  </circle>
+  
+  <rect x="20" y="150" width="160" height="40" rx="6" fill="transparent" />
+  <text x="60" y="175" font-family="Arial" font-size="14" fill="#94A3B8">Agenda</text>
+  <circle cx="40" cy="170" r="6" fill="#94A3B8" />
+  
+  <rect x="20" y="200" width="160" height="40" rx="6" fill="transparent" />
+  <text x="60" y="225" font-family="Arial" font-size="14" fill="#94A3B8">Clientes</text>
+  <circle cx="40" cy="220" r="6" fill="#94A3B8" />
+  
+  <rect x="20" y="250" width="160" height="40" rx="6" fill="transparent" />
+  <text x="60" y="275" font-family="Arial" font-size="14" fill="#94A3B8">Financeiro</text>
+  <circle cx="40" cy="270" r="6" fill="#94A3B8" />
+  
+  <rect x="20" y="300" width="160" height="40" rx="6" fill="transparent" />
+  <text x="60" y="325" font-family="Arial" font-size="14" fill="#94A3B8">Galeria</text>
+  <circle cx="40" cy="320" r="6" fill="#94A3B8" />
+  
+  <!-- Main Content Area -->
+  <!-- Header -->
+  <rect x="220" y="20" width="560" height="60" rx="8" fill="#1E293B" />
+  <text x="240" y="55" font-family="Arial" font-size="18" font-weight="bold" fill="white">Dashboard</text>
+  
+  <!-- User Profile -->
+  <circle cx="740" cy="50" r="20" fill="url(#statsGradient)">
+    <animate attributeName="r" values="20;22;20" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <text x="735" y="55" font-family="Arial" font-size="14" font-weight="bold" fill="white">JS</text>
+  
+  <!-- Stats Cards -->
+  <rect x="220" y="100" width="180" height="100" rx="8" fill="#1E293B">
+    <animate attributeName="fill" values="#1E293B;#202B3D;#1E293B" dur="8s" repeatCount="indefinite" />
+  </rect>
+  <text x="240" y="130" font-family="Arial" font-size="14" fill="#94A3B8">Sessões este mês</text>
+  <text x="240" y="170" font-family="Arial" font-size="24" font-weight="bold" fill="white">
+    <animate attributeName="fill" values="white;#E2E8F0;white" dur="8s" repeatCount="indefinite" />
+    24
+  </text>
+  <rect x="350" y="150" width="30" height="30" rx="15" fill="#2563EB" opacity="0.2" />
+  <text x="358" y="170" font-family="Arial" font-size="14" fill="#2563EB">+8%</text>
+  
+  <rect x="420" y="100" width="180" height="100" rx="8" fill="#1E293B">
+    <animate attributeName="fill" values="#1E293B;#202B3D;#1E293B" dur="8s" repeatCount="indefinite" />
+    <animate attributeName="fill-opacity" values="1;0.9;1" dur="8s" repeatCount="indefinite" />
+  </rect>
+  <text x="440" y="130" font-family="Arial" font-size="14" fill="#94A3B8">Faturamento</text>
+  <text x="440" y="170" font-family="Arial" font-size="24" font-weight="bold" fill="white">
+    <animate attributeName="fill" values="white;#E2E8F0;white" dur="8s" repeatCount="indefinite" />
+    R$4.250
+  </text>
+  <rect x="570" y="150" width="30" height="30" rx="15" fill="#10B981" opacity="0.2" />
+  <text x="578" y="170" font-family="Arial" font-size="14" fill="#10B981">+12%</text>
+  
+  <rect x="620" y="100" width="180" height="100" rx="8" fill="#1E293B">
+    <animate attributeName="fill" values="#1E293B;#202B3D;#1E293B" dur="8s" repeatCount="indefinite" />
+    <animate attributeName="fill-opacity" values="1;0.9;1" dur="8s" repeatCount="indefinite" />
+  </rect>
+  <text x="640" y="130" font-family="Arial" font-size="14" fill="#94A3B8">Novos clientes</text>
+  <text x="640" y="170" font-family="Arial" font-size="24" font-weight="bold" fill="white">
+    <animate attributeName="fill" values="white;#E2E8F0;white" dur="8s" repeatCount="indefinite" />
+    8
+  </text>
+  <rect x="750" y="150" width="30" height="30" rx="15" fill="#2563EB" opacity="0.2" />
+  <text x="758" y="170" font-family="Arial" font-size="14" fill="#2563EB">+5%</text>
+  
+  <!-- Calendar -->
+  <rect x="220" y="220" width="360" height="260" rx="8" fill="#1E293B" />
+  <text x="240" y="250" font-family="Arial" font-size="16" font-weight="bold" fill="white">Agenda da Semana</text>
+  
+  <!-- Calendar Grid -->
+  <rect x="240" y="270" width="320" height="190" rx="4" fill="#151823" />
+  
+  <!-- Calendar Days -->
+  <text x="270" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Seg</text>
+  <text x="320" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Ter</text>
+  <text x="370" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Qua</text>
+  <text x="420" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Qui</text>
+  <text x="470" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Sex</text>
+  <text x="520" y="290" font-family="Arial" font-size="12" fill="#94A3B8">Sáb</text>
+  
+  <!-- Calendar Events -->
+  <rect x="250" y="310" width="70" height="30" rx="4" fill="#2563EB" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="0s" repeatCount="indefinite" />
+  </rect>
+  <text x="260" y="330" font-family="Arial" font-size="10" fill="white">10:00 - Sessão</text>
+  
+  <rect x="350" y="310" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="0.5s" repeatCount="indefinite" />
+  </rect>
+  <text x="360" y="330" font-family="Arial" font-size="10" fill="white">09:30 - Ensaio</text>
+  
+  <rect x="450" y="310" width="70" height="30" rx="4" fill="#10B981" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="1s" repeatCount="indefinite" />
+  </rect>
+  <text x="460" y="330" font-family="Arial" font-size="10" fill="white">15:00 - Evento</text>
+  
+  <rect x="250" y="350" width="70" height="30" rx="4" fill="#F59E0B" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="1.5s" repeatCount="indefinite" />
+  </rect>
+  <text x="260" y="370" font-family="Arial" font-size="10" fill="white">14:00 - Reunião</text>
+  
+  <rect x="450" y="350" width="70" height="30" rx="4" fill="#2563EB" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="2s" repeatCount="indefinite" />
+  </rect>
+  <text x="460" y="370" font-family="Arial" font-size="10" fill="white">11:30 - Sessão</text>
+  
+  <rect x="250" y="390" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="2.5s" repeatCount="indefinite" />
+  </rect>
+  <text x="260" y="410" font-family="Arial" font-size="10" fill="white">16:00 - Ensaio</text>
+  
+  <rect x="350" y="390" width="70" height="30" rx="4" fill="#10B981" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" begin="3s" repeatCount="indefinite" />
+  </rect>
+  <text x="360" y="410" font-family="Arial" font-size="10" fill="white">13:00 - Evento</text>
+  
+  <!-- Activity Feed -->
+  <rect x="600" y="220" width="180" height="260" rx="8" fill="#1E293B" />
+  <text x="620" y="250" font-family="Arial" font-size="16" font-weight="bold" fill="white">Atividades Recentes</text>
+  
+  <!-- Activity Items -->
+  <circle cx="630" cy="290" r="10" fill="#2563EB">
+    <animate attributeName="r" values="10;11;10" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <line x1="630" y1="300" x2="630" y2="330" stroke="#2563EB" stroke-width="2" stroke-dasharray="2">
+    <animate attributeName="stroke-dashoffset" values="6;0;6" dur="4s" repeatCount="indefinite" />
+  </line>
+  <text x="650" y="290" font-family="Arial" font-size="12" fill="white">Novo agendamento</text>
+  <text x="650" y="305" font-family="Arial" font-size="10" fill="#94A3B8">Maria Silva - 15:30</text>
+  
+  <circle cx="630" cy="340" r="10" fill="#10B981">
+    <animate attributeName="r" values="10;11;10" dur="3s" repeatCount="indefinite" begin="1s" />
+  </circle>
+  <line x1="630" y1="350" x2="630" y2="380" stroke="#10B981" stroke-width="2" stroke-dasharray="2">
+    <animate attributeName="stroke-dashoffset" values="6;0;6" dur="4s" repeatCount="indefinite" begin="1s" />
+  </line>
+  <text x="650" y="340" font-family="Arial" font-size="12" fill="white">Pagamento recebido</text>
+  <text x="650" y="355" font-family="Arial" font-size="10" fill="#94A3B8">R$350 - João Santos</text>
+  
+  <circle cx="630" cy="390" r="10" fill="#F59E0B">
+    <animate attributeName="r" values="10;11;10" dur="3s" repeatCount="indefinite" begin="2s" />
+  </circle>
+  <line x1="630" y1="400" x2="630" y2="430" stroke="#F59E0B" stroke-width="2" stroke-dasharray="2">
+    <animate attributeName="stroke-dashoffset" values="6;0;6" dur="4s" repeatCount="indefinite" begin="2s" />
+  </line>
+  <text x="650" y="390" font-family="Arial" font-size="12" fill="white">Evento alterado</text>
+  <text x="650" y="405" font-family="Arial" font-size="10" fill="#94A3B8">Casamento - 25/07</text>
+  
+  <circle cx="630" cy="440" r="10" fill="#8B5CF6">
+    <animate attributeName="r" values="10;11;10" dur="3s" repeatCount="indefinite" begin="3s" />
+  </circle>
+  <text x="650" y="440" font-family="Arial" font-size="12" fill="white">Galeria enviada</text>
+  <text x="650" y="455" font-family="Arial" font-size="10" fill="#94A3B8">Aniversário - 32 fotos</text>
+  
+  <!-- Cursor piscando -->
+  <rect x="260" y="440" width="8" height="2" fill="white">
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" />
+  </rect>
+  
+  <!-- Notificação pulsante -->
+  <circle cx="720" cy="40" r="5" fill="#EF4444">
+    <animate attributeName="r" values="5;6;5" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg> 

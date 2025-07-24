@@ -1,22 +1,62 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
+import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  eventDates?: {
+    date: Date;
+    color?: string;
+  }[];
+};
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  eventDates = [],
   ...props
 }: CalendarProps) {
+  // Função para verificar se um dia tem eventos
+  const hasDayEvent = (day: Date) => {
+    return eventDates.find(eventDate => 
+      format(eventDate.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    );
+  };
+
+  // Função para personalizar a renderização dos dias
+  const modifiersStyles: Record<string, React.CSSProperties> = {};
+  
+  // Criar um modificador para cada dia com evento
+  const modifiers: Record<string, (date: Date) => boolean> = {};
+  eventDates.forEach((eventDate, index) => {
+    const key = `event-day-${index}`;
+    modifiers[key] = (date) => 
+      format(eventDate.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+    
+    // Definir o estilo para este modificador com ajustes para mobile
+    modifiersStyles[key] = {
+      color: 'white',
+      backgroundColor: eventDate.color || '#3c83f6',
+      borderRadius: '9999px', // Usando 9999px para garantir forma circular perfeita
+      width: '32px', // Largura fixa
+      height: '32px', // Altura fixa
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: '0 auto',
+    };
+  });
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      modifiers={modifiers}
+      modifiersStyles={modifiersStyles}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -37,7 +77,7 @@ function Calendar({
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-8 w-8 p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
         day_selected:

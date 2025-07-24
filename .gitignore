@@ -22,3 +22,30 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Performance monitoring
+lighthouse-reports/
+lighthouse-server-storage/
+performance-reports/
+performance-metrics/
+
+# Supabase
+.supabase/
+
+# Vercel
+.vercel
+.vercel/*
+*.vercel.app
+
+# Arquivos de segurança
+security-audit-*.json
+security-config-*.json
+*.pem
+*.key
+*.crt
+.env.staging

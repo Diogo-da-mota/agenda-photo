@@ -1,0 +1,186 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo do Dashboard -->
+  <rect width="1200" height="800" fill="#0f1729" />
+  
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="240" height="800" fill="#1E293B" />
+  
+  <!-- Logo -->
+  <rect x="25" y="25" width="190" height="50" rx="8" fill="#3B82F6" />
+  <text x="45" y="55" font-family="Arial" font-size="18" font-weight="bold" fill="white">AgendaPRO</text>
+  <circle cx="180" cy="50" r="8" fill="#60A5FA" />
+  
+  <!-- Menu -->
+  <rect x="20" y="120" width="200" height="50" rx="8" fill="#2563EB" />
+  <text x="60" y="150" font-family="Arial" font-size="16" fill="white">Dashboard</text>
+  <rect x="25" y="135" width="24" height="24" rx="4" fill="#60A5FA" opacity="0.5" />
+  <path d="M30 135 L45 135 L45 150 L30 150 Z" fill="white" />
+  
+  <rect x="20" y="180" width="200" height="50" rx="8" fill="#1E293B" />
+  <text x="60" y="210" font-family="Arial" font-size="16" fill="#94A3B8">Agendamentos</text>
+  <rect x="25" y="195" width="24" height="24" rx="4" fill="#94A3B8" opacity="0.3" />
+  <circle cx="37" cy="207" r="8" fill="#94A3B8" opacity="0.8" />
+  
+  <rect x="20" y="240" width="200" height="50" rx="8" fill="#1E293B" />
+  <text x="60" y="270" font-family="Arial" font-size="16" fill="#94A3B8">Clientes</text>
+  <rect x="25" y="255" width="24" height="24" rx="4" fill="#94A3B8" opacity="0.3" />
+  <path d="M30 260 C34 255, 40 255, 44 260 C45 268, 29 268, 30 260" fill="#94A3B8" />
+  <circle cx="37" cy="256" r="4" fill="#94A3B8" />
+  
+  <rect x="20" y="300" width="200" height="50" rx="8" fill="#1E293B" />
+  <text x="60" y="330" font-family="Arial" font-size="16" fill="#94A3B8">Financeiro</text>
+  <rect x="25" y="315" width="24" height="24" rx="4" fill="#94A3B8" opacity="0.3" />
+  <path d="M30 325 L44 325 M37 315 L37 339" stroke="#94A3B8" stroke-width="2" />
+  
+  <rect x="20" y="360" width="200" height="50" rx="8" fill="#1E293B" />
+  <text x="60" y="390" font-family="Arial" font-size="16" fill="#94A3B8">Galeria</text>
+  <rect x="25" y="375" width="24" height="24" rx="4" fill="#94A3B8" opacity="0.3" />
+  <rect x="30" y="380" width="6" height="6" fill="#94A3B8" />
+  <rect x="38" y="380" width="6" height="6" fill="#94A3B8" />
+  <rect x="30" y="388" width="6" height="6" fill="#94A3B8" />
+  <rect x="38" y="388" width="6" height="6" fill="#94A3B8" />
+  
+  <rect x="20" y="420" width="200" height="50" rx="8" fill="#1E293B" />
+  <text x="60" y="450" font-family="Arial" font-size="16" fill="#94A3B8">Configurações</text>
+  <rect x="25" y="435" width="24" height="24" rx="4" fill="#94A3B8" opacity="0.3" />
+  <circle cx="37" cy="447" r="6" stroke="#94A3B8" stroke-width="2" fill="none" />
+  <path d="M41 443 L44 440" stroke="#94A3B8" stroke-width="2" />
+  
+  <!-- Avatar do Usuário na Sidebar -->
+  <circle cx="60" cy="700" r="25" fill="#3B82F6" />
+  <text x="50" y="706" font-family="Arial" font-size="18" font-weight="bold" fill="white">JS</text>
+  <text x="100" y="695" font-family="Arial" font-size="16" fill="white">João Silva</text>
+  <text x="100" y="715" font-family="Arial" font-size="14" fill="#94A3B8">Fotógrafo</text>
+  
+  <!-- Header Principal -->
+  <rect x="240" y="0" width="960" height="80" fill="#1E293B" />
+  <text x="280" y="45" font-family="Arial" font-size="24" font-weight="bold" fill="white">Dashboard</text>
+  
+  <!-- Botões de Ação no Header -->
+  <rect x="880" y="20" width="100" height="40" rx="20" fill="#2563EB" />
+  <text x="900" y="45" font-family="Arial" font-size="14" fill="white">+ Novo</text>
+  
+  <circle cx="1020" cy="40" r="20" fill="#334155" />
+  <path d="M1013 40 L1027 40 M1020 33 L1020 47" stroke="white" stroke-width="2" />
+  
+  <circle cx="1070" cy="40" r="20" fill="#334155" />
+  <path d="M1065 36 C1065 36, 1068 34, 1070 34 C1072 34, 1075 36, 1075 36 M1063 45 L1077 45" stroke="white" stroke-width="2" />
+  
+  <circle cx="1120" cy="40" r="20" fill="#4F46E5" />
+  <text x="1115" y="45" font-family="Arial" font-size="14" font-weight="bold" fill="white">JS</text>
+  
+  <!-- Conteúdo Principal -->
+  <!-- Cards de Estatísticas -->
+  <rect x="280" y="120" width="240" height="120" rx="12" fill="#1E293B" />
+  <text x="310" y="150" font-family="Arial" font-size="16" fill="#94A3B8">Sessões este mês</text>
+  <text x="310" y="190" font-family="Arial" font-size="32" font-weight="bold" fill="white">27</text>
+  <rect x="220" y="130" width="10" height="100" rx="5" fill="#3B82F6" opacity="0.2" />
+  <rect x="220" y="180" width="10" height="50" rx="5" fill="#3B82F6" />
+  <text x="430" y="190" font-family="Arial" font-size="14" fill="#22C55E">+12%</text>
+  
+  <rect x="550" y="120" width="240" height="120" rx="12" fill="#1E293B" />
+  <text x="580" y="150" font-family="Arial" font-size="16" fill="#94A3B8">Faturamento</text>
+  <text x="580" y="190" font-family="Arial" font-size="32" font-weight="bold" fill="white">R$5.840</text>
+  <rect x="490" y="130" width="10" height="100" rx="5" fill="#22C55E" opacity="0.2" />
+  <rect x="490" y="160" width="10" height="70" rx="5" fill="#22C55E" />
+  <text x="700" y="190" font-family="Arial" font-size="14" fill="#22C55E">+18%</text>
+  
+  <rect x="820" y="120" width="240" height="120" rx="12" fill="#1E293B" />
+  <text x="850" y="150" font-family="Arial" font-size="16" fill="#94A3B8">Novos clientes</text>
+  <text x="850" y="190" font-family="Arial" font-size="32" font-weight="bold" fill="white">8</text>
+  <rect x="760" y="130" width="10" height="100" rx="5" fill="#F59E0B" opacity="0.2" />
+  <rect x="760" y="190" width="10" height="40" rx="5" fill="#F59E0B" />
+  <text x="970" y="190" font-family="Arial" font-size="14" fill="#F59E0B">+5%</text>
+  
+  <!-- Calendário -->
+  <rect x="280" y="280" width="500" height="400" rx="12" fill="#1E293B" />
+  <text x="310" y="320" font-family="Arial" font-size="18" font-weight="bold" fill="white">Agenda da Semana</text>
+  
+  <!-- Tabs do Calendário -->
+  <rect x="310" y="340" width="80" height="30" rx="15" fill="#2563EB" />
+  <text x="330" y="360" font-family="Arial" font-size="14" fill="white">Dia</text>
+  
+  <rect x="400" y="340" width="80" height="30" rx="15" fill="#334155" />
+  <text x="420" y="360" font-family="Arial" font-size="14" fill="#94A3B8">Semana</text>
+  
+  <rect x="490" y="340" width="80" height="30" rx="15" fill="#334155" />
+  <text x="510" y="360" font-family="Arial" font-size="14" fill="#94A3B8">Mês</text>
+  
+  <rect x="580" y="340" width="80" height="30" rx="15" fill="#334155" />
+  <text x="595" y="360" font-family="Arial" font-size="14" fill="#94A3B8">Lista</text>
+  
+  <!-- Grade do Calendário -->
+  <rect x="310" y="390" width="440" height="260" rx="8" fill="#0f1729" />
+  
+  <!-- Horas -->
+  <text x="320" y="410" font-family="Arial" font-size="12" fill="#94A3B8">08:00</text>
+  <text x="320" y="460" font-family="Arial" font-size="12" fill="#94A3B8">10:00</text>
+  <text x="320" y="510" font-family="Arial" font-size="12" fill="#94A3B8">12:00</text>
+  <text x="320" y="560" font-family="Arial" font-size="12" fill="#94A3B8">14:00</text>
+  <text x="320" y="610" font-family="Arial" font-size="12" fill="#94A3B8">16:00</text>
+  
+  <!-- Eventos do Calendário -->
+  <rect x="370" y="420" width="150" height="60" rx="4" fill="#3B82F6" opacity="0.9" />
+  <text x="380" y="440" font-family="Arial" font-size="12" fill="white">Ensaio de Casamento</text>
+  <text x="380" y="460" font-family="Arial" font-size="12" fill="#DBEAFE">Maria e João</text>
+  
+  <rect x="540" y="500" width="150" height="60" rx="4" fill="#8B5CF6" opacity="0.9" />
+  <text x="550" y="520" font-family="Arial" font-size="12" fill="white">Book Profissional</text>
+  <text x="550" y="540" font-family="Arial" font-size="12" fill="#EDE9FE">Ana Silva</text>
+  
+  <rect x="370" y="580" width="150" height="60" rx="4" fill="#22C55E" opacity="0.9" />
+  <text x="380" y="600" font-family="Arial" font-size="12" fill="white">Aniversário 15 Anos</text>
+  <text x="380" y="620" font-family="Arial" font-size="12" fill="#DCFCE7">Julia Martins</text>
+  
+  <!-- Linha de Tempo Atual -->
+  <line x1="310" y1="510" x2="750" y2="510" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4" />
+  <circle cx="310" cy="510" r="4" fill="#F43F5E" />
+  
+  <!-- Atividades Recentes -->
+  <rect x="810" y="280" width="300" height="400" rx="12" fill="#1E293B" />
+  <text x="840" y="320" font-family="Arial" font-size="18" font-weight="bold" fill="white">Atividades Recentes</text>
+  
+  <!-- Lista de Atividades -->
+  <circle cx="840" cy="360" r="6" fill="#3B82F6" />
+  <line x1="840" y1="366" x2="840" y2="400" stroke="#3B82F6" stroke-width="2" stroke-dasharray="2" />
+  <text x="860" y="360" font-family="Arial" font-size="14" fill="white">Novo agendamento</text>
+  <text x="860" y="380" font-family="Arial" font-size="12" fill="#94A3B8">Maria Silva - Ensaio de Casamento</text>
+  <text x="860" y="395" font-family="Arial" font-size="12" fill="#64748B">Hoje, 09:45</text>
+  
+  <circle cx="840" cy="420" r="6" fill="#22C55E" />
+  <line x1="840" y1="426" x2="840" y2="460" stroke="#22C55E" stroke-width="2" stroke-dasharray="2" />
+  <text x="860" y="420" font-family="Arial" font-size="14" fill="white">Pagamento recebido</text>
+  <text x="860" y="440" font-family="Arial" font-size="12" fill="#94A3B8">R$850,00 - Book Profissional</text>
+  <text x="860" y="455" font-family="Arial" font-size="12" fill="#64748B">Hoje, 11:20</text>
+  
+  <circle cx="840" cy="480" r="6" fill="#F59E0B" />
+  <line x1="840" y1="486" x2="840" y2="520" stroke="#F59E0B" stroke-width="2" stroke-dasharray="2" />
+  <text x="860" y="480" font-family="Arial" font-size="14" fill="white">Galeria enviada</text>
+  <text x="860" y="500" font-family="Arial" font-size="12" fill="#94A3B8">Ensaio Família Costa - 76 fotos</text>
+  <text x="860" y="515" font-family="Arial" font-size="12" fill="#64748B">Ontem, 18:30</text>
+  
+  <circle cx="840" cy="540" r="6" fill="#8B5CF6" />
+  <line x1="840" y1="546" x2="840" y2="580" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="2" />
+  <text x="860" y="540" font-family="Arial" font-size="14" fill="white">Contrato assinado</text>
+  <text x="860" y="560" font-family="Arial" font-size="12" fill="#94A3B8">Aniversário 15 Anos - Julia Martins</text>
+  <text x="860" y="575" font-family="Arial" font-size="12" fill="#64748B">Ontem, 14:15</text>
+  
+  <circle cx="840" cy="600" r="6" fill="#EC4899" />
+  <text x="860" y="600" font-family="Arial" font-size="14" fill="white">Lembrete</text>
+  <text x="860" y="620" font-family="Arial" font-size="12" fill="#94A3B8">Contatar clientes inativos</text>
+  <text x="860" y="635" font-family="Arial" font-size="12" fill="#64748B">Amanhã, 10:00</text>
+  
+  <!-- Tarefas Pendentes -->
+  <rect x="280" y="700" width="830" height="80" rx="12" fill="#1E293B" />
+  <text x="310" y="730" font-family="Arial" font-size="18" font-weight="bold" fill="white">Tarefas Pendentes</text>
+  
+  <!-- Tarefas -->
+  <rect x="310" y="745" width="20" height="20" rx="4" stroke="#94A3B8" stroke-width="2" fill="none" />
+  <text x="340" y="760" font-family="Arial" font-size="14" fill="#94A3B8">Confirmar horário com Maria e João</text>
+  
+  <rect x="550" y="745" width="20" height="20" rx="4" stroke="#94A3B8" stroke-width="2" fill="none" />
+  <text x="580" y="760" font-family="Arial" font-size="14" fill="#94A3B8">Enviar contrato para Ana Silva</text>
+  
+  <rect x="790" y="745" width="20" height="20" rx="4" stroke="#94A3B8" stroke-width="2" fill="none" />
+  <text x="820" y="760" font-family="Arial" font-size="14" fill="#94A3B8">Editar fotos do evento de ontem</text>
+</svg> 

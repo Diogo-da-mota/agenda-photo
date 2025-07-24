@@ -1,69 +1,78 @@
-# Welcome to your Lovable project
+# 📸 AgendaPRO: O Seu Estúdio, Organizado.
 
-## Project info
+**Cansado de planilhas confusas e de perder tempo com tarefas administrativas?**
 
-**URL**: https://lovable.dev/projects/4323fde6-44e3-42eb-81d7-71d7fabe28ce
+O AgendaPRO é a solução definitiva para fotógrafos que desejam focar no que realmente importa: **a sua arte.**
 
-## How can I edit this code?
+Transforme a maneira como você gerencia seu negócio com uma plataforma inteligente, intuitiva e projetada exclusivamente para as suas necessidades.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+### ✨ **Por que escolher o AgendaPRO?**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4323fde6-44e3-42eb-81d7-71d7fabe28ce) and start prompting.
+✅ **Tenha Tudo em um Só Lugar:** Agenda, clientes, portfólio e finanças. Diga adeus à desorganização.
 
-Changes made via Lovable will be committed automatically to this repo.
+✅ **Economize Tempo Precioso:** Automatize lembretes, pagamentos e a organização do seu portfólio. Mais tempo para você e para seus clientes.
 
-**Use your preferred IDE**
+✅ **Apresente-se com Profissionalismo:** Crie um portfólio deslumbrante e compartilhe com o mundo de forma fácil e elegante.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+✅ **Nunca Mais Perca um Prazo:** Com a nossa agenda inteligente, todos os seus compromissos e entregas ficam visíveis e organizados.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+### 🌟 **Funcionalidades Pensadas para Você:**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+*   **🗓️ Agenda Inteligente e Visual:**
+    *   Visualize todos os seus eventos por mês, semana ou dia.
+    *   Cadastre novos ensaios em segundos, com informações de cliente, local e pagamentos.
+    *   Mude o status de um evento com um clique: `Agendado` ➔ `Confirmado` ➔ `Concluído`.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+*   **🖼️ Portfólio de Alto Impacto:**
+    *   Faça o upload das suas melhores fotos e crie uma galeria incrível.
+    *   Organize seus trabalhos por categorias (Casamentos, Ensaios, etc.) e tags.
+    *   Compartilhe seu portfólio com um link exclusivo e profissional.
 
-# Step 3: Install the necessary dependencies.
-npm i
+*   **👥 Gestão de Clientes Simplificada:**
+    *   Mantenha um cadastro completo e acessível de todos os seus clientes.
+    *   Acesse o histórico de eventos e pagamentos de cada cliente rapidamente.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+*   **💰 Controle Financeiro Básico:**
+    *   Registre os pagamentos de entrada e os valores restantes para cada trabalho.
+    - Gere recibos de forma simplificada.
 
-**Edit a file directly in GitHub**
+*   **🔐 Segurança Total:**
+    *   Seus dados são apenas seus. A plataforma garante total privacidade e segurança para suas informações.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+### **Para quem é o AgendaPRO?**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+O AgendaPRO é perfeito para **fotógrafos autônomos, estúdios de fotografia e criadores de conteúdo visual** que buscam:
 
-## What technologies are used for this project?
+-   Organizar a agenda de forma eficiente.
+-   Otimizar o fluxo de trabalho administrativo.
+-   Apresentar seu portfólio de maneira profissional e atraente.
+-   Ter mais controle sobre seu negócio para poder crescer.
 
-This project is built with .
+**AgendaPRO - Menos administração, mais fotografia.**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🚀 Tecnologias Utilizadas
 
-## How can I deploy this project?
+- **Frontend**: React, TypeScript, Vite, TailwindCSS
+- **Componentes UI**: shadcn/ui
+- **Backend & Banco de Dados**: Supabase (PostgreSQL + API RESTful)
+- **Autenticação**: Supabase Auth
+- **Automação de Upload**: N8N para integração com Google Drive
 
-Simply open [Lovable](https://lovable.dev/projects/4323fde6-44e3-42eb-81d7-71d7fabe28ce) and click on Share -> Publish.
 
-## I want to use a custom domain - is that possible?
+## 📚 Documentação Técnica
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Para mais detalhes sobre a arquitetura e implementação do projeto, consulte nossa documentação:
+
+- [Integração Agenda-Dashboard](docs/DINAMICA-AGENDA-DASHBOARD.md)
+- [Implementação Supabase](docs/SUPABASE-SITE.md)
+- [Multiusuário com Supabase](docs/MULTIUSUARIO-SUPABASE.md)
+- [Configuração CORS N8N](docs/CORS-N8N-Config.md)
+
+---
+*Este projeto foi desenvolvido com ❤️ e muito café!*

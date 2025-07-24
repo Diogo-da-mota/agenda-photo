@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_9c444bb557f5a3d5ae096fb30ad5a1e25aae4e03"
+      ],
+      "description": "Servidor MCP para interagir com o Supabase."
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "@upstash/context7-mcp"
+      ],
+      "description": "Interage com o Context7 para obter a última documentação das tecnologias e frameworks utilizadas no projeto."
+    },
+    "playwright-mcp-server": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@executeautomation/playwright-mcp-server",
+        "--key",
+        "dca06788-f0f1-4d56-a755-ae37442af098"
+      ],
+      "description": "Servidor MCP para automação com Playwright."
+    },
+    "@21st-dev/magic": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@21st-dev/magic@latest",
+        "API_KEY=6db8e29f923380fdc206171eb9ceaced59c2960718d15c9c8929ef7507bbb951"
+      ],
+      "description": "Servidor MCP para interação com a API Magic."
+    },
+    "Navegador": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@agentdeskai/browser-tools-mcp@1.2.0"
+      ],
+      "description": "Servidor MCP para ferramentas do navegador."
+    }
+  }
+}

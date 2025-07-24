@@ -1,0 +1,117 @@
+/* Estilos para o componente Agenda */
+
+/* Estilos para o calendário com eventos */
+.event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 2px;
+}
+
+/* Cores de status para os eventos */
+.status-upcoming {
+  background-color: #f59e0b;
+  color: #fff;
+}
+
+.status-confirmed {
+  background-color: #10b981;
+  color: #fff;
+}
+
+.status-pending {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.status-completed {
+  background-color: #8b5cf6;
+  color: #fff;
+}
+
+.status-canceled {
+  background-color: #6b7280;
+  color: #fff;
+}
+
+.status-past {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+/* Animações para os botões de ação */
+.action-button {
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+}
+
+.action-button:active {
+  transform: scale(0.95);
+}
+
+/* Animação de carregamento */
+.spin-loader {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-container {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Calendário responsivo */
+  .mobile-calendar {
+    font-size: 0.875rem;
+  }
+  
+  .mobile-calendar .rdp-caption {
+    font-size: 0.875rem;
+  }
+  
+  .mobile-calendar .rdp-day {
+    width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.75rem;
+  }
+  
+  .mobile-calendar .rdp-head_cell {
+    width: 2rem !important;
+    font-size: 0.75rem;
+  }
+  
+  /* Filtros de status responsivos */
+  .status-filters {
+    display: none !important;
+  }
+  
+  /* Título centralizado em mobile */
+  .card-title-mobile {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Ações do evento card */
+  .event-card-actions .action-button {
+    justify-content: center;
+  }
+}

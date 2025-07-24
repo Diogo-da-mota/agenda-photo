@@ -1,25 +1,70 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { CSRFProvider } from "@/components/security";
+import AppRoutes from "./AppRoutes";
+import { useState } from 'react';
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Contact from './pages/Contact';
-import Login from './pages/Login';
-import NotFound from './pages/NotFound';
-import Admin from './pages/Admin';
-import Survey from './pages/Survey';
-import TestSupabase from './pages/TestSupabase';
+import OfflineIndicator from '@/components/ui/OfflineIndicator';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { createQueryClient } from "./lib/react-query-config";
+import { useIsMobile } from "./hooks/use-mobile";
+import { useEntregaFotosAutomatico } from "@/hooks/useEntregaFotosAutomatico";
 
-function App() {
+// A criação do client foi movida para dentro do componente App
+// para usar o hook useIsMobile e aplicar a lógica de cache dinâmica.
+
+// Componente interno simplificado
+const AppWithRoutes = () => {
+  // Inicializar processos automáticos de entrega de fotos
+  useEntregaFotosAutomatico({
+    intervaloMinutos: 60, // Executa a cada 1 hora
+    executarAoIniciar: true,
+    habilitado: true
+  });
+
+  return <AppRoutes />;
+};
+
+const App = () => {
+  const isMobile = useIsMobile();
+  
+  // Usamos useState para garantir que a instância do QueryClient seja criada
+  // apenas uma vez durante o ciclo de vida do componente.
+  const [queryClient] = useState(() => createQueryClient(isMobile));
+
+  // Log apenas em desenvolvimento
+  if (import.meta.env.MODE === 'development') {
+    console.log('App inicializando...', { isMobile });
+  }
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/survey" element={<Survey />} />
-        <Route path="/test-supabase" element={<TestSupabase />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <BrowserRouter future={{ 
+            v7_startTransition: true,
+            v7_relativeSplatPath: true 
+          }}>
+            <CSRFProvider>
+              <AuthProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <OfflineIndicator />
+                  <AppWithRoutes />
+                </TooltipProvider>
+              </AuthProvider>
+            </CSRFProvider>
+          </BrowserRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App;

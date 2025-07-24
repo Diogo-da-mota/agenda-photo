@@ -1,0 +1,1 @@
+{"query":"select * from financeiro_transacoes where clientename = 'Diogo gonçalves da mota'"}
