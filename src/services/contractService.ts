@@ -1,12 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { createClient, User } from "@supabase/supabase-js";
 import { registrarContratoCriado } from './atividadeService';
-import { envConfig } from '@/lib/env-config';
 
 // Cliente Supabase para consultas públicas (sem RLS)
 const publicSupabase = createClient(
-  envConfig.supabaseUrl,
-  envConfig.supabaseAnonKey,
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
   {
     auth: {
       persistSession: false,
@@ -14,7 +13,7 @@ const publicSupabase = createClient(
     },
     global: {
       headers: {
-        'Authorization': `Bearer ${envConfig.supabaseAnonKey}`
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
       }
     }
   }
