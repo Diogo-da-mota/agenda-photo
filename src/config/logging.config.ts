@@ -7,22 +7,22 @@ import { EnvironmentConfig } from "@/types/logging";
  */
 export const loggingConfig: EnvironmentConfig = {
   development: {
-    level: 'debug',
-    maskData: false,
+    level: 'warn', // Reduzido de 'debug' para 'warn' para menos logs
+    maskData: true, // Ativado mascaramento mesmo em desenvolvimento
     disableLogs: false,
   },
   staging: {
-    level: 'info',
+    level: 'warn', // Reduzido de 'info' para 'warn'
     maskData: true,
     disableLogs: false,
   },
   production: {
-    level: 'warn',
+    level: 'error', // Reduzido de 'warn' para 'error'
     maskData: true,
     disableLogs: false,
   },
   default: {
-    level: 'info',
+    level: 'warn', // Reduzido de 'info' para 'warn'
     maskData: true,
     disableLogs: false,
   },

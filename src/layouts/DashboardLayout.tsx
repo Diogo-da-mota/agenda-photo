@@ -13,7 +13,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { sidebarOpen, toggleSidebar } = useDashboardLayout();
 
   return (
-    <div className="flex h-screen bg-[#0B0F17] text-white overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#0B0F17] text-gray-900 dark:text-white overflow-hidden">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       

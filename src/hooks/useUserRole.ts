@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useUserRole = () => {
   const [role, setRole] = useState<string>('usuario');
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const determineUserRole = async () => {
+    const determineUserRole = () => {
       setLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
         if (!user) {
           setRole('usuario');
           return;
@@ -34,7 +34,7 @@ export const useUserRole = () => {
     };
 
     determineUserRole();
-  }, []);
+  }, [user]);
 
   const isAdmin = role === 'admin';
 

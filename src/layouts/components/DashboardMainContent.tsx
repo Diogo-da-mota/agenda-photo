@@ -20,7 +20,7 @@ const DashboardMainContent: React.FC<DashboardMainContentProps> = ({
       <DashboardHeader toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 bg-[#0B0F17]">
+      <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 bg-gray-50 dark:bg-[#0B0F17]">
         <div className="w-full h-full max-w-full">
           {children || <Outlet />}
         </div>

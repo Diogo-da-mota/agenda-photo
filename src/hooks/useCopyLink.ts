@@ -1,14 +1,36 @@
 import { useToast } from '@/hooks/use-toast';
+import { generateContractUrl } from '@/utils/slugify';
+
+interface ContractUrlData {
+  id_contrato: string;
+  id_amigavel: number;
+  nome_cliente: string;
+}
 
 /**
  * Hook personalizado para copiar links de contratos
  * Centraliza a lógica de cópia e notificação, seguindo o princípio DRY
+ * Suporta tanto o novo formato quanto o formato legado
  */
 export const useCopyLink = () => {
   const { toast } = useToast();
 
-  const copyContractLink = (contractId: string | number) => {
-    const link = `${window.location.origin}/contrato/${contractId}`;
+  // Sobrecarga para suportar ambos os formatos
+  function copyContractLink(contractData: ContractUrlData): void;
+  function copyContractLink(contractId: string | number, contractTitle?: string): void;
+  function copyContractLink(
+    contractDataOrId: ContractUrlData | string | number, 
+    contractTitle?: string
+  ): void {
+    let link: string;
+    
+    if (typeof contractDataOrId === 'object' && contractDataOrId.id_amigavel && contractDataOrId.nome_cliente) {
+      // Usar novo formato com dados completos
+      link = `${window.location.origin}${generateContractUrl(contractDataOrId)}`;
+    } else {
+      // Fallback para formato antigo
+      link = `${window.location.origin}${generateContractUrl(contractDataOrId as string | number, contractTitle)}`;
+    }
     
     navigator.clipboard.writeText(link).then(() => {
       toast({
@@ -23,7 +45,7 @@ export const useCopyLink = () => {
         variant: "destructive",
       });
     });
-  };
+  }
 
   return { copyContractLink };
 };

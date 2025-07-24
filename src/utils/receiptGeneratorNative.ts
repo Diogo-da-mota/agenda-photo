@@ -1,3 +1,5 @@
+import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from './emojiUtils';
+
 /**
  * Versão alternativa do gerador de recibo usando apenas APIs nativas do navegador
  * Não requer dependências externas como html2canvas ou jspdf
@@ -849,12 +851,17 @@ export const openWhatsAppWithReceipt = (
   // Garantir que tenha o código do país (55 para Brasil)
   const numeroCompleto = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
   
-  const mensagem = encodeURIComponent(
+  const mensagemTexto = 
     `Olá ${clienteNome}! 😊\n\n` +
     `Aqui está o recibo do seu ${eventoTipo}.\n\n` +
     `Obrigado por confiar em nossos serviços! 🎉\n\n` +
-    `*Bright Spark* - Transformando momentos em memórias especiais ✨`
-  );
+    `*Bright Spark* - Transformando momentos em memórias especiais ✨`;
+
+  // Processar emojis para garantir compatibilidade com WhatsApp
+  const mensagemProcessada = processEmojisForWhatsApp(mensagemTexto);
+  
+  // Codificar mensagem preservando emojis
+  const mensagem = encodeTextWithEmojisForURL(mensagemProcessada);
 
   // URL do WhatsApp Web/App
   const whatsappUrl = `https://wa.me/${numeroCompleto}?text=${mensagem}`;

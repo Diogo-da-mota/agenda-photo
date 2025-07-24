@@ -15,7 +15,7 @@ export const useSecurity = () => {
     if (typeof input !== 'string') return '';
     
     return input
-      .replace(/[<>\"'&]/g, '')
+      .replace(/[<>"'&]/g, '')
       .trim()
       .substring(0, 1000); // Limite de caracteres
   }, []);

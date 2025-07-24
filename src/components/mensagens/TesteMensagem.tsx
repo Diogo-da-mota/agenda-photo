@@ -11,18 +11,18 @@ export const TesteMensagem: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // Exemplo com \n (formato incorreto)
-  const mensagemTesteIncorreta = `Olá {{nome_cliente}}!\n\nConfirmamos o recebimento do seu pagamento! ✅\n\n📋 Detalhes do pagamento:\n💰 Valor: R$ {{valor_entrada}}\n📅 Data: {{data_atual}}\n📋 Referente: {{titulo_evento}}\n🧾 Comprovante: #{{data_atual}}\n\nObrigado pela confiança!\n\n{{nome_empresa}}\n{{telefone_empresa}}`;
+  const mensagemTesteIncorreta = `Olá {{nome_cliente}}!\n\nConfirmamos o recebimento do seu pagamento! \u2705\n\n\u{1F4CB} Detalhes do pagamento:\n\u{1F4B0} Valor: R$ {{valor_entrada}}\n\u{1F4C5} Data: {{data_atual}}\n\u{1F4CB} Referente: {{titulo_evento}}\n\u{1F9FE} Comprovante: #{{data_atual}}\n\nObrigado pela confiança!\n\n{{nome_empresa}}\n{{telefone_empresa}}`;
 
   // Exemplo com quebras de linha reais (formato correto)
   const mensagemTesteCorreta = `Olá {nome_cliente}!
 
-Confirmamos o recebimento do seu pagamento! ✅
+Confirmamos o recebimento do seu pagamento! \u2705
 
-📋 Detalhes do pagamento:
-💰 Valor: R$ {valor_entrada}
-📅 Data: {data_atual}
-📋 Referente: {titulo_evento}
-🧾 Comprovante: #{data_atual}
+\u{1F4CB} Detalhes do pagamento:
+\u{1F4B0} Valor: R$ {valor_entrada}
+\u{1F4C5} Data: {data_atual}
+\u{1F4CB} Referente: {titulo_evento}
+\u{1F9FE} Comprovante: {data_atual}
 
 Obrigado pela confiança!
 
@@ -32,13 +32,13 @@ Obrigado pela confiança!
   // Exemplo com chaves duplas sem \n (para teste de conversão)
   const mensagemTesteChavesDuplas = `Olá {{nome_cliente}}!
 
-Confirmamos o recebimento do seu pagamento! ✅
+Confirmamos o recebimento do seu pagamento! \u2705
 
-📋 Detalhes do pagamento:
-💰 Valor: R$ {{valor_entrada}}
-📅 Data: {{data_atual}}
-📋 Referente: {{titulo_evento}}
-🧾 Comprovante: #{{data_atual}}
+\u{1F4CB} Detalhes do pagamento:
+\u{1F4B0} Valor: R$ {{valor_entrada}}
+\u{1F4C5} Data: {{data_atual}}
+\u{1F4CB} Referente: {{titulo_evento}}
+\u{1F9FE} Comprovante: {{data_atual}}
 
 Obrigado pela confiança!
 
@@ -175,4 +175,4 @@ Obrigado pela confiança!
       </CardContent>
     </Card>
   );
-}; 
+};

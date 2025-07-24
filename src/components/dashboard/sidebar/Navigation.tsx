@@ -51,7 +51,7 @@ const Navigation: React.FC<NavigationProps> = ({ menuItems, isOpen, closeMobileS
                         ? "bg-red-600 text-white hover:bg-red-700" 
                         : isActive
                           ? "bg-brand-blue text-white" // Usando a cor azul da marca para o item ativo
-                          : "text-gray-300 hover:bg-[#1A1F2E] hover:text-white",
+                          : "text-gray-300 hover:bg-contract-bg hover:text-white",
                       item.highlight ? "font-medium" : ""
                     )
                   }
@@ -72,7 +72,17 @@ const Navigation: React.FC<NavigationProps> = ({ menuItems, isOpen, closeMobileS
                     )}
                   </div>
                   {isOpen && (
-                    <span className="truncate">{item.name}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="truncate">{item.name}</span>
+                      {item.newBadge && (
+                        <Badge 
+                          className="text-[10px] px-1.5 py-0.0 bg-purple-500 text-white border-0" 
+                          variant="outline"
+                        >
+                          {item.newBadge}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </NavLink>
               </li>

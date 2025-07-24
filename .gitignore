@@ -37,6 +37,10 @@ performance-metrics/
 # Supabase
 .supabase/
 
+# Vercel
+.vercel
+.vercel/*
+*.vercel.app
 
 # Arquivos de segurança
 security-audit-*.json

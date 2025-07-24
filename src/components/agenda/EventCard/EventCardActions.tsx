@@ -10,6 +10,31 @@ import { EventCardActionsProps, EventStatus, Event } from './types';
 import { useUserRole } from '@/hooks/useUserRole'; // Importar o hook
 import { format } from 'date-fns';
 
+/**
+ * Formata um número de telefone brasileiro
+ */
+const formatPhone = (phone: string): string => {
+  if (!phone) return '';
+  
+  // Remove tudo que não é número
+  const numbers = phone.replace(/\D/g, '');
+  
+  // Se não tem números, retorna vazio
+  if (!numbers) return '';
+  
+  // Aplica a máscara baseada no comprimento
+  if (numbers.length <= 2) {
+    return `(${numbers}`;
+  } else if (numbers.length <= 6) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+  } else if (numbers.length <= 10) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
+  } else {
+    // Para celular (11 dígitos): (00) 00000-0000
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  }
+};
+
 const generateGoogleCalendarUrl = (event: Event) => {
   const G_CAL_URL = 'https://www.google.com/calendar/render?action=TEMPLATE';
 
@@ -36,7 +61,7 @@ const generateGoogleCalendarUrl = (event: Event) => {
   ];
 
   // Dados do Cliente
-  if (event.phone) detailsParts.push(`📞 Telefone: ${event.phone}`);
+  if (event.phone) detailsParts.push(`📞 Telefone: ${formatPhone(event.phone)}`);
   if (event.birthday) detailsParts.push(`🎂 Aniversário: ${format(new Date(event.birthday), 'dd/MM/yyyy')}`);
   if (event.cpf_cliente) detailsParts.push(`📄 CPF: ${event.cpf_cliente}`);
   if (event.endereco_cliente) detailsParts.push(`🏠 Endereço: ${event.endereco_cliente}`);

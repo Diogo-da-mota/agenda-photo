@@ -1,7 +1,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/hooks/useAuth';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard/Dashboard';
@@ -25,7 +25,7 @@ const PageLoader = () => (
 );
 
 const AppRoutes: React.FC = () => {
-  const { profile: user, loading } = useUserProfile();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <PageLoader />;

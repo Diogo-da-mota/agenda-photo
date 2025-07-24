@@ -30,10 +30,12 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { useEmpresa } from '@/hooks/useEmpresa';
-import { generateContractPdf } from '@/utils/contractPdfGenerator';
+import { generateContractPdf, downloadBlob } from '@/utils/contractPdfGenerator';
+import { generateContractTemplate } from './ContractForm';
 import { useContracts } from '@/hooks/useContracts';
 import { deleteContract } from '@/services/contractService';
 import { useAuth } from '@/hooks/use-auth';
+import { generateContractUrl } from '@/utils/slugify';
 
 // Dados mockados removidos - usando apenas dados reais do Supabase
 
@@ -69,17 +71,20 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
   };
 
   // Usar apenas contratos reais do Supabase
-  const contractsToUse = contracts.map((contract: any) => ({
-    id: contract.id,
-    clientName: contract.nome_cliente || contract.clientes?.nome || extractClientNameFromTitle(contract.titulo) || 'Cliente',
-    clientEmail: contract.clientes?.email || contract.email_cliente || '',
-    eventType: contract.tipo_evento || contract.titulo || 'Evento',
-    eventDate: contract.data_evento ? new Date(contract.data_evento) : new Date(),
-    sentDate: new Date(contract.criado_em),
-    signedDate: contract.data_assinatura ? new Date(contract.data_assinatura) : undefined,
-    status: contract.status as 'pendente' | 'assinado' | 'expirado',
-    value: contract.valor_total || 0,
-  }));
+  const contractsToUse = contracts.map((contract: any) => {
+    
+    return {
+      id: contract.id_contrato,
+      clientName: contract.nome_cliente || contract.clientes?.nome || extractClientNameFromTitle(contract.titulo) || 'Cliente',
+      clientEmail: contract.clientes?.email || contract.email_cliente || '',
+      eventType: contract.tipo_evento || contract.titulo || 'Evento',
+      eventDate: contract.data_evento ? new Date(contract.data_evento) : new Date(),
+      sentDate: new Date(contract.criado_em),
+      signedDate: contract.data_assinatura ? new Date(contract.data_assinatura) : undefined,
+      status: contract.status as 'pendente' | 'assinado' | 'expirado',
+      value: contract.valor_total || 0,
+    };
+  });
   
   // Filter contracts based on selected tab and search query
   const filteredContracts = contractsToUse
@@ -94,8 +99,23 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
       contract.eventType.toLowerCase().includes(searchQuery.toLowerCase())
     );
   
-  const handleView = (id: string) => {
-    navigate(`/contratos/${id}`);
+  const handleView = (id_contrato: string, titulo?: string) => {
+    // Buscar dados completos do contrato para gerar URL no novo formato
+    const originalContract = contracts.find((c: any) => c.id_contrato === id_contrato);
+    
+    if (originalContract && originalContract.id_amigavel && originalContract.nome_cliente) {
+      // Usar novo formato com dados completos
+      const contractUrl = generateContractUrl({
+        id_contrato,
+        id_amigavel: originalContract.id_amigavel,
+        nome_cliente: originalContract.nome_cliente
+      });
+      navigate(contractUrl.replace('/contrato/', '/contratos/'));
+    } else {
+      // Fallback para formato antigo se dados não estão disponíveis
+      const contractUrl = generateContractUrl(id_contrato, titulo);
+      navigate(contractUrl.replace('/contrato/', '/contratos/'));
+    }
   };
   
   const handleResend = (id: string, email: string) => {
@@ -107,11 +127,13 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
   
   // Função de cópia de link agora centralizada no hook useCopyLink
   
-  const handleDownload = (id: string) => {
+  const handleDownload = async (id: string) => {
     try {
-      // Buscar dados do contrato específico pelo ID
-      const contract = contractsToUse.find(c => c.id === id);
-      if (!contract) {
+      // Buscar dados do contrato específico pelo ID nos dados originais do Supabase
+      const originalContract = contracts.find((c: any) => c.id_contrato === id);
+      const mappedContract = contractsToUse.find(c => c.id === id);
+      
+      if (!originalContract || !mappedContract) {
         toast({
           title: "Erro",
           description: "Contrato não encontrado.",
@@ -120,31 +142,20 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
         return;
       }
 
+      // Gera o conteúdo completo do contrato usando o template
+      const conteudoContrato = generateContractTemplate(originalContract, configuracoes);
+
       const contractData = {
-        contractId: id,
-        contractStatus: contract.status,
-        clientData: {
-          nome: contract.clientName,
-          telefone: "(11) 99999-9999",
-          email: contract.clientEmail,
-          tipoEvento: contract.eventType
-        },
-        eventoData: {
-          data: format(contract.eventDate, "dd/MM/yyyy", { locale: ptBR }),
-          local: "Local do evento a ser definido"
-        },
-        pagamentoData: {
-          valorTotal: `R$ ${contract.value.toFixed(2).replace('.', ',')}`,
-          sinal: "R$ 500,00",
-          valorRestante: `R$ ${(contract.value - 500).toFixed(2).replace('.', ',')}`
-        },
-        conteudoContrato: ``,
-        includeSignature: contract.status === 'assinado',
-        signatureDate: contract.status === 'assinado' && contract.signedDate ? format(contract.signedDate, "dd/MM/yyyy", { locale: ptBR }) : undefined,
-        nomeContratado: contract.status === 'assinado' ? contract.clientName : undefined
+        conteudoContrato,
+        includeSignature: mappedContract.status === 'assinado',
+        signatureDate: mappedContract.status === 'assinado' && mappedContract.signedDate ? format(mappedContract.signedDate, "dd/MM/yyyy", { locale: ptBR }) : undefined,
+        nomeContratado: nomeContratado,
+        clientName: mappedContract.status === 'assinado' ? mappedContract.clientName : undefined
       };
 
-      generateContractPdf(contractData);
+      // Gerar o PDF e fazer o download
+      const pdfBlob = await generateContractPdf(contractData);
+      downloadBlob(pdfBlob, `contrato-${mappedContract.clientName}.pdf`);
       
       toast({
         title: "Download iniciado",
@@ -301,7 +312,7 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
                         size="sm" 
                         variant="outline" 
                         className="gap-1"
-                        onClick={() => handleView(contract.id)}
+                        onClick={() => handleView(contract.id, contract.eventType)}
                       >
                         <Eye size={14} />
                         <span className="hidden sm:inline">Visualizar</span>
@@ -329,14 +340,14 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
-                            onClick={() => handleView(contract.id)}
+                            onClick={() => handleView(contract.id, contract.eventType)}
                             className="cursor-pointer"
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Visualizar
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => copyContractLink(contract.id)}
+                            onClick={() => copyContractLink(contract.id, contract.eventType)}
                             className="cursor-pointer"
                           >
                             <Copy className="mr-2 h-4 w-4" />

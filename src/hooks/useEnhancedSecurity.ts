@@ -144,7 +144,7 @@ export const useEnhancedSecurity = (): SecurityHookReturn => {
     if (!input) return '';
     
     return input
-      .replace(/[<>\"'&]/g, '') // Remove caracteres perigosos para XSS
+      .replace(/[<>"'&]/g, '') // Remove caracteres perigosos para XSS
       .trim()
       .substring(0, 1000); // Limite de caracteres
   }, []);

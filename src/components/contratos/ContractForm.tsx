@@ -14,25 +14,104 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile } from '@/hooks/auth/useUserProfile';
+import { useAuth } from '@/hooks/useAuth';
 import { useEmpresa } from '@/hooks/useEmpresa';
 import { ContractPreview } from './ContractPreview';
 // import { ContractTemplateSelector } from './ContractTemplateSelector'; // Removido
 import { eventTypes } from '@/components/agenda/types';
 import { createContract } from '@/services/contractService';
 import { supabase } from '@/lib/supabase';
+import { generateUniqueContractId } from '@/utils/contractIdGenerator';
+
+// Funções de formatação (movidas para antes do template)
+const formatPhone = (value: string) => {
+  if (!value) return '';
+  
+  // Remove tudo que não é número
+  const numbers = value.replace(/\D/g, '');
+  
+  // Se não tem números, retorna vazio
+  if (!numbers) return '';
+  
+  // Aplica a máscara baseada no comprimento
+  if (numbers.length <= 2) {
+    return `(${numbers}`;
+  } else if (numbers.length <= 6) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+  } else if (numbers.length <= 10) {
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
+  } else {
+    // Para celular (11 dígitos): (00) 00000-0000
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  }
+};
+
+const formatCurrency = (value: string | number) => {
+  // Converte para string se for número
+  const stringValue = typeof value === 'number' ? value.toString() : value;
+  
+  // Se o valor é um número puro (ex: "1000"), formata como moeda
+  if (/^\d+$/.test(stringValue)) {
+    const numValue = parseFloat(stringValue);
+    return numValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+  
+  // Remove tudo que não é número ou vírgula
+  let numbers = stringValue.replace(/[^\d,]/g, '');
+  
+  // Se não tem números, retorna vazio
+  if (!numbers) return '';
+  
+  // Se tem vírgula, divide em partes
+  const parts = numbers.split(',');
+  
+  // Formata a parte inteira com pontos de milhares
+  let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  
+  // Se tem parte decimal, limita a 2 dígitos
+  let decimalPart = parts[1] ? parts[1].slice(0, 2) : '';
+  
+  // Monta o resultado
+  if (decimalPart) {
+    return `${integerPart},${decimalPart}`;
+  } else if (numbers.includes(',')) {
+    return `${integerPart},`;
+  } else {
+    return integerPart;
+  }
+};
+
+const parseCurrency = (value: string) => {
+  // Remove formatação e converte para número
+  const numbers = value.replace(/[^\d,]/g, '').replace(',', '.');
+  return parseFloat(numbers) || 0;
+};
 
 // Função para gerar template dinâmico baseado nos dados do cliente e empresa
-const generateContractTemplate = (clientData?: any, empresaConfig?: any) => {
-  const nomeCliente = clientData?.clientName || '[NOME DO CONTRATANTE]';
-  const tipoEvento = clientData?.eventType || 'casamento';
-  const dataEvento = clientData?.eventDate ? new Date(clientData.eventDate).toLocaleDateString('pt-BR') : '[DATA DO EVENTO]';
-  const horaEvento = clientData?.eventTime || '[HORÁRIO]';
-  const localEvento = clientData?.eventLocation || '[LOCAL DO EVENTO]';
-  const valorTotal = clientData?.price ? `R$ ${clientData.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR TOTAL]';
-  const valorSinal = clientData?.downPayment ? `R$ ${clientData.downPayment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR ENTRADA]';
-  const valorRestante = (clientData?.price && clientData?.downPayment) 
-    ? `R$ ${(clientData.price - clientData.downPayment).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+export const generateContractTemplate = (clientData?: any, empresaConfig?: any) => {
+  // PRIORIDADE 1: Se existe conteúdo personalizado (da coluna 'conteudo'), usar ele com substituições dinâmicas
+  const conteudoPersonalizado = clientData?.termsAndConditions || clientData?.conteudo;
+  
+  if (conteudoPersonalizado && conteudoPersonalizado.trim() !== '') {
+    // Aplicar substituições dinâmicas no conteúdo personalizado
+    return applyDynamicReplacements(conteudoPersonalizado, clientData, empresaConfig);
+  }
+  
+  // PRIORIDADE 2: Se não há conteúdo personalizado, usar template padrão com dados dinâmicos
+  const nomeCliente = clientData?.clientName || clientData?.nome_cliente || '[NOME DO CONTRATANTE]';
+  const tipoEvento = clientData?.eventType || clientData?.tipo_evento || 'casamento';
+  const dataEvento = clientData?.eventDate || clientData?.data_evento ? new Date(clientData.eventDate || clientData.data_evento).toLocaleDateString('pt-BR') : '[DATA DO EVENTO]';
+  const horaEvento = clientData?.eventTime || clientData?.hora_evento || '[HORÁRIO]';
+  const localEvento = clientData?.eventLocation || clientData?.local_evento || '[LOCAL DO EVENTO]';
+  const valorTotalNum = clientData?.price ?? clientData?.valor_total;
+  const valorSinalNum = clientData?.downPayment ?? clientData?.valor_sinal;
+  const valorTotal = valorTotalNum ? `R$ ${Number(valorTotalNum).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR TOTAL]';
+  const valorSinal = valorSinalNum ? `R$ ${Number(valorSinalNum).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR ENTRADA]';
+  const valorRestante = (valorTotalNum && valorSinalNum) 
+    ? `R$ ${(Number(valorTotalNum) - Number(valorSinalNum)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
     : 'R$ [VALOR RESTANTE]';
 
   // Dados da empresa/fotógrafo vindos das configurações
@@ -67,20 +146,20 @@ const generateContractTemplate = (clientData?: any, empresaConfig?: any) => {
   }
   
   // Adicionar email se disponível
-  const emailCliente = clientData?.clientEmail;
+  const emailCliente = clientData?.clientEmail || clientData?.email_cliente;
   if (isValidValue(emailCliente)) {
     contratanteInfo += `, email ${emailCliente}`;
   }
   
   // Adicionar telefone se disponível
-  const telefoneCliente = clientData?.phoneNumber;
+  const telefoneCliente = clientData?.phoneNumber || clientData?.telefone_cliente;
   if (isValidValue(telefoneCliente)) {
-    contratanteInfo += `, telefone ${telefoneCliente}`;
+    contratanteInfo += `, telefone ${formatPhone(telefoneCliente)}`;
   }
 
   return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS FOTOGRÁFICOS 
 
-Pelo presente instrumento particular de contrato, de um lado, ${contratanteInfo}, doravante denominada CONTRATANTE, e de outro lado, ${nomeEmpresa}, com endereço profissional na ${enderecoEmpresa}, inscrito no CPF/CNPJ sob o nº ${cnpjEmpresa}, celular ${telefoneEmpresa}, doravante denominado CONTRATADO, têm entre si justo e contratado o que segue:
+Pelo presente instrumento particular de contrato, de um lado, ${contratanteInfo}, doravante denominada CONTRATANTE, e de outro lado, ${nomeEmpresa}, com endereço profissional na ${enderecoEmpresa}, inscrito no CPF/CNPJ sob o nº ${cnpjEmpresa}, celular ${formatPhone(telefoneEmpresa)}, doravante denominado CONTRATADO, têm entre si justo e contratado o que segue:
 
 Cobertura fotográfica e serviços contratados
 
@@ -161,6 +240,7 @@ Cláusula 16. Fica eleito o foro da comarca de ${cidadeEmpresa}/${estadoEmpresa}
 
 E por estarem justos e contratados, firmam o presente instrumento em duas vias de igual teor e forma.
 
+
 ______________________________________________________
 ${nomeCliente}
 Contratante
@@ -170,77 +250,75 @@ ${nomeEmpresa}
 Contratado`;
 };
 
+// Função auxiliar para aplicar substituições dinâmicas no conteúdo personalizado
+const applyDynamicReplacements = (content: string, clientData?: any, empresaConfig?: any): string => {
+  if (!content) return '';
+  
+  // Dados do cliente
+  const nomeCliente = clientData?.clientName || clientData?.nome_cliente || '[NOME DO CONTRATANTE]';
+  const tipoEvento = clientData?.eventType || clientData?.tipo_evento || 'casamento';
+  const dataEvento = clientData?.eventDate || clientData?.data_evento ? new Date(clientData.eventDate || clientData.data_evento).toLocaleDateString('pt-BR') : '[DATA DO EVENTO]';
+  const horaEvento = clientData?.eventTime || clientData?.hora_evento || '[HORÁRIO]';
+  const localEvento = clientData?.eventLocation || clientData?.local_evento || '[LOCAL DO EVENTO]';
+  const valorTotalNum = clientData?.price ?? clientData?.valor_total;
+  const valorSinalNum = clientData?.downPayment ?? clientData?.valor_sinal;
+  const valorTotal = valorTotalNum ? `R$ ${Number(valorTotalNum).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR TOTAL]';
+  const valorSinal = valorSinalNum ? `R$ ${Number(valorSinalNum).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ [VALOR ENTRADA]';
+  const valorRestante = (valorTotalNum && valorSinalNum) 
+    ? `R$ ${(Number(valorTotalNum) - Number(valorSinalNum)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+    : 'R$ [VALOR RESTANTE]';
+
+  // Dados da empresa/fotógrafo
+  const nomeEmpresa = empresaConfig?.nome_empresa || '[NOME DO FOTÓGRAFO]';
+  const enderecoEmpresa = empresaConfig?.endereco || '[ENDEREÇO DO FOTÓGRAFO]';
+  const cnpjEmpresa = empresaConfig?.cnpj || '[CPF/CNPJ DO FOTÓGRAFO]';
+  const telefoneEmpresa = empresaConfig?.telefone || '[TELEFONE DO FOTÓGRAFO]';
+  const cidadeEmpresa = empresaConfig?.cidade || '[CIDADE]';
+  const estadoEmpresa = empresaConfig?.estado || '[ESTADO]';
+  const emailEmpresa = empresaConfig?.email_empresa || '[EMAIL DO FOTÓGRAFO]';
+  
+  // Dados adicionais do cliente
+  const emailCliente = clientData?.clientEmail || clientData?.email_cliente || '[EMAIL DO CLIENTE]';
+  const telefoneCliente = clientData?.phoneNumber || clientData?.telefone_cliente || '[TELEFONE DO CLIENTE]';
+  const cpfCliente = clientData?.cpfCliente || clientData?.cpf_cliente || '[CPF DO CLIENTE]';
+  const enderecoCliente = clientData?.enderecoCliente || clientData?.endereco_cliente || '[ENDEREÇO DO CLIENTE]';
+
+  // Aplicar todas as substituições possíveis
+  let processedContent = content
+    // Dados do cliente
+    .replace(/\[NOME DO CONTRATANTE\]/g, nomeCliente)
+    .replace(/\[NOME DO CLIENTE\]/g, nomeCliente)
+    .replace(/\[EMAIL DO CLIENTE\]/g, emailCliente)
+    .replace(/\[TELEFONE DO CLIENTE\]/g, formatPhone(telefoneCliente))
+    .replace(/\[CPF DO CLIENTE\]/g, cpfCliente)
+    .replace(/\[ENDEREÇO DO CLIENTE\]/g, enderecoCliente)
+    
+    // Dados do evento
+    .replace(/\[TIPO DE EVENTO\]/g, tipoEvento)
+    .replace(/\[DATA DO EVENTO\]/g, dataEvento)
+    .replace(/\[HORÁRIO\]/g, horaEvento)
+    .replace(/\[LOCAL DO EVENTO\]/g, localEvento)
+    
+    // Valores financeiros
+    .replace(/\[VALOR TOTAL\]/g, valorTotal)
+    .replace(/\[VALOR ENTRADA\]/g, valorSinal)
+    .replace(/\[VALOR RESTANTE\]/g, valorRestante)
+    
+    // Dados da empresa
+    .replace(/\[NOME DO FOTÓGRAFO\]/g, nomeEmpresa)
+    .replace(/\[NOME DA EMPRESA\]/g, nomeEmpresa)
+    .replace(/\[ENDEREÇO DO FOTÓGRAFO\]/g, enderecoEmpresa)
+    .replace(/\[CPF\/CNPJ DO FOTÓGRAFO\]/g, cnpjEmpresa)
+    .replace(/\[TELEFONE DO FOTÓGRAFO\]/g, formatPhone(telefoneEmpresa))
+    .replace(/\[CIDADE\]/g, cidadeEmpresa)
+    .replace(/\[ESTADO\]/g, estadoEmpresa)
+    .replace(/\[EMAIL DO FOTÓGRAFO\]/g, emailEmpresa);
+
+  return processedContent;
+};
+
 // Template padrão estático (fallback)
 const DEFAULT_CONTRACT_TEMPLATE = generateContractTemplate();
-
-// Funções de formatação
-const formatPhone = (value: string) => {
-  if (!value) return '';
-  
-  // Remove tudo que não é número
-  const numbers = value.replace(/\D/g, '');
-  
-  // Se não tem números, retorna vazio
-  if (!numbers) return '';
-  
-  console.log('📞 formatPhone - input:', value, 'numbers:', numbers);
-  
-  // Aplica a máscara baseada no comprimento
-  if (numbers.length <= 2) {
-    return `(${numbers}`;
-  } else if (numbers.length <= 6) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-  } else if (numbers.length <= 10) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
-  } else {
-    // Para celular (11 dígitos): (00) 00000-0000
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  }
-};
-
-const formatCurrency = (value: string | number) => {
-  // Converte para string se for número
-  const stringValue = typeof value === 'number' ? value.toString() : value;
-  
-  // Se o valor é um número puro (ex: "1000"), formata como moeda
-  if (/^\d+$/.test(stringValue)) {
-    const numValue = parseFloat(stringValue);
-    return numValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-  
-  // Remove tudo que não é número ou vírgula
-  let numbers = stringValue.replace(/[^\d,]/g, '');
-  
-  // Se não tem números, retorna vazio
-  if (!numbers) return '';
-  
-  // Se tem vírgula, divide em partes
-  const parts = numbers.split(',');
-  
-  // Formata a parte inteira com pontos de milhares
-  let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  
-  // Se tem parte decimal, limita a 2 dígitos
-  let decimalPart = parts[1] ? parts[1].slice(0, 2) : '';
-  
-  // Monta o resultado
-  if (decimalPart) {
-    return `${integerPart},${decimalPart}`;
-  } else if (numbers.includes(',')) {
-    return `${integerPart},`;
-  } else {
-    return integerPart;
-  }
-};
-
-const parseCurrency = (value: string) => {
-  // Remove formatação e converte para número
-  const numbers = value.replace(/[^\d,]/g, '').replace(',', '.');
-  return parseFloat(numbers) || 0;
-};
 
 // Form schema
 const formSchema = z.object({
@@ -273,7 +351,7 @@ interface ContractFormProps {
 
 export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
   const { toast } = useToast();
-  const { user } = useUserProfile();
+  const { user } = useAuth();
   const { configuracoes: empresaConfig, carregando: empresaCarregando } = useEmpresa();
   const [step, setStep] = useState<'form' | 'preview'>('form');
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -288,17 +366,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
   
   // Função para gerar template atual com dados da empresa
   const getCurrentTemplate = () => {
-    let template = generateContractTemplate(initialData, empresaConfig);
-    // Substituir placeholders se já houver dados
-    if (initialData) {
-      if (initialData.enderecoCliente) {
-        template = template.replace(/\[ENDEREÇO DO CONTRATANTE\]/g, initialData.enderecoCliente);
-      }
-      if (initialData.cpfCliente) {
-        template = template.replace(/\[CPF DO CONTRATANTE\]/g, initialData.cpfCliente);
-      }
-    }
-    return template;
+    return generateContractTemplate(initialData, empresaConfig);
   };
   
   // Default form values with template text for T&C
@@ -320,8 +388,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
       // Corrigir nomes vindos do evento para camelCase esperado pelo formulário
       const updatedValues = {
         ...initialData,
-        cpfCliente: initialData.cpfCliente || (initialData as any).cpf_cliente || '',
-        enderecoCliente: initialData.enderecoCliente || (initialData as any).endereco_cliente || '',
+        cpfCliente: initialData.cpfCliente || initialData.cpf_cliente || '',
+        enderecoCliente: initialData.enderecoCliente || initialData.endereco_cliente || '',
         termsAndConditions: initialData?.termsAndConditions || getCurrentTemplate()
       };
       // Os dados já são processados dinamicamente na função generateContractTemplate
@@ -419,8 +487,12 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
       setIsSubmitting(true);
       
       try {
+        // Gerar ID único para o contrato
+        const contractId = await generateUniqueContractId();
+        
         // Preparar dados do contrato para o Supabase
         const contractData = {
+          id_contrato: contractId,
           cliente_id: null, // Será implementado quando tivermos cliente específico
           titulo: `Contrato - ${data.eventType} - ${data.clientName}`,
           descricao: `Contrato para ${data.eventType} em ${data.eventLocation || 'Local a definir'}`,
@@ -742,8 +814,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
                     align-items: center;
                     justify-content: center;
                     text-align: center !important;
-                    margin: 3rem auto;
-                    padding: 2rem 0;
+                    margin: 3rem auto 0 auto; /* Reduzida a margem inferior para 0 */
+                    padding: 2rem 0 0 0; /* Removido o padding inferior */
                     width: 100%;
                     max-width: 600px;
                   }
@@ -751,7 +823,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    margin: 1.5rem 0;
+                    margin: 2.5rem 0; /* Aumentado de 1.5rem para 2.5rem para mais espaço */
                     width: 100%;
                   }
                   .signature-line {

@@ -30,14 +30,14 @@ export const MessagePreview = ({ template, className }: MessagePreviewProps) => 
   
   if (loading) {
     return (
-      <div className={cn("whitespace-pre-wrap text-gray-500", className)}>
+      <div className={cn("whitespace-pre-wrap text-gray-500 text-sm sm:text-base p-3 sm:p-4", className)}>
         Carregando preview...
       </div>
     );
   }
   
   return (
-    <div className={cn("whitespace-pre-wrap", className)}>
+    <div className={cn("whitespace-pre-wrap text-sm sm:text-base leading-relaxed p-3 sm:p-4 break-words", className)}>
       {previewContent}
     </div>
   );

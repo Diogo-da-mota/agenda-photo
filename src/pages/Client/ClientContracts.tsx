@@ -18,17 +18,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { generateContractPdf } from '@/utils/contractPdfGenerator';
+import { useEmpresa } from '@/hooks/useEmpresa';
+import { generateContractPdf, downloadBlob } from '@/utils/contractPdfGenerator';
+import { generateContractTemplate } from '@/components/contratos/ContractForm';
+import { generateContractUrl } from '@/utils/slugify';
 
 // Sample data for client contracts
 const sampleContracts = [
   {
     id: "1",
-    title: "Contrato de Casamento",
-    event: "Casamento - 15/12/2023",
+    title: "Contrato de Book Gestante",
+    event: "Book de Gestante - 15/12/2023",
     sentDate: new Date("2023-11-05"),
     status: "pending",
-    expirationDate: new Date("2023-12-05")
+    expirationDate: new Date("2023-12-05"),
+    id_amigavel: 7,
+    nome_cliente: "GESTANTE-MARIA"
   },
   {
     id: "2",
@@ -37,15 +42,19 @@ const sampleContracts = [
     sentDate: new Date("2023-10-01"),
     signedDate: new Date("2023-10-05"),
     status: "signed",
-    expirationDate: new Date("2023-11-01")
+    expirationDate: new Date("2023-11-01"),
+    id_amigavel: 8,
+    nome_cliente: "CASAL-SILVA"
   },
   {
     id: "3",
-    title: "Contrato de Aniversário",
-    event: "Aniversário de 15 anos - 22/09/2023",
+    title: "Contrato de Sessão Familiar",
+    event: "Sessão Fotográfica Familiar - 22/09/2023",
     sentDate: new Date("2023-08-15"),
     status: "expired",
-    expirationDate: new Date("2023-09-15")
+    expirationDate: new Date("2023-09-15"),
+    id_amigavel: 9,
+    nome_cliente: "FAMILIA-SANTOS"
   }
 ];
 
@@ -72,6 +81,7 @@ const ClientContracts = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
+  const { configuracoes } = useEmpresa();
   
   // Filter contracts based on tab and search
   const filteredContracts = sampleContracts.filter(contract => {
@@ -85,7 +95,7 @@ const ClientContracts = () => {
     return true;
   });
     // Handle download
-  const handleDownload = (contractId: string) => {
+  const handleDownload = async (contractId: string) => {
     try {
       // Buscar dados do contrato específico pelo ID
       const contract = sampleContracts.find(c => c.id === contractId);
@@ -98,32 +108,21 @@ const ClientContracts = () => {
         return;
       }
 
-      const contractData = {
-        contractId: contractId,
-        contractStatus: contract.status,
-        clientData: {
-          nome: "Ana Silva", // Em produção, viria dos dados do contrato
-          telefone: "(11) 99999-9999",
-          email: "ana.silva@email.com",
-          tipoEvento: contract.title.split(' - ')[0] || "Evento"
-        },
-        eventoData: {
-          data: contract.event.split(' - ')[1] || format(new Date(), "dd/MM/yyyy", { locale: ptBR }),
-          local: "Local do evento a ser definido"
-        },
-        pagamentoData: {
-          valorTotal: "R$ 2.500,00",
-          sinal: "R$ 500,00",
-          valorRestante: "R$ 2.000,00"
-        },
-        conteudoContrato: ``,
+      // Gera o conteúdo completo do contrato usando o template
+      const conteudoContrato = generateContractTemplate(contract, configuracoes);
+
+      const pdfData = {
+        conteudoContrato,
         includeSignature: contract.status === 'signed',
         signatureDate: contract.status === 'signed' && contract.signedDate ? 
           format(contract.signedDate, "dd/MM/yyyy", { locale: ptBR }) : undefined,
-        nomeContratado: contract.status === 'signed' ? "Ana Silva" : undefined
+        nomeContratado: configuracoes?.nome_empresa || 'Bright Spark Photography',
+        clientName: contract.status === 'signed' ? contract.title : undefined
       };
 
-      generateContractPdf(contractData);
+      // Gerar o PDF e fazer o download
+      const pdfBlob = await generateContractPdf(pdfData);
+      downloadBlob(pdfBlob, `contrato-${contract.title}.pdf`);
       
       toast({
         title: "Download iniciado",
@@ -211,7 +210,19 @@ const ClientContracts = () => {
                             </Button>
                           )}
                           
-                          <Link to={`/cliente/contrato/${contract.id}`}>
+                          <Link to={(() => {
+                            // Usar novo formato se dados estão disponíveis
+                            if (contract.id_amigavel && contract.nome_cliente) {
+                              return generateContractUrl({
+                                id_contrato: contract.id,
+                                id_amigavel: contract.id_amigavel,
+                                nome_cliente: contract.nome_cliente
+                              }).replace('/contrato/', '/cliente/contrato/');
+                            } else {
+                              // Fallback para formato antigo
+                              return generateContractUrl(contract.id, contract.event).replace('/contrato/', '/cliente/contrato/');
+                            }
+                          })()}>
                             <Button 
                               variant={contract.status === 'pending' ? 'default' : 'outline'} 
                               size="sm"

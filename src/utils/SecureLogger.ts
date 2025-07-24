@@ -66,12 +66,31 @@ class SecureLoggerImpl {
     if (typeof data === 'object' && data !== null) {
       const masked: any = {};
       Object.entries(data).forEach(([key, value]) => {
-        masked[key] = this.maskSensitiveData(value);
+        // Mascarar chaves sensíveis específicas
+        if (this.isSensitiveKey(key)) {
+          masked[key] = '[SENSITIVE_DATA_MASKED]';
+        } else {
+          masked[key] = this.maskSensitiveData(value);
+        }
       });
       return masked;
     }
     
     return data;
+  }
+
+  private isSensitiveKey(key: string): boolean {
+    const sensitiveKeys = [
+      'userId', 'user_id', 'id_usuario',
+      'password', 'senha', 'secret',
+      'token', 'auth', 'authorization',
+      'email', 'cpf', 'cnpj',
+      'telefone', 'phone',
+      'id_contrato', 'contrato_id'
+    ];
+    return sensitiveKeys.some(sensitiveKey => 
+      key.toLowerCase().includes(sensitiveKey.toLowerCase())
+    );
   }
 
   error(message: string, error?: any, data?: any): void {

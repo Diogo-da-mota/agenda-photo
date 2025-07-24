@@ -99,9 +99,7 @@ export class SessionSecurityManager {
    * Mostra aviso de timeout de sessão
    */
   private showTimeoutWarning(): void {
-    securityLog('SESSION_TIMEOUT_WARNING', {
-      minutesUntilTimeout: this.config.maxIdleTimeMinutes - this.config.warningTimeMinutes
-    });
+    // Log removido por segurança - não expor informações sobre timeouts de sessão
 
     if (this.timeoutWarningCallback) {
       this.timeoutWarningCallback();
@@ -112,9 +110,7 @@ export class SessionSecurityManager {
    * Gerencia timeout da sessão
    */
   private async handleSessionTimeout(): Promise<void> {
-    securityLog('SESSION_TIMEOUT', {
-      lastActivity: new Date(this.lastActivity).toISOString()
-    });
+    // Log removido por segurança - não expor informações sobre atividade do usuário
 
     try {
       await supabase.auth.signOut();
@@ -135,7 +131,7 @@ export class SessionSecurityManager {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        securityLog('SESSION_REFRESH_ERROR', { error: error.message });
+        // Log removido por segurança - não expor erros de refresh de sessão
         return;
       }
 
@@ -150,14 +146,14 @@ export class SessionSecurityManager {
           const { error: refreshError } = await supabase.auth.refreshSession();
           
           if (refreshError) {
-            securityLog('SESSION_REFRESH_FAILED', { error: refreshError.message });
+            // Log removido por segurança - não expor falhas de refresh
           } else {
-            securityLog('SESSION_REFRESHED', { minutesUntilExpiry });
+            // Log removido por segurança - não expor informações de expiração
           }
         }
       }
     } catch (error) {
-      securityLog('SESSION_CHECK_ERROR', { error: error instanceof Error ? error.message : 'Unknown error' });
+      // Log removido por segurança - não expor erros de verificação de sessão
     }
   }
 
@@ -169,15 +165,15 @@ export class SessionSecurityManager {
       const { error } = await supabase.auth.refreshSession();
       
       if (error) {
-        securityLog('FORCE_REFRESH_FAILED', { error: error.message });
+        // Log removido por segurança - não expor falhas de refresh forçado
         return false;
       }
 
       this.updateLastActivity();
-      securityLog('FORCE_REFRESH_SUCCESS');
+      // Log removido por segurança - não expor sucesso de refresh
       return true;
     } catch (error) {
-      securityLog('FORCE_REFRESH_ERROR', { error: error instanceof Error ? error.message : 'Unknown error' });
+      // Log removido por segurança - não expor erros de refresh forçado
       return false;
     }
   }
@@ -187,7 +183,7 @@ export class SessionSecurityManager {
    */
   extendSession(): void {
     this.updateLastActivity();
-    securityLog('SESSION_EXTENDED');
+    // Log removido por segurança - não expor extensões de sessão
   }
 
   /**

@@ -82,8 +82,8 @@ export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, atta
                     align-items: center;
                     justify-content: center;
                     text-align: center !important;
-                    margin: 3rem auto;
-                    padding: 2rem 0;
+                    margin: 3rem auto 0 auto; /* Reduzida a margem inferior para 0 */
+                    padding: 2rem 0 0 0; /* Removido o padding inferior */
                     width: 100%;
                     max-width: 600px;
                   }
@@ -91,7 +91,7 @@ export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, atta
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    margin: 1.5rem 0;
+                    margin: 2.5rem 0; /* Aumentado de 1.5rem para 2.5rem para mais espaço */
                     width: 100%;
                   }
                   .signature-line {

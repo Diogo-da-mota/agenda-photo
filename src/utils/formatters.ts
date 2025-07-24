@@ -17,7 +17,7 @@ export const formatarNumero = (valor: string): string => {
   return parteInteiraFormatada + parteDecimal;
 };
 
-// Função para formatar telefone no padrão (00) 0 0000-0000
+// Função para formatar telefone no padrão (00)0 0000-0000
 export const formatarTelefone = (telefone: string): string => {
   // Remove todos os caracteres não numéricos
   const numeroLimpo = telefone.replace(/\D/g, '');
@@ -29,11 +29,11 @@ export const formatarTelefone = (telefone: string): string => {
   if (numeroLimitado.length <= 2) {
     return numeroLimitado;
   } else if (numeroLimitado.length <= 3) {
-    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2)}`;
+    return `(${numeroLimitado.slice(0, 2)})${numeroLimitado.slice(2)}`;
   } else if (numeroLimitado.length <= 7) {
-    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3)}`;
+    return `(${numeroLimitado.slice(0, 2)})${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3)}`;
   } else {
-    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3, 7)}-${numeroLimitado.slice(7)}`;
+    return `(${numeroLimitado.slice(0, 2)})${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3, 7)}-${numeroLimitado.slice(7)}`;
   }
 };
 
@@ -208,7 +208,6 @@ export const aplicarMascaraData = (valorDigitado: string): string => {
 };
 
 // Função para formatar entrada de valores monetários
-// Função para formatar entrada de valores monetários
 export const formatarEntradaMonetaria = (valor: string): string => {
   // Remove todos os caracteres não numéricos
   const numeroLimpo = valor.replace(/\D/g, '');
@@ -221,6 +220,23 @@ export const formatarEntradaMonetaria = (valor: string): string => {
   
   // Formatar como moeda brasileira
   return numero.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+// Função para formatar valores monetários para exibição (com separador de milhares)
+export const formatarValorMonetario = (valor: number | string | null | undefined): string => {
+  if (valor === null || valor === undefined || valor === '') return '0,00';
+  
+  // Converter para número se for string
+  const numeroValor = typeof valor === 'string' ? parseFloat(valor) : valor;
+  
+  // Se não for um número válido, retornar 0,00
+  if (isNaN(numeroValor)) return '0,00';
+  
+  // Formatar como moeda brasileira (sem o símbolo R$)
+  return numeroValor.toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });

@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import CompanyLogo from './CompanyLogo';
 import CompanyForm from './CompanyForm';
 import { CompanyData } from './types';
+import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from '@/utils/emojiUtils';
 
 export const CompanySection = () => {
   const { toast } = useToast();
@@ -37,7 +38,16 @@ export const CompanySection = () => {
   const openWhatsApp = () => {
     const phoneNumber = companyData.whatsapp.replace(/\D/g, '');
     if (phoneNumber) {
-      window.open(`https://wa.me/55${phoneNumber}`, '_blank');
+      // Mensagem padrão com emojis
+      const mensagemTexto = "Olá! Entrando em contato através do site da empresa. Como posso ajudar? 😊";
+      
+      // Processar emojis para garantir compatibilidade com WhatsApp
+      const mensagemProcessada = processEmojisForWhatsApp(mensagemTexto);
+      
+      // Codificar mensagem preservando emojis
+      const mensagemCodificada = encodeTextWithEmojisForURL(mensagemProcessada);
+      
+      window.open(`https://wa.me/55${phoneNumber}?text=${mensagemCodificada}`, '_blank');
     } else {
       toast({
         title: "Número de WhatsApp não configurado",

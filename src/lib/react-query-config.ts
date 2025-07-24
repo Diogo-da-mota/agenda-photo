@@ -4,7 +4,6 @@
  * Cache longo com invalidação automática após operações CRUD
  */
 import { QueryClient } from '@tanstack/react-query';
-import { useIsMobile } from '@/hooks/use-mobile'; // Importando o hook
 
 /**
  * Função dinâmica para obter as opções padrão do React Query.
@@ -278,4 +277,4 @@ export const safeInvalidateQueries = (queryKey: unknown[], userId?: string) => {
     console.warn('[Cache] Erro na invalidação segura:', error);
     // Não throw error - site continua funcionando
   }
-}; 
+};

@@ -38,7 +38,7 @@ export function ClientSelector({ events, onSelect, className, resetSelection = f
       );
     }
     
-    return [...filtered].sort((a, b) => b.date.getTime() - a.date.getTime());
+    return [...filtered].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [events, searchTerm]);
 
   const handleSelect = (event: any) => {
@@ -60,6 +60,7 @@ export function ClientSelector({ events, onSelect, className, resetSelection = f
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -129,4 +130,4 @@ export function ClientSelector({ events, onSelect, className, resetSelection = f
       </PopoverContent>
     </Popover>
   );
-} 
+}

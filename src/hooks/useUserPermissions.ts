@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface UserPermissions {
   canManageUsers: boolean;
@@ -18,17 +19,16 @@ export const useUserPermissions = () => {
     isAdmin: false
   });
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUserPermissions = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user?.id) {
-          setLoading(false);
-          return;
-        }
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
+      try {
         // Verificar papel do usuário na nova tabela segura
         const { data, error } = await supabase
           .from('user_roles')
@@ -61,7 +61,7 @@ export const useUserPermissions = () => {
     };
 
     fetchUserPermissions();
-  }, []);
+  }, [user?.id]);
 
   return { permissions, loading };
 };

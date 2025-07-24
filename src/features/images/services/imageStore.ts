@@ -27,7 +27,7 @@ export const useImageStore = () => {
     setLoading(true);
     try {
       // Mock data - em um ambiente real seria uma consulta ao Supabase
-      console.log('Buscando imagens para usuário:', userId);
+      // Log removido por segurança - não expor userId
       return [];
     } catch (error) {
       console.error('Erro ao buscar imagens:', error);

@@ -43,14 +43,14 @@ export const useContractCopy = () => {
   const createContractCopy = (originalContract: ContractData, eventLocation?: string) => {
     try {
       // Validar se o contrato original existe
-      if (!originalContract || !originalContract.id) {
+      if (!originalContract || !originalContract.id_contrato) {
         throw new Error('Contrato original inválido');
       }
 
       // Criar cópia do contrato
       const copiedContract: ContractData = {
         ...originalContract,
-        id: `${originalContract.id}-copy-${Date.now()}`, // Novo ID para a cópia
+        id_contrato: `${originalContract.id_contrato}-copy-${Date.now()}`, // Novo ID para a cópia
         status: 'pendente', // Cópia sempre inicia como pendente
         criado_em: new Date().toISOString() // Nova data de criação
       };
@@ -153,7 +153,7 @@ export const useContractCopy = () => {
       // Simular download da cópia
       // Em produção, aqui seria gerado um PDF da cópia com assinatura digital
       
-      const fileName = `contrato-copia-${copyState.copiedContract.id}.pdf`;
+      const fileName = `contrato-copia-${copyState.copiedContract.id_contrato}.pdf`;
       
       toast({
         title: "Download Iniciado",

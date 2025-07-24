@@ -8,9 +8,10 @@ import ContractClientInfo from './details/ContractClientInfo';
 import ContractPaymentInfo from './details/ContractPaymentInfo';
 import ContractAttachments from './details/ContractAttachments';
 import ContractContent from './details/ContractContent';
+import { formatarTelefoneExibicao } from '@/utils/formatters';
 
 interface ContractData {
-  id: string;
+  id_contrato: string;
   status: string;
   nome_cliente?: string;
   email_cliente?: string;
@@ -87,7 +88,7 @@ const ContractCopyWithSignature = ({
                   <ContractClientInfo 
                     clientName={originalContract.nome_cliente || originalContract.clientes?.nome || 'N/A'}
                     clientEmail={originalContract.email_cliente || originalContract.clientes?.email || 'N/A'}
-                    phoneNumber={originalContract.telefone_cliente || originalContract.clientes?.telefone || 'N/A'}
+                    phoneNumber={formatarTelefoneExibicao(originalContract.telefone_cliente || originalContract.clientes?.telefone) || 'N/A'}
                     eventType={originalContract.tipo_evento || 'N/A'}
                     eventDate={originalContract.data_evento ? new Date(originalContract.data_evento) : new Date()}
                     eventLocation={eventLocation}
@@ -103,7 +104,14 @@ const ContractCopyWithSignature = ({
                   
                   <Separator className="my-6" />
                   
-                  <ContractAttachments attachments={[]} />
+                  <ContractAttachments 
+                    attachments={[]}
+                    contractData={{
+                      id: originalContract.id_contrato,
+                      nome_cliente: originalContract.nome_cliente || originalContract.clientes?.nome,
+                      pdfUrl: `${window.location.origin}/api/contracts/${originalContract.id_contrato}/pdf`
+                    }}
+                  />
                 </CardContent>
               </Card>
               
@@ -146,7 +154,7 @@ const ContractCopyWithSignature = ({
                 <CardContent className="p-6">
                   <h3 className="font-medium mb-4">Informações da Cópia</h3>
                   <div className="space-y-2 text-sm">
-                    <p><strong>Contrato Original:</strong> #{originalContract.id}</p>
+                    <p><strong>Contrato Original:</strong> #{originalContract.id_contrato}</p>
                     <p><strong>Data da Cópia:</strong> {new Date().toLocaleDateString('pt-BR')}</p>
                     <p><strong>Status:</strong> Pendente de Assinatura</p>
                     <p><strong>Funcionalidade:</strong> Assinatura Digital Habilitada</p>
