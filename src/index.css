@@ -327,3 +327,11 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Ocultar badge do Lovable */
+#lovable-badge {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
