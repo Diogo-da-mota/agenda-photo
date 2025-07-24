@@ -6,7 +6,6 @@ export interface MenuItem {
   icon: LucideIcon;
   iconColor?: string;
   badge?: number;
-  newBadge?: string; // Nova propriedade para badge de texto
   highlight?: boolean;
   category?: string;
   roles?: string[];

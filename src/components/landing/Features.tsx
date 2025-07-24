@@ -1,17 +1,18 @@
 import React from 'react';
-// Imports específicos de ícones para reduzir bundle size
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import Users from 'lucide-react/dist/esm/icons/users';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
-import Camera from 'lucide-react/dist/esm/icons/camera';
-import Clock from 'lucide-react/dist/esm/icons/clock';
-import Shield from 'lucide-react/dist/esm/icons/shield';
-import Zap from 'lucide-react/dist/esm/icons/zap';
-import Heart from 'lucide-react/dist/esm/icons/heart';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import { 
+  Calendar, 
+  Users, 
+  MessageSquare, 
+  FileText, 
+  CreditCard, 
+  BarChart3,
+  Camera,
+  Clock,
+  Shield,
+  Zap,
+  Heart,
+  TrendingUp
+} from 'lucide-react';
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';

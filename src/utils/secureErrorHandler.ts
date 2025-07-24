@@ -113,11 +113,15 @@ export class SecureErrorHandler {
   }
 
   /**
-   * Registra evento de segurança - Logs removidos por segurança
+   * Registra evento de segurança
    */
   private static logSecurityEvent(event: string, details: any): void {
-    // Log removido por segurança - não expor userAgent, URL e detalhes de erro
-    // que podem conter informações sensíveis sobre o sistema e usuário
+    securityLog(event, {
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent.substring(0, 100),
+      url: window.location.href,
+      ...details
+    });
   }
 
   /**

@@ -32,6 +32,32 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
+    // N8N REMOVIDO - Sistema usa Amazon S3
+    // Proxy para resolver problema CORS com N8N
+    /* COMENTADO - INTEGRAÇÃO N8N REMOVIDA
+    proxy: {
+      '/api/n8n': {
+        target: 'https://webhook.n8n.agendaphoto.com.br',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/n8n/, ''),
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('🔧 Proxy N8N:', req.method, req.url);
+            proxyReq.removeHeader('origin');
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('📊 N8N Response:', proxyRes.statusCode);
+            proxyRes.headers['access-control-allow-origin'] = 'http://localhost:8080';
+            proxyRes.headers['access-control-allow-credentials'] = 'true';
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('❌ Proxy Error:', err.message);
+          });
+        }
+      }
+    }
+    */
   },
   preview: {
     headers: securityHeaders
@@ -45,27 +71,41 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Build config otimizado para produção
+  // Build config otimizado para evitar constructor errors
   build: {
     sourcemap: false,
     target: 'es2020',
-    minify: 'esbuild',
+    minify: mode === 'production' ? 'esbuild' : false,
     rollupOptions: {
       output: {
+        // Ofuscar nomes de chunks em produção para segurança
+        chunkFileNames: mode === 'production' ? '[hash].js' : '[name]-[hash].js',
+        assetFileNames: mode === 'production' ? '[hash].[ext]' : '[name]-[hash].[ext]',
         manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'router': ['react-router-dom'],
-          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', 'lucide-react']
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+          supabase: ['@supabase/supabase-js'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', 'lucide-react']
         }
       }
     },
+    cssCodeSplit: false,
     emptyOutDir: true,
   },
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
-      'react-router-dom'
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@supabase/supabase-js',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      'lucide-react',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge'
     ],
     exclude: ['lovable-tagger']
   },

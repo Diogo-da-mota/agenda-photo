@@ -6,22 +6,15 @@ import { Button } from '@/components/ui/button';
 import { useCopyLink } from '@/hooks/useCopyLink';
 import { useEmpresa } from '@/hooks/useEmpresa';
 import { generateContractPdf, downloadBlob } from '@/utils/contractPdfGenerator';
-import { generateContractTemplate } from '../ContractForm';
-import { generateContractUrl } from '@/utils/slugify';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
-import { Contract } from '@/types/contract';
-
 interface ContractHeaderProps {
-  contract: Contract;
   handleResend: () => void;
   contractStatus: string;
   contractId: string;
 }
 
-const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: ContractHeaderProps) => {
+const ContractHeader = ({ handleResend, contractStatus, contractId }: ContractHeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { copyContractLink } = useCopyLink();
@@ -31,58 +24,68 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
   const handleBackToList = () => {
     navigate('/contratos');
   };
-    const handleDownload = async () => {
-      if (!contract || !configuracoes) return;
+    const handleDownload = () => {
+    try {
+      // Dados do cliente - em produção, estes dados viriam de props ou API
+      const clientData = {
+        nome: "Ana Silva",
+        telefone: "(11) 98765-4321",
+        email: "ana.silva@email.com",
+        tipoEvento: "Casamento"
+      };
+      
+      const eventoData = {
+        data: "15 de outubro de 2023",
+        local: "Espaço Jardim Botânico, São Paulo - SP"
+      };
+      
+      const pagamentoData = {
+        valorTotal: "R$ 2.500,00",
+        sinal: "R$ 500,00",
+        valorRestante: "R$ 2.000,00"
+      };
+      
+      // Texto completo do contrato
+      const conteudoContrato = ``;
 
-      try {
-        // Gera o conteúdo completo do contrato usando o template
-        const conteudoContrato = generateContractTemplate(contract, configuracoes);
-
-        const pdfData = {
-          conteudoContrato,
-          includeSignature: contract.status === 'assinado',
-          signatureDate: contract.status === 'assinado' && contract.signatureInfo ? format(new Date(contract.signatureInfo.timestamp), "dd/MM/yyyy", { locale: ptBR }) : undefined,
-          nomeContratado: configuracoes.nome_empresa || 'Bright Spark Photography',
-          clientName: contract.status === 'assinado' ? contract.signatureInfo?.name : contract.clientName
-        };
-
-        // Gerar o PDF e fazer o download
-        const pdfBlob = await generateContractPdf(pdfData);
-        // Usar nome_cliente ou nome do cliente relacionado, sem ID no nome do arquivo
-        const clientName = contract.nome_cliente || contract.clientes?.nome || 'cliente';
-        downloadBlob(pdfBlob, `${clientName}.pdf`);
-        
-        toast({
-          title: "Download iniciado",
-          description: "O contrato está sendo baixado em formato PDF.",
-        });
-      } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        toast({
-          title: "Erro no download",
-          description: "Ocorreu um erro ao gerar o PDF. Tente novamente.",
-          variant: "destructive",
-        });
-      }
-    };
-  
-  const handleViewSite = () => {
-    let contractUrl;
-    
-    if (contract.id_amigavel && contract.nome_cliente) {
-      // Usar novo formato com dados completos
-      contractUrl = generateContractUrl({
-        id_contrato: contractId,
-        id_amigavel: contract.id_amigavel,
-        nome_cliente: contract.nome_cliente
+      // Gerar o PDF usando o utilitário
+      const pdfBlob = generateContractPdf({
+        clientData,
+        eventoData,
+        pagamentoData,
+        conteudoContrato,
+        contractId,
+        contractStatus,
+        includeSignature: contractStatus.toLowerCase() === 'assinado',
+        nomeContratado
       });
-    } else {
-      // Fallback para formato antigo
-      contractUrl = generateContractUrl(contractId, contract.tipo_evento);
+      
+      // Fazer o download
+      downloadBlob(pdfBlob, `contrato-${clientData.nome.replace(/\s+/g, '-')}-${contractId}.pdf`);
+      
+      toast({
+        title: "Download concluído",
+        description: "O contrato foi baixado em formato PDF.",
+      });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro no download",
+        description: "Não foi possível gerar o PDF. Tente novamente.",
+        variant: "destructive",
+      });
     }
+  };
+
+  const handleViewSite = () => {
+    // Abre o contrato na visualização pública do cliente em uma nova aba
+    const publicContractUrl = `/contrato/${contractId}`;
+    window.open(publicContractUrl, '_blank');
     
-    const link = `${window.location.origin}${contractUrl}`;
-    window.open(link, '_blank');
+    toast({
+      title: "Site aberto",
+      description: "O contrato foi aberto na visualização do cliente.",
+    });
   };
   
   return (
@@ -100,17 +103,7 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
             Reenviar
           </Button>
         )}
-        <Button variant="outline" className="gap-2" onClick={() => {
-          if (contract.id_amigavel && contract.nome_cliente) {
-            copyContractLink({
-              id_contrato: contractId,
-              id_amigavel: contract.id_amigavel,
-              nome_cliente: contract.nome_cliente
-            });
-          } else {
-            copyContractLink(contractId, contract.tipo_evento);
-          }
-        }}>
+        <Button variant="outline" className="gap-2" onClick={() => copyContractLink(contractId)}>
           <Copy size={16} />
           Copiar Link
         </Button>

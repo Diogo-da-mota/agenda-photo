@@ -7,7 +7,6 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from '@/utils/emojiUtils';
 
 const ClientNotifications = () => {
   const { toast } = useToast();
@@ -61,23 +60,17 @@ const ClientNotifications = () => {
     
     // Mensagens padrão baseadas no tipo
     const messages = {
-      contract: "Olá! Vi que você tem um contrato pendente para assinatura. Podemos ajudar com algo? 📋",
-      event: "Olá! Gostaria de confirmar nosso próximo evento agendado. Está tudo certo para a data marcada? 🎉",
-      payment: "Olá! Notamos que há um pagamento pendente em seu nome. Podemos ajudar com o processo de pagamento? 💳",
-      general: "Olá! Como posso ajudar você hoje? 😊"
+      contract: "Olá! Vi que você tem um contrato pendente para assinatura. Podemos ajudar com algo?",
+      event: "Olá! Gostaria de confirmar nosso próximo evento agendado. Está tudo certo para a data marcada?",
+      payment: "Olá! Notamos que há um pagamento pendente em seu nome. Podemos ajudar com o processo de pagamento?",
+      general: "Olá! Como posso ajudar você hoje?"
     };
     
     // Determinar qual mensagem usar
     const message = messages[type as keyof typeof messages] || messages.general;
     
-    // Processar emojis para garantir compatibilidade com WhatsApp
-    const mensagemProcessada = processEmojisForWhatsApp(message);
-    
-    // Codificar mensagem preservando emojis
-    const mensagemCodificada = encodeTextWithEmojisForURL(mensagemProcessada);
-    
     // Abrir WhatsApp com o número e mensagem
-    window.open(`https://wa.me/55${phoneNumber}?text=${mensagemCodificada}`, '_blank');
+    window.open(`https://wa.me/55${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     
     toast({
       title: "WhatsApp aberto",

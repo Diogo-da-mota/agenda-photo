@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Check, X } from 'lucide-react';
-import { formatarTelefoneExibicao } from '@/utils/formatters';
 
 interface ContractClientInfoProps {
   clientName: string;
@@ -57,7 +56,7 @@ const ContractClientInfo = ({
             {clientEmail && clientEmail !== 'N/A' && (
               <p><strong>Email:</strong> {clientEmail}</p>
             )}
-            <p><strong>Telefone:</strong> {formatarTelefoneExibicao(phoneNumber)}</p>
+            <p><strong>Telefone:</strong> {phoneNumber}</p>
           </div>
         </div>
         

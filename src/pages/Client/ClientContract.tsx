@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { 
   Check, Download, FileText, Calendar, 
   MapPin, DollarSign, Pen, Info,
-  Clock, CheckCircle, Loader2, Upload, X
+  Clock, CheckCircle, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -24,18 +24,12 @@ import {
 } from '@/components/ui/dialog';
 import ContractContent from '@/components/contratos/details/ContractContent';
 import ContractAttachments from '@/components/contratos/details/ContractAttachments';
-import PdfPreview from '@/components/contratos/details/PdfPreview';
 import SignatureModal from '@/components/contratos/SignatureModal';
 import { useContract } from '@/hooks/useContract';
 import { usePublicContract } from '@/hooks/usePublicContract';
 import { useAuth } from '@/hooks/useAuth';
 import { useEmpresa } from '@/hooks/useEmpresa';
-import { generateContractPdf, downloadBlob } from '@/utils/contractPdfGenerator';
-import { generateContractTemplate } from '@/components/contratos/ContractForm';
-import { parseContractSlug } from '@/utils/slugify';
-import { formatarTelefoneExibicao } from '@/utils/formatters';
-import { supabase } from '@/lib/supabase';
-import { uploadContractAttachments } from '../../services/supabaseStorageService';
+import { generateContractPdf } from '@/utils/contractPdfGenerator';
 
 // Mock contract data (in a real app would be fetched based on id)
 const mockContract = {
@@ -50,40 +44,7 @@ const mockContract = {
   value: 2500.00,
   downPayment: 500.00,
   status: 'pendente', // 'pendente', 'assinado', 'expirado', 'cancelado'
-  termsAndConditions: `# CONTRATO DE PRESTAÇÃO DE SERVIÇOS FOTOGRÁFICOS - TESTE CONTEÚDO PERSONALIZADO
-
-## CONTRATANTE
-**Nome:** {{CLIENTE_NOME}}
-**Email:** {{CLIENTE_EMAIL}}
-**Telefone:** {{CLIENTE_TELEFONE}}
-
-## CONTRATADA
-**Empresa:** {{EMPRESA_NOME}}
-**CNPJ:** {{EMPRESA_CNPJ}}
-**Email:** {{EMPRESA_EMAIL}}
-
-## OBJETO DO CONTRATO
-O presente contrato tem por objeto a prestação de serviços fotográficos para o evento **{{EVENTO_TIPO}}**, a ser realizado no dia **{{DATA_EVENTO}}**.
-
-## VALOR E FORMA DE PAGAMENTO
-O valor total dos serviços é de **R$ {{VALOR_TOTAL}}**, sendo:
-- Entrada: R$ {{VALOR_ENTRADA}}
-- Saldo: R$ {{VALOR_SALDO}}
-
-## CLÁUSULAS ESPECIAIS - CONTEÚDO PERSONALIZADO DA COLUNA "conteudo"
-1. **EXCLUSIVIDADE**: A contratada terá exclusividade fotográfica durante todo o evento.
-
-2. **ENTREGA**: As fotos editadas serão entregues em até 30 dias após o evento via galeria online.
-
-3. **DIREITOS DE IMAGEM**: O contratante autoriza o uso das imagens para divulgação do trabalho da contratada.
-
-4. **CANCELAMENTO**: Em caso de cancelamento com mais de 30 dias de antecedência, será devolvido 50% do valor pago.
-
-## ASSINATURA
-Este contrato foi gerado automaticamente em **{{DATA_ATUAL}}** e é válido mediante aceite eletrônico.
-
----
-**ESTE É UM TESTE DO CONTEÚDO PERSONALIZADO DA COLUNA "conteudo" COM PLACEHOLDERS DINÂMICOS**`,
+  termsAndConditions: ``,
   photographerName: "Mariana Fotografias",
   attachments: [
     { name: 'cronograma_evento.pdf', size: '145 KB' },
@@ -100,55 +61,22 @@ interface SignatureInfo {
   method: 'draw' | 'text';
 }
 
-interface FileAttachment {
-  id: string;
-  name: string;
-  size: string;
-  type: string;
-  file?: File;
-}
-
 const ClientContract = () => {
-  // Usar slug como parâmetro principal para suportar URLs amigáveis
-  const { slug, id_contrato } = useParams<{ slug?: string; id_contrato?: string }>();
+  const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const { configuracoes } = useEmpresa();
   const { user } = useAuth();
   
-  // Extrair ID do contrato do slug ou usar ID direto (retrocompatibilidade)
-  const contractId = React.useMemo(() => {
-    if (slug) {
-      // Nova URL com slug: /contrato/titulo-slug-12345678 ou /cliente/contrato/titulo-slug-12345678
-      const result = parseContractSlug(slug);
-      if (result.isValid && result.id_contrato) {
-        return result.id_contrato;
-      }
-      // Se o slug não é válido, pode ser um ID direto na posição do slug
-      return slug;
-    }
-    // URL antiga com ID direto: /contrato/12345678 ou /cliente/contrato/12345678
-    return id_contrato || '';
-  }, [slug, id_contrato]);
-  
   // Buscar dados reais do contrato - usar hook apropriado baseado na autenticação
   const { data: contractData, isLoading: contractLoading, error: contractError } = user 
-    ? useContract(contractId) 
-    : usePublicContract(contractId);
+    ? useContract(id || '') 
+    : usePublicContract(id || '');
   
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [signatureInfo, setSignatureInfo] = useState<SignatureInfo | null>(null);
   
-  // Estados para upload de arquivos
-  const [clientAttachments, setClientAttachments] = useState<FileAttachment[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  
-  // Estado para PDF do contrato
-  const [contractPdfUrl, setContractPdfUrl] = useState<string | null>(null);
-  const [savedContractPdfUrl, setSavedContractPdfUrl] = useState<string | null>(null);
-
   const nomeContratado = configuracoes?.nome_empresa || mockContract.photographerName;
   
   // Função para extrair nome do cliente do título do contrato
@@ -164,194 +92,27 @@ const ClientContract = () => {
     return null;
   };
   
-  // Usar dados reais do contrato quando disponíveis - MEMOIZADO para evitar loop infinito
-  const contract = React.useMemo(() => {
-    if (!contractData) {
-      // Fallback para mock contract para demonstração/teste
-      if (contractId === '1' || contractId === 'mock' || contractId === 'demo') {
-        return {
-          id: mockContract.id,
-          clientName: mockContract.clientName,
-          clientEmail: mockContract.clientEmail,
-          phoneNumber: mockContract.phoneNumber,
-          eventType: mockContract.eventType,
-          eventDate: mockContract.eventDate,
-          eventLocation: mockContract.eventLocation,
-          sentDate: mockContract.sentDate,
-          value: mockContract.value,
-          downPayment: mockContract.downPayment,
-          status: mockContract.status,
-          termsAndConditions: mockContract.termsAndConditions,
-          photographerName: nomeContratado,
-          attachments: existingAttachments,
-          signatureInfo: signatureInfo
-        };
-      }
-      return null;
-    }
-    
-    return {
-      id: contractData.id,
-      clientName: contractData.clientes?.nome || contractData.nome_cliente || extractClientNameFromTitle(contractData.titulo) || 'Cliente',
-      clientEmail: contractData.clientes?.email || contractData.email_cliente || 'email@exemplo.com',
-      phoneNumber: formatarTelefoneExibicao(contractData.clientes?.telefone || contractData.telefone_cliente) || '(00) 00000-0000',
-      eventType: contractData.titulo?.split(' - ')[1] || contractData.tipo_evento || 'Evento',
-      eventDate: contractData.data_evento ? new Date(contractData.data_evento) : new Date(),
-      eventLocation: contractData.local_evento || 'Local a definir',
-      sentDate: contractData.created_at ? new Date(contractData.created_at) : new Date(),
-      value: contractData.valor_total || 0,
-      downPayment: contractData.valor_sinal || 0,
-      status: contractData.status || 'pendente',
-      termsAndConditions: contractData.conteudo || '',
-      photographerName: nomeContratado,
-      attachments: existingAttachments,
-      signatureInfo: signatureInfo
-    };
-  }, [contractData, existingAttachments, signatureInfo, nomeContratado, contractId]);
-
-  // Função para carregar anexos existentes do contrato
-  const loadExistingAttachments = React.useCallback(async () => {
-    if (!contractId) return;
-    
-    try {
-      const { data: anexos, error } = await supabase
-        .from('anexos_contrato')
-        .select('*')
-        .eq('id_contrato', contractId);
-      
-      if (error) {
-        console.error('Erro ao carregar anexos existentes:', error);
-        return;
-      }
-      
-      if (anexos && anexos.length > 0) {
-        const attachments = anexos.map(anexo => {
-          // Gerar URL pública do arquivo no bucket se necessário
-          let fileUrl = anexo.url;
-          
-          // Se a URL não for completa, gerar URL pública do bucket
-          if (fileUrl && !fileUrl.startsWith('http')) {
-            const { data: urlData } = supabase.storage
-              .from('contratos')
-              .getPublicUrl(fileUrl);
-            fileUrl = urlData.publicUrl;
-          }
-          
-          return {
-            name: anexo.nome,
-            size: anexo.tamanho ? `${(anexo.tamanho / 1024 / 1024).toFixed(2)} MB` : 'Desconhecido',
-            type: anexo.tipo,
-            url: fileUrl
-          };
-        });
-        
-        setExistingAttachments(attachments);
-        
-        // Buscar especificamente o PDF do contrato principal
-        const contractPdf = anexos.find(anexo => 
-          anexo.tipo === 'application/pdf' && 
-          (anexo.nome.toLowerCase().includes('contrato') || anexo.nome.toLowerCase().includes('contract'))
-        );
-        
-        if (contractPdf && contractPdf.url) {
-          let pdfUrl = contractPdf.url;
-          
-          // Se a URL não for completa, gerar URL pública do bucket
-          if (!pdfUrl.startsWith('http')) {
-            const { data: urlData } = supabase.storage
-              .from('contratos')
-              .getPublicUrl(pdfUrl);
-            pdfUrl = urlData.publicUrl;
-          }
-          
-          setSavedContractPdfUrl(pdfUrl);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao carregar anexos:', error);
-    }
-  }, [contractId]);
-
-  // Função para gerar URL do PDF do contrato - OTIMIZADA para evitar loop
-  const generateContractPdfUrl = React.useCallback(async () => {
-    if (!contractData || !configuracoes) return;
-    
-    try {
-      // Construir objeto do contrato apenas para geração do PDF
-      const contractForPdf = {
-        id: contractData.id,
-        clientName: contractData.clientes?.nome || contractData.nome_cliente || extractClientNameFromTitle(contractData.titulo) || 'Cliente',
-        clientEmail: contractData.clientes?.email || contractData.email_cliente || 'email@exemplo.com',
-        phoneNumber: formatarTelefoneExibicao(contractData.clientes?.telefone || contractData.telefone_cliente) || '(00) 00000-0000',
-        eventType: contractData.titulo?.split(' - ')[1] || contractData.tipo_evento || 'Evento',
-        eventDate: contractData.data_evento ? new Date(contractData.data_evento) : new Date(),
-        eventLocation: contractData.local_evento || 'Local a definir',
-        sentDate: contractData.created_at ? new Date(contractData.created_at) : new Date(),
-        value: contractData.valor_total || 0,
-        downPayment: contractData.valor_sinal || 0,
-        status: contractData.status || 'pendente',
-        termsAndConditions: contractData.conteudo || '',
-        photographerName: nomeContratado,
-        attachments: existingAttachments,
-        signatureInfo: signatureInfo
-      };
-
-      // Gera o conteúdo completo do contrato usando o template
-      const conteudoContrato = generateContractTemplate(contractForPdf, configuracoes);
-
-      const pdfData = {
-        conteudoContrato,
-        includeSignature: contractForPdf.status === 'assinado',
-        signatureDate: contractForPdf.status === 'assinado' && (contractForPdf.signatureInfo || signatureInfo) ? 
-          format((contractForPdf.signatureInfo || signatureInfo)!.timestamp, "dd/MM/yyyy", { locale: ptBR }) : undefined,
-        nomeContratado: nomeContratado,
-        clientName: contractForPdf.status === 'assinado' ? (contractForPdf.signatureInfo?.name || signatureInfo?.name || contractForPdf.clientName) : undefined
-      };
-
-      // Gerar o PDF blob
-      const pdfBlob = generateContractPdf(pdfData);
-      
-      // Criar URL temporária para o blob
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      setContractPdfUrl(prevUrl => {
-        // Limpar URL anterior se existir
-        if (prevUrl) {
-          URL.revokeObjectURL(prevUrl);
-        }
-        return pdfUrl;
-      });
-    } catch (error) {
-      console.error('Erro ao gerar PDF para preview:', error);
-    }
-  }, [contractData, configuracoes, signatureInfo, nomeContratado, existingAttachments]);
-
-  // Carregar anexos existentes quando o contractId estiver disponível
-  React.useEffect(() => {
-    if (contractId) {
-      loadExistingAttachments();
-    }
-  }, [contractId, loadExistingAttachments]);
-
-  // Gerar PDF do contrato quando estiver disponível - OTIMIZADO para evitar loop
-  React.useEffect(() => {
-    if (contractData && configuracoes) {
-      generateContractPdfUrl();
-    }
-  }, [contractData?.id, configuracoes, generateContractPdfUrl]);
-
-  // Cleanup para revogar URLs quando componente for desmontado
-  React.useEffect(() => {
-    return () => {
-      if (contractPdfUrl) {
-        URL.revokeObjectURL(contractPdfUrl);
-      }
-    };
-  }, [contractPdfUrl]);
-
-  // Logs de debug removidos por segurança
+  // Usar dados reais do contrato quando disponíveis
+  const contract = contractData ? {
+    id: contractData.id,
+    clientName: contractData.clientes?.nome || contractData.nome_cliente || extractClientNameFromTitle(contractData.titulo) || 'Cliente',
+    clientEmail: contractData.clientes?.email || contractData.email_cliente || 'email@exemplo.com',
+    phoneNumber: contractData.clientes?.telefone || contractData.telefone_cliente || '(00) 00000-0000',
+    eventType: contractData.titulo?.split(' - ')[1] || contractData.tipo_evento || 'Evento',
+    eventDate: contractData.data_evento ? new Date(contractData.data_evento) : new Date(),
+    eventLocation: contractData.local_evento || 'Local a definir',
+    sentDate: contractData.created_at ? new Date(contractData.created_at) : new Date(),
+    value: contractData.valor_total || 0,
+    downPayment: contractData.valor_sinal || 0,
+    status: contractData.status || 'pendente',
+    termsAndConditions: contractData.conteudo || '',
+    photographerName: nomeContratado,
+    attachments: [],
+    signatureInfo: signatureInfo
+  } : null;
   
-  // Se não há dados do contrato e não está carregando, mostrar erro (exceto para IDs de teste)
-  if (!contractLoading && !contract && contractId !== '1' && contractId !== 'mock' && contractId !== 'demo') {
+  // Se não há dados do contrato e não está carregando, mostrar erro
+  if (!contractLoading && !contract) {
     return (
       <ResponsiveContainer>
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
@@ -369,8 +130,8 @@ const ClientContract = () => {
     );
   }
   
-  // Loading state (exceto para IDs de teste)
-  if (contractLoading && contractId !== '1' && contractId !== 'mock' && contractId !== 'demo') {
+  // Loading state
+  if (contractLoading) {
     return (
       <ResponsiveContainer>
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
@@ -388,8 +149,8 @@ const ClientContract = () => {
     );
   }
   
-  // Error state (exceto para IDs de teste)
-  if (contractError && contractId !== '1' && contractId !== 'mock' && contractId !== 'demo') {
+  // Error state
+  if (contractError) {
     return (
       <ResponsiveContainer>
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
@@ -406,25 +167,35 @@ const ClientContract = () => {
       </ResponsiveContainer>
     );
   }
-    const handleDownload = async () => {
+    const handleDownload = () => {
     try {
-      if (!contract) return;
-
-      // Gera o conteúdo completo do contrato usando o template
-      const conteudoContrato = generateContractTemplate(contract, configuracoes);
-
-      const pdfData = {
-        conteudoContrato,
+      const contractData = {
+        contractId: id || '1',
+        contractStatus: contract.status,
+        clientData: {
+          nome: contract.clientName,
+          telefone: contract.phoneNumber,
+          email: contract.clientEmail,
+          tipoEvento: contract.eventType
+        },
+        eventoData: {
+          data: format(contract.eventDate, "dd/MM/yyyy", { locale: ptBR }),
+          local: contract.eventLocation
+        },
+        pagamentoData: {
+          valorTotal: contract.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+          sinal: contract.downPayment.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+          valorRestante: (contract.value - contract.downPayment).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        },
+        conteudoContrato: contract.termsAndConditions,
         includeSignature: contract.status === 'assinado',
-        signatureDate: contract.status === 'assinado' && (contract.signatureInfo || signatureInfo) ? 
-          format((contract.signatureInfo || signatureInfo)!.timestamp, "dd/MM/yyyy", { locale: ptBR }) : undefined,
-        nomeContratado: nomeContratado,
-        clientName: contract.status === 'assinado' ? (contract.signatureInfo?.name || signatureInfo?.name || contract.clientName) : undefined
+        signatureDate: contract.status === 'assinado' && contract.signatureInfo ? 
+          format(contract.signatureInfo.timestamp, "dd/MM/yyyy", { locale: ptBR }) : undefined,
+        nomeContratado: contract.status === 'assinado' && contract.signatureInfo ? 
+          contract.signatureInfo.name : undefined
       };
 
-      // Gerar o PDF e fazer o download
-      const pdfBlob = await generateContractPdf(pdfData);
-      downloadBlob(pdfBlob, `contrato-${contract.clientName}.pdf`);
+      generateContractPdf(contractData);
       
       toast({
         title: "Download iniciado",
@@ -440,90 +211,6 @@ const ClientContract = () => {
     }
   };
   
-  // Função para salvar (nova funcionalidade)
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      
-      if (!contract?.id || clientAttachments.length === 0) {
-        toast({
-          title: "Nenhum anexo para salvar",
-          description: "Adicione anexos antes de salvar.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Filtrar apenas anexos que têm arquivo (novos uploads)
-      const newAttachments = clientAttachments.filter(attachment => attachment.file);
-      
-      if (newAttachments.length === 0) {
-        toast({
-          title: "Nenhum anexo novo para salvar",
-          description: "Todos os anexos já foram salvos.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Upload dos arquivos usando o serviço específico para anexos de contrato
-      const files = newAttachments.map(attachment => attachment.file!);
-      const uploadResult = await uploadContractAttachments(files, {
-        bucket: 'contratos',
-        pathPrefix: `contract-${contract.id}`
-      });
-
-      if (!uploadResult.success) {
-        throw new Error(`Erro no upload: ${uploadResult.errors.map(e => e.error).join(', ')}`);
-      }
-
-      // Salvar informações dos anexos na tabela anexos_contrato
-      for (let i = 0; i < newAttachments.length; i++) {
-        const attachment = newAttachments[i];
-        const publicUrl = uploadResult.urls[i];
-        
-        const { error: dbError } = await supabase
-          .from('anexos_contrato')
-          .insert({
-            id_contrato: contract.id,
-            id_user: user?.id, // Adicionar o ID do usuário logado
-            nome: attachment.name,
-            url: publicUrl,
-            tipo: attachment.type,
-            tamanho: attachment.file!.size
-          });
-
-        if (dbError) {
-          console.error('Erro ao salvar no banco:', dbError);
-          throw new Error(`Erro ao salvar informações do arquivo ${attachment.name}`);
-        }
-      }
-
-      // Limpar anexos após salvar
-      setClientAttachments([]);
-      
-      // Recarregar anexos existentes para mostrar os novos
-      await loadExistingAttachments();
-      
-      toast({
-        title: "Anexos salvos com sucesso",
-        description: `${newAttachments.length} arquivo(s) foram salvos no contrato.`,
-      });
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Erro ao salvar:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao salvar os anexos. Tente novamente.",
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
-  };
-
   const handleSignConfirm = (signedBy: string, signature: string | null, ip: string) => {
     if (!signature) return;
     
@@ -565,105 +252,6 @@ const ClientContract = () => {
     }
   };
 
-  // Funções para upload de arquivos
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      handleFiles(Array.from(files));
-    }
-  };
-
-  const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    
-    const files = event.dataTransfer.files;
-    if (files) {
-      handleFiles(Array.from(files));
-    }
-  };
-
-  const handleFiles = (files: File[]) => {
-    const validFiles = files.filter(file => {
-      // Validar tipo de arquivo
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/gif'
-      ];
-      
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Tipo de arquivo não suportado",
-          description: `O arquivo "${file.name}" não é um tipo suportado.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Validar tamanho (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: `O arquivo "${file.name}" excede o limite de 5MB.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      return true;
-    });
-
-    const newAttachments: FileAttachment[] = validFiles.map(file => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-      type: file.type,
-      file: file
-    }));
-
-    setClientAttachments(prev => [...prev, ...newAttachments]);
-    
-    if (newAttachments.length > 0) {
-      toast({
-        title: "Arquivos adicionados",
-        description: `${newAttachments.length} arquivo(s) adicionado(s) com sucesso.`,
-      });
-    }
-  };
-
-  const removeClientAttachment = (id: string) => {
-    setClientAttachments(prev => prev.filter(attachment => attachment.id !== id));
-    toast({
-      title: "Arquivo removido",
-      description: "O arquivo foi removido da lista de anexos.",
-    });
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-  };
-
-  const getFileIcon = (type: string) => {
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('word') || type.includes('document')) return '📝';
-    if (type.includes('excel') || type.includes('sheet')) return '📊';
-    if (type.includes('image')) return '🖼️';
-    return '📎';
-  };
-
   return (
     <ResponsiveContainer>
       <div className="max-w-4xl mx-auto space-y-6 pb-12">
@@ -679,6 +267,7 @@ const ClientContract = () => {
                 variant="outline" 
                 className="gap-2" 
                 onClick={handleDownload}
+                disabled={contract.status !== 'assinado'}
               >
                 <Download size={16} />
                 Baixar PDF
@@ -701,7 +290,7 @@ const ClientContract = () => {
                   {contract.clientEmail && contract.clientEmail !== 'N/A' && contract.clientEmail !== 'email@exemplo.com' && (
                     <p><strong>Email:</strong> {contract.clientEmail}</p>
                   )}
-                  <p><strong>Telefone:</strong> {formatarTelefoneExibicao(contract.phoneNumber)}</p>
+                  <p><strong>Telefone:</strong> {contract.phoneNumber}</p>
                 </div>
               </div>
               
@@ -744,157 +333,93 @@ const ClientContract = () => {
             
             {contract.attachments.length > 0 && (
               <div className="mb-6">
-                <ContractAttachments 
-                  attachments={contract.attachments}
-                  contractData={{
-                    id: contract.id,
-                    nome_cliente: contract.clientName,
-                    pdfUrl: savedContractPdfUrl || contractPdfUrl || undefined
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Seção de Upload de Arquivos do Cliente - Apenas para contratos pendentes */}
-            {contract.status === 'pendente' && (
-              <div className="mb-6">
-                <h3 className="font-medium mb-4">Adicionar Documentos</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Você pode anexar documentos adicionais relacionados ao contrato (opcional).
-                </p>
-                
-                {/* Anexos Existentes */}
-                {existingAttachments.length > 0 && (
-                  <div className="mb-6">
-                    <ContractAttachments 
-                      attachments={existingAttachments}
-                      contractData={{
-                        id: contract.id,
-                        nome_cliente: contract.clientName,
-                        pdfUrl: savedContractPdfUrl || contractPdfUrl || undefined
-                      }}
-                      showRemoveButton={false}
-                    />
-                  </div>
-                )}
-                
-                {/* Visualização do PDF do Contrato */}
-                {(savedContractPdfUrl || contractPdfUrl) && (
-                  <div className="mb-6">
-                    <h3 className="font-medium mb-4">Visualização do Contrato</h3>
-                    <PdfPreview 
-                      pdfUrl={savedContractPdfUrl || contractPdfUrl || undefined}
-                      fileName={`Contrato - ${contract.clientName}.pdf`}
-                      showPreview={!!(savedContractPdfUrl || contractPdfUrl)}
-                      className="mb-4"
-                    />
-                    {savedContractPdfUrl && (
-                      <p className="text-xs text-muted-foreground">
-                        📄 Contrato salvo no sistema
-                      </p>
-                    )}
-                    {!savedContractPdfUrl && contractPdfUrl && (
-                      <p className="text-xs text-muted-foreground">
-                        📄 Visualização gerada dinamicamente
-                      </p>
-                    )}
-                  </div>
-                )}
-                
-                {/* Área de Upload */}
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                    isDragging 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted-foreground/25 hover:border-primary/50'
-                  }`}
-                  onDrop={handleFileDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                >
-                  <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium mb-1">
-                    Arraste arquivos aqui ou clique para selecionar
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    PDF, Word, Excel ou Imagens (máx. 5MB cada)
-                  </p>
-                  
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="client-file-upload"
-                  />
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => document.getElementById('client-file-upload')?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Escolher Arquivos
-                  </Button>
-                </div>
-                
-                {/* Lista de Arquivos Anexados pelo Cliente */}
-                {clientAttachments.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium mb-2">Documentos Anexados:</h4>
-                    <div className="space-y-2">
-                      {clientAttachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between p-3 bg-muted/30 rounded-md"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-lg">{getFileIcon(attachment.type)}</span>
-                            <div>
-                              <p className="text-sm font-medium">{attachment.name}</p>
-                              <p className="text-xs text-muted-foreground">{attachment.size}</p>
-                            </div>
-                          </div>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeClientAttachment(attachment.id)}
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <ContractAttachments attachments={contract.attachments} />
               </div>
             )}
             
             <Separator className="my-6" />
             
-            {/* Botão de Salvar - substituindo a seção de Assinatura Digital */}
-            <div className="flex justify-center">
-              <Button 
-                onClick={handleSave}
-                disabled={loading}
-                className="gap-2 min-w-[200px]"
-              >
-                {loading ? (
+            {contract.status === 'pendente' ? (
+              <div>
+                <h2 className="text-lg font-bold mb-4">Assinatura Digital</h2>
+                
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Para concluir o processo, é necessário assinar digitalmente este contrato.
+                    Você pode usar um mouse ou o dedo (em dispositivos touch) para desenhar sua assinatura.
+                  </p>
+                  
+                  <Button 
+                    onClick={() => setShowSignatureModal(true)} 
+                    className="gap-2 w-full"
+                  >
+                    <Pen size={16} />
+                    Assinar Digitalmente
+                  </Button>
+                  
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2 bg-muted/30 p-2 rounded-md">
+                    <Info size={14} />
+                    <p>Após a assinatura, uma cópia do contrato será enviada para seu email e estará disponível para download.</p>
+                  </div>
+                </div>
+              </div>
+            ) : contract.status === 'assinado' ? (
+              <div className="bg-green-50 border border-green-200 rounded-md p-4 text-green-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle size={20} className="text-green-600" />
+                  <h3 className="font-medium">Contrato Assinado</h3>
+                </div>
+                
+                {contract.signatureInfo && (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Salvar
+                    <p className="text-sm mb-4">
+                        Este contrato foi assinado digitalmente por {(contract.signatureInfo || signatureInfo)?.name} em{' '}
+                        {format((contract.signatureInfo || signatureInfo)?.timestamp || new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}.
+                      </p>
+                    
+                    <div className="bg-white border border-green-100 rounded-md p-3 mb-4">
+                      <p className="text-xs text-muted-foreground mb-1">Assinatura:</p>
+                      {(contract.signatureInfo || signatureInfo)?.method === 'draw' ? (
+                        <img 
+                          src={(contract.signatureInfo || signatureInfo)?.signature} 
+                          alt="Assinatura" 
+                          className="max-h-20"
+                        />
+                      ) : (
+                        <p className="font-medium text-xl italic">{(contract.signatureInfo || signatureInfo)?.name}</p>
+                      )}
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground bg-green-50 p-2 rounded border border-green-100">
+                      <p><strong>Informações de segurança:</strong></p>
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        <li>IP da assinatura: {(contract.signatureInfo || signatureInfo)?.ip}</li>
+                        <li>Data e hora: {format((contract.signatureInfo || signatureInfo)?.timestamp || new Date(), "dd/MM/yyyy HH:mm:ss", { locale: ptBR })}</li>
+                        <li>Método de assinatura: {(contract.signatureInfo || signatureInfo)?.method === 'draw' ? 'Desenho à mão' : 'Digitação de nome'}</li>
+                      </ul>
+                    </div>
                   </>
                 )}
-              </Button>
-            </div>
+                
+                <div className="mt-4">
+                  <Button className="gap-2" onClick={handleDownload}>
+                    <Download size={16} />
+                    Baixar Contrato Assinado
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <Info size={20} className="text-yellow-600" />
+                  <h3 className="font-medium">Este contrato não está mais disponível para assinatura</h3>
+                </div>
+                <p className="text-sm">
+                  Este contrato foi {contract.status === 'expirado' ? 'expirado' : 'cancelado'}.
+                  Entre em contato com o prestador de serviço para mais informações.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

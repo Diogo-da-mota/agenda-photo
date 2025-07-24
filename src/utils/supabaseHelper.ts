@@ -71,7 +71,7 @@ export interface AuditLog {
 }
 
 export interface Contrato {
-  id_contrato: string;
+  id: string;
   cliente_id: string;
   user_id: string;
   titulo: string;

@@ -449,13 +449,3 @@ IMPORTANTE:
 Este PRD foi estruturado para fornecer uma visão completa do sistema, desde a arquitetura até os detalhes de implementação. O foco está em criar uma experiência premium tanto para fotógrafos quanto para seus clientes, com performance e usabilidade como prioridades.
 
 A implementação progressiva permite entregas rápidas de valor enquanto o sistema evolui para sua versão completa.
-
-
-
-
-Próximos passos:
-🧠 Conectar ao Supabase: Substituir os dados falsos por dados reais.
-🔐 Autenticação: Fazer o login do fotógrafo funcionar de verdade.
-⬆️ Upload Real: Ativar a área de upload para enviar as fotos.
-⬇️ Downloads: Implementar a lógica para baixar as imagens.
-Por onde prefere começar? 🚀

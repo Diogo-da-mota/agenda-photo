@@ -17,6 +17,13 @@ export interface TemplateSelectProps {
 
 
 
+export interface CreateTemplateDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (name: string, content: string) => void;
+  currentContent?: string;
+}
+
 export interface ContractTemplateSelectorProps {
   selectedTemplate: string;
   onTemplateChange: (templateId: string) => void;

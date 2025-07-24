@@ -1,6 +1,5 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from './emojiUtils';
 
 export interface ReceiptData {
   eventoId: string;
@@ -29,31 +28,6 @@ const defaultCompanyInfo: CompanyInfo = {
   telefone: "(11) 99999-9999",
   email: "contato@brightspark.com",
   website: "www.brightspark.com"
-};
-
-/**
- * Formata um número de telefone brasileiro
- */
-const formatPhone = (phone: string): string => {
-  if (!phone) return '';
-  
-  // Remove tudo que não é número
-  const numbers = phone.replace(/\D/g, '');
-  
-  // Se não tem números, retorna vazio
-  if (!numbers) return '';
-  
-  // Aplica a máscara baseada no comprimento
-  if (numbers.length <= 2) {
-    return `(${numbers}`;
-  } else if (numbers.length <= 6) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-  } else if (numbers.length <= 10) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
-  } else {
-    // Para celular (11 dígitos): (00) 00000-0000
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  }
 };
 
 /**
@@ -334,7 +308,7 @@ export const generateReceiptHTML = (
           <div class="company-logo">BS</div>
           <div class="company-name">${companyInfo.nome}</div>
           <div class="company-info">
-            ${formatPhone(companyInfo.telefone)} • ${companyInfo.email}<br>
+            ${companyInfo.telefone} • ${companyInfo.email}<br>
             ${companyInfo.website}
           </div>
         </div>
@@ -355,7 +329,7 @@ export const generateReceiptHTML = (
               ${receiptData.clienteTelefone ? `
                 <div class="info-item">
                   <div class="info-label">Telefone</div>
-                  <div class="info-value">${formatPhone(receiptData.clienteTelefone)}</div>
+                  <div class="info-value">${receiptData.clienteTelefone}</div>
                 </div>
               ` : ''}
             </div>
@@ -505,17 +479,12 @@ export const openWhatsAppWithReceipt = (
   // Garantir que tenha o código do país (55 para Brasil)
   const numeroCompleto = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
   
-  const mensagemTexto = 
+  const mensagem = encodeURIComponent(
     `Olá ${clienteNome}! 😊\n\n` +
     `Aqui está o recibo do seu ${eventoTipo}.\n\n` +
     `Obrigado por confiar em nossos serviços! 🎉\n\n` +
-    `*Bright Spark* - Transformando momentos em memórias especiais ✨`;
-
-  // Processar emojis para garantir compatibilidade com WhatsApp
-  const mensagemProcessada = processEmojisForWhatsApp(mensagemTexto);
-  
-  // Codificar mensagem preservando emojis
-  const mensagem = encodeTextWithEmojisForURL(mensagemProcessada);
+    `*Bright Spark* - Transformando momentos em memórias especiais ✨`
+  );
 
   // URL do WhatsApp Web/App
   const whatsappUrl = `https://wa.me/${numeroCompleto}?text=${mensagem}`;

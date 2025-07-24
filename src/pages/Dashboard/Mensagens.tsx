@@ -8,22 +8,21 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-
+import { useToast } from '@/hooks/use-toast';
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { MessageTemplateEditor } from '@/components/mensagens/MessageTemplateEditor';
 import { MessagePreview } from '@/components/mensagens/MessagePreview';
 import { TemplateList } from '@/components/mensagens/TemplateList';
-import { MensagensProgramadasManager } from '@/components/mensagens/MensagensProgramadasManager';
-import { MessageSquare, Mail, Send, Save, Plus, Edit, Trash2, RefreshCw, Clock } from 'lucide-react';
+import { MessageSquare, Mail, Send, Save, Plus, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
 import {
   buscarTemplates,
   buscarTemplatePorId,
-  buscarTemplatePorTitulo,
   criarTemplate,
   atualizarTemplate,
+  deletarTemplate,
   buscarConfiguracao,
   salvarConfiguracao,
   buscarGatilhos,
@@ -31,7 +30,6 @@ import {
   restaurarTemplatePadrao,
   renderizarPreview,
   inicializarTemplatesPadrao,
-  forcarRecriacaoTemplatesPadrao,
   type MensagemTemplate,
   type MensagemConfiguracao,
   type MensagemGatilho,
@@ -39,14 +37,12 @@ import {
 } from '@/services/mensagemService';
 
 const Mensagens = () => {
+  const { toast } = useToast();
   
   // Estados para templates
   const [templates, setTemplates] = useState<MensagemTemplate[]>([]);
   const [templateSelecionado, setTemplateSelecionado] = useState<MensagemTemplate | null>(null);
   const [modoEdicao, setModoEdicao] = useState<'novo' | 'editar' | null>(null);
-  
-  // Estado para templates placeholder (não salvos)
-  const [templatesPlaceholder, setTemplatesPlaceholder] = useState<MensagemTemplate[]>([]);
   
   // Estados para preview
   const [mostrarPreview, setMostrarPreview] = useState(false);
@@ -96,9 +92,6 @@ const Mensagens = () => {
   
   // Estado para controlar inicialização dos templates padrão
   const [inicializandoTemplates, setInicializandoTemplates] = useState(false);
-  
-  // Estado para controlar a exibição do gerenciador de mensagens programadas
-  const [mostrarMensagensProgramadas, setMostrarMensagensProgramadas] = useState(false);
   
   const mensagemTesteCorreta = `Olá {nome_cliente}, tudo bem?
 
@@ -173,167 +166,44 @@ Atenciosamente,
     }
   }, [templates, gatilhos]);
   
-  // Função para criar templates placeholder (não salvos no banco)
-  const criarTemplatesPlaceholder = (): MensagemTemplate[] => {
-    const agora = new Date().toISOString();
-    return [
-      {
-        id: 'placeholder-lembrete',
-        titulo: "Lembrete de Sessão",
-        categoria: "lembrete",
-        tags: ["agenda", "lembrete"],
-        user_id: userId,
-        criado_em: agora,
-        atualizado_em: agora,
-        conteudo: `Olá {nome_cliente}, tudo bem?
-
-Passando para lembrar que temos uma sessão agendada para {data_evento} às {hora_evento}.
-
-Local: {local_evento}
-
-Qualquer dúvida, estou à disposição.
-
-Atenciosamente,
-{nome_empresa}`
-      },
-      {
-        id: 'placeholder-confirmacao',
-        titulo: "Confirmação de Agendamento",
-        categoria: "confirmacao",
-        tags: ["agenda", "confirmacao"],
-        user_id: userId,
-        criado_em: agora,
-        atualizado_em: agora,
-        conteudo: `Olá {nome_cliente}!
-
-Seu agendamento foi confirmado com sucesso! ✅
-
-Detalhes da sessão:
-📋 Serviço: {titulo_evento}
-📅 Data: {data_evento}
-🕗 Horário: {hora_evento}
-📍 Local: {local_evento}
-💰 Valor: R$ {valor_entrada}
-
-Aguardamos você!
-
-{nome_empresa}
-{telefone_empresa}`
-      },
-      {
-        id: 'placeholder-pagamento',
-        titulo: "Confirmação de Pagamento",
-        categoria: "pagamento",
-        tags: ["financeiro", "pagamento"],
-        user_id: userId,
-        criado_em: agora,
-        atualizado_em: agora,
-        conteudo: `Olá {nome_cliente}!
-
-Confirmamos o recebimento do seu pagamento! ✅
-
-📋 Detalhes do pagamento:
-💰 Valor: R$ {valor_entrada}
-📅 Data: {data_atual}
-📋 Referente: {titulo_evento}
-🧾 Comprovante: {data_atual}
-
-Obrigado pela confiança!
-
-{nome_empresa}
-{telefone_empresa}`
-      },
-      {
-        id: 'placeholder-entrega',
-        titulo: "Entrega de Fotos",
-        categoria: "geral",
-        tags: ["fotos", "entrega"],
-        user_id: userId,
-        criado_em: agora,
-        atualizado_em: agora,
-        conteudo: `Olá {nome_cliente}! 📸
-
-Suas fotos estão prontas! 🎉
-
-📅 Sessão: {data_evento}
-🔗 Link para download: [Suas fotos aqui]
-📅 Total de fotos: 30 imagens editadas
-
-As fotos ficarão disponíveis por 30 dias.
-
-{nome_empresa}
-{telefone_empresa}`
-      },
-      {
-        id: 'placeholder-promocao',
-        titulo: "Promoção Personalizada",
-        categoria: "promocao",
-        tags: ["promocao", "marketing"],
-        user_id: userId,
-        criado_em: agora,
-        atualizado_em: agora,
-        conteudo: `Olá {nome_cliente}! ✨
-
-Temos uma promoção especial para você!
-
-🎯 Oferta exclusiva para nossos clientes
-💰 Condições especiais disponíveis
-📞 Entre em contato para mais detalhes
-
-Não perca essa oportunidade!
-
-{nome_empresa}
-{telefone_empresa}`
-      }
-    ];
-  };
-
-  // Função específica para carregar templates (SEM inicialização automática)
+  // Função específica para carregar templates
   const carregarTemplates = async (userIdParam: string) => {
     try {
       setLoadingTemplates(true);
       setInicializandoTemplates(false);
       
-      // Buscar apenas templates existentes, SEM criar automaticamente
-      const templatesData = await buscarTemplates(userIdParam);
+      // Verificar se o usuário possui templates, se não tiver, criar os padrão
+      let templatesData;
+      try {
+        setInicializandoTemplates(true); // Indica que está inicializando templates
+        templatesData = await inicializarTemplatesPadrao(userIdParam);
+        
+        // Se retornou templates e foram recém-criados (tamanho > 0 e não havia antes)
+        if (templatesData.length > 0 && templates.length === 0) {
+          toast({
+            title: "Templates criados",
+            description: "Templates padrão foram criados para você começar!",
+            variant: "default",
+          });
+        }
+      } catch (error) {
+        // Em caso de erro na inicialização, tentar carregar os templates normalmente
+        logger.error('Erro ao inicializar templates padrão, tentando buscar templates existentes', error, 'Mensagens');
+        templatesData = await buscarTemplates(userIdParam);
+      } finally {
+        setInicializandoTemplates(false);
+      }
+      
       setTemplates(templatesData);
-      
-      // Sempre criar placeholders para categorias que não existem
-      const categoriasExistentes = templatesData.map(t => t.categoria);
-      const todasCategorias = ['lembrete', 'confirmacao', 'pagamento', 'geral', 'promocao'];
-      
-      const placeholders = criarTemplatesPlaceholder().filter(placeholder => {
-        // Manter placeholder se a categoria não existe nos templates salvos
-        return !categoriasExistentes.includes(placeholder.categoria);
-      });
-      
-      setTemplatesPlaceholder(placeholders);
-      
-      logger.debug(`${templatesData.length} templates carregados, ${placeholders.length} placeholders criados`, null, 'Mensagens');
     } catch (error) {
       logger.error('Erro ao carregar templates', error, 'Mensagens');
-      // Em caso de erro, criar todos os placeholders
-      const placeholders = criarTemplatesPlaceholder();
-      setTemplatesPlaceholder(placeholders);
-      setTemplates([]);
+      toast({
+        title: "Erro ao carregar templates",
+        description: "Não foi possível carregar os templates.",
+        variant: "destructive",
+      });
     } finally {
       setLoadingTemplates(false);
-    }
-  };
-
-  // Função para inicializar templates padrão MANUALMENTE (com confirmação do usuário)
-  const inicializarTemplatesManuais = async () => {
-    try {
-      setInicializandoTemplates(true);
-      
-      const templatesData = await inicializarTemplatesPadrao(userId);
-      setTemplates(templatesData);
-      
-      logger.info('Templates padrão criados com sucesso', { count: templatesData.length }, 'Mensagens');
-    } catch (error) {
-      logger.error('Erro ao inicializar templates padrão', error, 'Mensagens');
-    } finally {
-      setInicializandoTemplates(false);
     }
   };
   
@@ -349,7 +219,11 @@ Não perca essa oportunidade!
       }
     } catch (error) {
       logger.error('Erro ao carregar configurações', error, 'Mensagens');
-      // Erro ao carregar configurações
+      toast({
+        title: "Erro ao carregar configurações",
+        description: "Não foi possível carregar as configurações.",
+        variant: "destructive",
+      });
     } finally {
       setLoadingConfig(false);
     }
@@ -365,7 +239,11 @@ Não perca essa oportunidade!
       setGatilhos(gatilhosData);
     } catch (error) {
       logger.error('Erro ao carregar gatilhos', error, 'Mensagens');
-      // Erro ao carregar gatilhos
+      toast({
+        title: "Erro ao carregar gatilhos",
+        description: "Não foi possível carregar os gatilhos.",
+        variant: "destructive",
+      });
     } finally {
       setLoadingGatilhos(false);
     }
@@ -402,7 +280,11 @@ Não perca essa oportunidade!
       }
     } catch (error) {
       logger.error('Erro ao carregar detalhes do template', error, 'Mensagens');
-      // Erro ao carregar template
+      toast({
+        title: "Erro ao carregar template",
+        description: "Não foi possível carregar os detalhes do template.",
+        variant: "destructive",
+      });
       setTemplateSelecionado(template);
     } finally {
       setLoadingTemplate(false);
@@ -420,128 +302,78 @@ Não perca essa oportunidade!
     setModoEdicao('editar');
   };
   
-  const handleSalvarTemplate = async (dadosTemplate: Omit<MensagemTemplate, 'id' | 'criado_em' | 'atualizado_em'> & { id?: string }) => {
+  const handleSalvarTemplate = async (dadosTemplate: Omit<MensagemTemplate, 'id' | 'criado_em' | 'atualizado_em'>) => {
     try {
       setLoading(true);
       
-      // Verificar se é um placeholder (ID começa com 'placeholder-')
-      const isPlaceholder = dadosTemplate.id?.startsWith('placeholder-');
-      
-      // Verificar se já existe um template com o mesmo título
-      const templateExistentePorTitulo = await buscarTemplatePorTitulo(dadosTemplate.titulo, userId);
-      
-      if (dadosTemplate.id && !isPlaceholder) {
-        // Atualizar template existente (não placeholder)
-        const { id, ...dadosParaAtualizar } = dadosTemplate;
+      if (modoEdicao === 'novo') {
+        const novoTemplate = await criarTemplate(dadosTemplate, userId);
+        setTemplates(prev => [novoTemplate, ...prev]);
+        toast({
+          title: "Template criado",
+          description: "Template criado com sucesso!",
+          variant: "default",
+        });
+      } else if (modoEdicao === 'editar' && templateSelecionado) {
+        await atualizarTemplate(templateSelecionado.id, dadosTemplate, userId);
         
-        // Se existe outro template com o mesmo título (e não é o mesmo template), mostrar erro
-        if (templateExistentePorTitulo && templateExistentePorTitulo.id !== id) {
-          throw new Error(`Já existe um template com o título "${dadosTemplate.titulo}". Escolha um título diferente.`);
-        }
-        
-        await atualizarTemplate(id, dadosParaAtualizar, userId);
-        
-        // Atualizar o template selecionado com os novos dados
-        const templateAtualizado = {
-          ...templateSelecionado!,
-          ...dadosParaAtualizar,
-          atualizado_em: new Date().toISOString()
-        };
-        setTemplateSelecionado(templateAtualizado);
-        
-        // Atualizar o template na lista sem recarregar tudo
-        setTemplates(prev => prev.map(template => 
-          template.id === id ? templateAtualizado : template
-        ));
+        // Recarregar templates para atualizar a lista
+        const templatesAtualizados = await buscarTemplates(userId);
+        setTemplates(templatesAtualizados);
         
         // Também devemos atualizar os gatilhos caso o template tenha sido alterado
         if (
-          id === templateLembreteSelecionado || 
-          id === templateConfirmacaoSelecionado || 
-          id === templatePagamentoSelecionado
+          templateSelecionado.id === templateLembreteSelecionado || 
+          templateSelecionado.id === templateConfirmacaoSelecionado || 
+          templateSelecionado.id === templatePagamentoSelecionado
         ) {
           const gatilhosAtualizados = await buscarGatilhos(userId);
           setGatilhos(gatilhosAtualizados);
         }
         
-        // Template atualizado com sucesso!
-      } else {
-        // Criar novo template (seja placeholder ou novo)
-        const { id, ...dadosParaCriar } = dadosTemplate;
-        
-        if (templateExistentePorTitulo) {
-          // Se já existe um template com esse título, atualizar em vez de criar
-          await atualizarTemplate(templateExistentePorTitulo.id, dadosParaCriar, userId);
-          
-          // Buscar o template atualizado
-          const templateAtualizado = await buscarTemplatePorId(templateExistentePorTitulo.id, userId);
-          
-          if (isPlaceholder) {
-            // Se era um placeholder, remover da lista de placeholders
-            setTemplatesPlaceholder(prev => prev.filter(t => t.id !== dadosTemplate.id));
-            
-            // Recriar placeholders para categorias que ainda não existem
-            setTemplates(prev => {
-              const templatesAtualizados = prev.map(template => 
-                template.id === templateExistentePorTitulo.id ? templateAtualizado! : template
-              );
-              
-              const categoriasExistentes = templatesAtualizados.map(t => t.categoria);
-              const novosPlaceholders = criarTemplatesPlaceholder().filter(placeholder => {
-                return !categoriasExistentes.includes(placeholder.categoria);
-              });
-              
-              setTemplatesPlaceholder(novosPlaceholders);
-              return templatesAtualizados;
-            });
-          } else {
-            // Atualizar o template na lista
-            setTemplates(prev => prev.map(template => 
-              template.id === templateExistentePorTitulo.id ? templateAtualizado! : template
-            ));
-          }
-          
-          // Manter o template atualizado selecionado
-          setTemplateSelecionado(templateAtualizado);
-          setModoEdicao('editar'); // Mudar para modo de edição
-        } else {
-          // Criar novo template
-          const novoTemplate = await criarTemplate(dadosParaCriar, userId);
-          
-          if (isPlaceholder) {
-            // Se era um placeholder, remover da lista de placeholders e adicionar aos templates reais
-            setTemplatesPlaceholder(prev => prev.filter(t => t.id !== dadosTemplate.id));
-            
-            setTemplates(prev => {
-              const novosTemplates = [novoTemplate, ...prev];
-              
-              // Recriar placeholders para categorias que ainda não existem
-              const categoriasExistentes = novosTemplates.map(t => t.categoria);
-              const novosPlaceholders = criarTemplatesPlaceholder().filter(placeholder => {
-                return !categoriasExistentes.includes(placeholder.categoria);
-              });
-              
-              setTemplatesPlaceholder(novosPlaceholders);
-              return novosTemplates;
-            });
-          } else {
-            // Novo template normal
-            setTemplates(prev => [novoTemplate, ...prev]);
-          }
-          
-          // Manter o novo template selecionado após criação
-          setTemplateSelecionado(novoTemplate);
-          setModoEdicao('editar'); // Mudar para modo de edição
-        }
-        
-        // Template criado/atualizado com sucesso!
+        toast({
+          title: "Template atualizado",
+          description: "Template atualizado com sucesso!",
+          variant: "default",
+        });
       }
       
-      // NÃO resetar o modo de edição nem o template selecionado
-      // para manter o usuário na mesma tela após salvar
+      setModoEdicao(null);
+      setTemplateSelecionado(null);
     } catch (error) {
       logger.error('Erro ao salvar template', error, 'Mensagens');
-      // Erro ao salvar template
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o template.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleExcluirTemplate = async () => {
+    if (!templateSelecionado) return;
+    
+    try {
+      setLoading(true);
+      await deletarTemplate(templateSelecionado.id, userId);
+      setTemplates(prev => prev.filter(t => t.id !== templateSelecionado.id));
+      setTemplateSelecionado(null);
+      setModoEdicao(null);
+      
+      toast({
+        title: "Template excluído",
+        description: "Template excluído com sucesso!",
+        variant: "default",
+      });
+    } catch (error) {
+      logger.error('Erro ao excluir template', error, 'Mensagens');
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o template.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -557,10 +389,18 @@ Não perca essa oportunidade!
       const templatesAtualizados = await buscarTemplates(userId);
       setTemplates(templatesAtualizados);
       
-      // Template restaurado para o padrão!
+      toast({
+        title: "Template restaurado",
+        description: "Template restaurado para o padrão!",
+        variant: "default",
+      });
     } catch (error) {
       logger.error('Erro ao restaurar template padrão', error, 'Mensagens');
-      // Erro ao restaurar template padrão
+      toast({
+        title: "Erro ao restaurar",
+        description: "Não foi possível restaurar o template padrão.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -574,7 +414,11 @@ Não perca essa oportunidade!
       setMostrarPreview(true);
     } catch (error) {
       logger.error('Erro ao gerar preview', error, 'Mensagens');
-      // Erro no preview da mensagem
+      toast({
+        title: "Erro no preview",
+        description: "Não foi possível gerar o preview da mensagem.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -648,10 +492,18 @@ Não perca essa oportunidade!
       const gatilhosAtualizados = await buscarGatilhos(userId);
       setGatilhos(gatilhosAtualizados);
       
-      // Configurações e gatilhos salvos com sucesso!
+      toast({
+        title: "Configurações salvas",
+        description: "Configurações e gatilhos salvos com sucesso!",
+        variant: "default",
+      });
     } catch (error) {
       logger.error('Erro ao salvar configuração', error, 'Mensagens');
-      // Erro ao salvar configurações
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
       setSalvaGatilhos(false);
@@ -673,26 +525,20 @@ Não perca essa oportunidade!
       setMostrarTesteMensagem(true);
     } catch (error) {
       logger.error('Erro ao testar mensagem', error, 'Mensagens');
-      // Erro no teste de mensagem
+      toast({
+        title: "Erro no teste",
+        description: "Não foi possível processar a mensagem de teste.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
   
   return (
-    <ResponsiveContainer customWidth={true}>
+    <ResponsiveContainer>
       <div className="flex flex-col space-y-4 pb-10">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h1 className="text-2xl font-bold">Mensagens</h1>
-          <Button 
-            onClick={() => setMostrarMensagensProgramadas(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Clock size={16} />
-            Mensagens Programadas
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold">Mensagens</h1>
         <Tabs defaultValue="templates" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="templates">Templates</TabsTrigger>
@@ -700,139 +546,134 @@ Não perca essa oportunidade!
           </TabsList>
           
           <TabsContent value="templates" className="pt-4">
-            {/* Layout Mobile-First: Stack vertical em mobile, grid em desktop */}
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6">
-              {/* Lista de Templates - Altura responsiva */}
-              <Card className="lg:col-span-1 flex flex-col h-auto lg:h-[calc(100vh-8rem)] min-h-[950px] max-h-[1200px] lg:max-h-none">
-                <CardHeader className="pb-2 px-4 lg:px-6">
-                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                     <div className="flex-1">
-                       <CardTitle className="text-lg lg:text-xl">Templates</CardTitle>
-                       <CardDescription className="text-sm">
-                         {inicializandoTemplates 
-                           ? "Criando templates padrão para você..." 
-                           : "Modelos de mensagens para seus clientes"}
-                       </CardDescription>
-                     </div>
-                     <div className="flex gap-2">
-                       <Button 
-                         type="button" 
-                         variant="outline" 
-                         size="sm" 
-                         onClick={handleNovoTemplate} 
-                         disabled={inicializandoTemplates}
-                         className="h-9 px-3 text-sm touch-manipulation"
-                       >
-                         <Plus size={16} className="mr-1" /> Novo
-                       </Button>
-                     </div>
-                   </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="md:col-span-1 h-[calc(100vh-250px)] flex flex-col">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Templates</CardTitle>
+                    <Button variant="outline" size="sm" onClick={handleNovoTemplate} disabled={inicializandoTemplates}>
+                      <Plus size={14} className="mr-1" /> Novo
+                    </Button>
+                  </div>
+                  <CardDescription>
+                    {inicializandoTemplates 
+                      ? "Criando templates padrão para você..." 
+                      : "Modelos de mensagens para seus clientes"}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-grow overflow-auto p-0">
-                  <TemplateList 
-                    templates={[...templates, ...templatesPlaceholder]} 
-                    onEdit={handleEditarTemplate} 
-                    templateSelecionado={templateSelecionado}
-                    isLoading={loadingTemplates} 
-                    onInicializarTemplates={inicializarTemplatesManuais}
-                    inicializandoTemplates={inicializandoTemplates}
-                  />
-                </CardContent>
+                                  <CardContent className="flex-grow overflow-auto p-0">
+                    <TemplateList 
+                      templates={templates} 
+                      onEdit={handleEditarTemplate} 
+                      templateSelecionado={templateSelecionado}
+                      isLoading={loadingTemplates || inicializandoTemplates} 
+                    />
+                  </CardContent>
               </Card>
               
-              {/* Editor de Template - Responsivo sem largura fix */}
-              <Card className="lg:col-span-2 w-full overflow-hidden min-h-[950px] lg:h-[calc(100vh-8rem)]">
-                <CardHeader className="px-4 lg:px-6">
-                  <CardTitle className="text-lg lg:text-xl">
+              {/* Editor de Template */}
+              <Card className="md:col-span-2" style={{ minWidth: 'calc(100% + 2cm)' }}>
+                <CardHeader>
+                  <CardTitle>
                     {modoEdicao === 'novo' ? 'Novo Template' : 
                      modoEdicao === 'editar' ? 'Editar Template' : 
                      'Editor de Template'}
                   </CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription>
                     Personalize suas mensagens automáticas
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-4 lg:px-6">
+                <CardContent>
                   <MessageTemplateEditor 
                     template={templateSelecionado}
                     onSave={handleSalvarTemplate}
                     onPreview={handlePreview}
                     onCancel={handleCancelarEdicao}
-                    onRestaurarPadrao={handleRestaurarPadrao}
                     loading={loading}
                   />
                 </CardContent>
+                <CardFooter className="flex justify-between border-t pt-6">
+                  <Button 
+                    variant="outline"
+                    onClick={handleExcluirTemplate}
+                    disabled={!templateSelecionado || modoEdicao === 'novo' || loading}
+                  >
+                    Excluir
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleRestaurarPadrao}
+                    disabled={!templateSelecionado || modoEdicao === 'novo' || loading}
+                  >
+                    <RefreshCw size={16} className="mr-2" />
+                    Restaurar Padrão
+                  </Button>
+                </CardFooter>
               </Card>
             </div>
           </TabsContent>
           
           <TabsContent value="configuracao">
-            {/* Layout responsivo: Stack em mobile, grid em tablet+ */}
-            <div className="flex flex-col md:grid md:grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Configuração de canais de envio */}
               <Card className="lg:col-span-1">
-                <CardHeader className="px-4 lg:px-6">
-                  <CardTitle className="text-lg lg:text-xl">Canais de Envio</CardTitle>
-                  <CardDescription className="text-sm">
+                <CardHeader>
+                  <CardTitle>Canais de Envio</CardTitle>
+                  <CardDescription>
                     Configure como suas mensagens serão enviadas
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 px-4 lg:px-6">
-                  <div className="flex items-center justify-between space-x-2 py-2">
-                    <div className="flex flex-col space-y-1 flex-1">
-                      <Label htmlFor="whatsapp" className="font-medium text-sm">WhatsApp</Label>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-col space-y-1">
+                      <Label htmlFor="whatsapp" className="font-medium">WhatsApp</Label>
                       <p className="text-xs text-muted-foreground">Envio automático via WhatsApp</p>
                     </div>
                     <Switch 
                       id="whatsapp" 
                       checked={configuracao.canal_whatsapp}
                       onCheckedChange={(checked) => handleAtualizarConfiguracao('canal_whatsapp', checked)}
-                      className="touch-manipulation"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between space-x-2 py-2">
-                    <div className="flex flex-col space-y-1 flex-1">
-                      <Label htmlFor="email" className="font-medium text-sm">E-mail</Label>
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-col space-y-1">
+                      <Label htmlFor="email" className="font-medium">E-mail</Label>
                       <p className="text-xs text-muted-foreground">Envio automático via E-mail</p>
                     </div>
                     <Switch 
                       id="email" 
                       checked={configuracao.canal_email}
                       onCheckedChange={(checked) => handleAtualizarConfiguracao('canal_email', checked)}
-                      className="touch-manipulation"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between space-x-2 py-2">
-                    <div className="flex flex-col space-y-1 flex-1">
-                      <Label htmlFor="sms" className="font-medium text-sm">SMS</Label>
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-col space-y-1">
+                      <Label htmlFor="sms" className="font-medium">SMS</Label>
                       <p className="text-xs text-muted-foreground">Envio automático via SMS</p>
                     </div>
                     <Switch 
                       id="sms" 
                       checked={configuracao.canal_sms}
                       onCheckedChange={(checked) => handleAtualizarConfiguracao('canal_sms', checked)}
-                      className="touch-manipulation"
                     />
                   </div>
                   
-                  <div className="pt-4 space-y-2">
-                    <Label htmlFor="webhook" className="font-medium text-sm">Webhook para integrações</Label>
-                    <p className="text-xs text-muted-foreground">URL para integração com serviços externos</p>
+                  <div className="pt-4">
+                    <Label htmlFor="webhook" className="font-medium">Webhook para integrações</Label>
+                    <p className="text-xs text-muted-foreground mb-2">URL para integração com serviços externos</p>
                     <Input 
                       id="webhook" 
                       placeholder="https://..." 
                       value={configuracao.webhook_url || ''}
                       onChange={(e) => handleAtualizarConfiguracao('webhook_url', e.target.value)}
-                      className="w-full"
                     />
                   </div>
                 </CardContent>
-                <CardFooter className="px-4 lg:px-6">
+                <CardFooter>
                   <Button 
-                    type="button"
-                    className="w-full h-10 touch-manipulation"
+                    className="w-full"
                     onClick={handleSalvarConfiguracao}
                     disabled={loading}
                   >
@@ -843,13 +684,13 @@ Não perca essa oportunidade!
               
               {/* Configuração de gatilhos automáticos */}
               <Card className="lg:col-span-2">
-                <CardHeader className="px-4 lg:px-6">
-                  <CardTitle className="text-lg lg:text-xl">Gatilhos Automáticos</CardTitle>
-                  <CardDescription className="text-sm">
+                <CardHeader>
+                  <CardTitle>Gatilhos Automáticos</CardTitle>
+                  <CardDescription>
                     Quando e como suas mensagens serão enviadas automaticamente
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6 px-4 lg:px-6">
+                <CardContent className="space-y-6">
                   {loadingGatilhos || templates.length === 0 ? (
                     <div className="animate-pulse flex flex-col space-y-4">
                       <div className="h-12 bg-gray-100 dark:bg-gray-800 rounded"></div>
@@ -860,29 +701,28 @@ Não perca essa oportunidade!
                   ) : (
                     <>
                       {/* Lembrete de Sessão */}
-                      <div className="space-y-4 p-4 border rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex flex-col space-y-1">
-                            <h3 className="font-medium text-sm">Lembrete de Sessão</h3>
-                            <p className="text-xs text-muted-foreground">Enviar lembrete antes da sessão</p>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <h3 className="font-medium">Lembrete de Sessão</h3>
+                            <p className="text-sm text-muted-foreground">Enviar lembrete antes da sessão</p>
                           </div>
                           <Switch 
                             id="lembrete_sessao" 
                             checked={lembreteAtivo}
                             onCheckedChange={setLembreteAtivo}
-                            className="touch-manipulation"
                           />
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="template_lembrete" className="text-sm">Template</Label>
+                        <div className="grid grid-cols-2 gap-4 ml-6">
+                          <div>
+                            <Label htmlFor="template_lembrete">Template</Label>
                             <Select 
                               value={templateLembreteSelecionado || undefined} 
                               onValueChange={setTemplateLembreteSelecionado}
                               disabled={salvaGatilhos}
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger>
                                 <SelectValue placeholder="Selecione um template" />
                               </SelectTrigger>
                               <SelectContent>
@@ -894,14 +734,14 @@ Não perca essa oportunidade!
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="antecedencia_lembrete" className="text-sm">Antecedência</Label>
+                          <div>
+                            <Label htmlFor="antecedencia_lembrete">Antecedência</Label>
                             <Select 
                               value={antecedenciaLembrete} 
                               onValueChange={setAntecedenciaLembrete}
                               disabled={salvaGatilhos}
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger>
                                 <SelectValue placeholder="Tempo de antecedência" />
                               </SelectTrigger>
                               <SelectContent>
@@ -918,29 +758,28 @@ Não perca essa oportunidade!
                       </div>
                       
                       {/* Confirmação de Agendamento */}
-                      <div className="space-y-4 p-4 border rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex flex-col space-y-1">
-                            <h3 className="font-medium text-sm">Confirmação de Agendamento</h3>
-                            <p className="text-xs text-muted-foreground">Enviar confirmação após agendamento</p>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <h3 className="font-medium">Confirmação de Agendamento</h3>
+                            <p className="text-sm text-muted-foreground">Enviar confirmação após agendamento</p>
                           </div>
                           <Switch 
                             id="confirmacao_agendamento" 
                             checked={confirmacaoAtiva}
                             onCheckedChange={setConfirmacaoAtiva}
-                            className="touch-manipulation"
                           />
                         </div>
                         
-                        <div className="grid grid-cols-1 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="template_confirmacao" className="text-sm">Template</Label>
+                        <div className="grid grid-cols-2 gap-4 ml-6">
+                          <div>
+                            <Label htmlFor="template_confirmacao">Template</Label>
                             <Select 
                               value={templateConfirmacaoSelecionado || undefined}
                               onValueChange={setTemplateConfirmacaoSelecionado}
                               disabled={salvaGatilhos}
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger>
                                 <SelectValue placeholder="Selecione um template" />
                               </SelectTrigger>
                               <SelectContent>
@@ -956,29 +795,28 @@ Não perca essa oportunidade!
                       </div>
                       
                       {/* Lembrete de Pagamento */}
-                      <div className="space-y-4 p-4 border rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex flex-col space-y-1">
-                            <h3 className="font-medium text-sm">Lembrete de Pagamento</h3>
-                            <p className="text-xs text-muted-foreground">Enviar lembretes de pagamentos pendentes</p>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <h3 className="font-medium">Lembrete de Pagamento</h3>
+                            <p className="text-sm text-muted-foreground">Enviar lembretes de pagamentos pendentes</p>
                           </div>
                           <Switch 
                             id="lembrete_pagamento" 
                             checked={pagamentoAtivo}
                             onCheckedChange={setPagamentoAtivo}
-                            className="touch-manipulation"
                           />
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="template_pagamento" className="text-sm">Template</Label>
+                        <div className="grid grid-cols-2 gap-4 ml-6">
+                          <div>
+                            <Label htmlFor="template_pagamento">Template</Label>
                             <Select 
                               value={templatePagamentoSelecionado || undefined}
                               onValueChange={setTemplatePagamentoSelecionado}
                               disabled={salvaGatilhos}
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger>
                                 <SelectValue placeholder="Selecione um template" />
                               </SelectTrigger>
                               <SelectContent>
@@ -990,14 +828,14 @@ Não perca essa oportunidade!
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="frequencia_lembrete" className="text-sm">Frequência</Label>
+                          <div>
+                            <Label htmlFor="frequencia_lembrete">Frequência</Label>
                             <Select 
                               value={frequenciaPagamento}
                               onValueChange={setFrequenciaPagamento}
                               disabled={salvaGatilhos}
                             >
-                              <SelectTrigger className="h-10">
+                              <SelectTrigger>
                                 <SelectValue placeholder="Frequência de envio" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1013,10 +851,9 @@ Não perca essa oportunidade!
                     </>
                   )}
                 </CardContent>
-                <CardFooter className="px-4 lg:px-6">
+                <CardFooter>
                   <Button 
-                    type="button"
-                    className="w-full h-10 touch-manipulation"
+                    className="w-full"
                     onClick={handleSalvarConfiguracao}
                     disabled={loading}
                   >
@@ -1067,21 +904,6 @@ Não perca essa oportunidade!
                 {resultadoTesteMensagem}
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Mensagens Programadas */}
-      <Dialog open={mostrarMensagensProgramadas} onOpenChange={setMostrarMensagensProgramadas}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Mensagens Programadas</DialogTitle>
-            <DialogDescription>
-              Gerencie suas mensagens programadas e agendamentos
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-auto">
-            <MensagensProgramadasManager />
           </div>
         </DialogContent>
       </Dialog>

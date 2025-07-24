@@ -1,5 +1,5 @@
 import React from 'react';
-import { File, Download, FileText, FileImage, Eye, X } from 'lucide-react';
+import { File, Download, FileText, FileImage, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PdfPreview from './PdfPreview';
 
 interface Attachment {
   name: string;
@@ -17,26 +16,11 @@ interface Attachment {
   url?: string;
 }
 
-interface ContractData {
-  id?: string;
-  nome_cliente?: string;
-  pdfUrl?: string;
-  [key: string]: any;
-}
-
 interface ContractAttachmentsProps {
   attachments: Attachment[];
-  contractData?: ContractData;
-  onRemoveAttachment?: (index: number) => void;
-  showRemoveButton?: boolean;
 }
 
-const ContractAttachments = ({ 
-  attachments, 
-  contractData,
-  onRemoveAttachment, 
-  showRemoveButton = false 
-}: ContractAttachmentsProps) => {
+const ContractAttachments = ({ attachments }: ContractAttachmentsProps) => {
   const { toast } = useToast();
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [previewAttachment, setPreviewAttachment] = React.useState<Attachment | null>(null);
@@ -100,21 +84,8 @@ const ContractAttachments = ({
   return (
     <div>
       <h3 className="font-medium mb-4">Anexos</h3>
-      
-      {/* Card de Visualização do PDF do Contrato */}
-      {contractData?.pdfUrl && (
-        <div className="mb-6">
-          <PdfPreview
-            pdfUrl={contractData.pdfUrl}
-            fileName={`Contrato - ${contractData.nome_cliente || 'Cliente'}.pdf`}
-            showPreview={true}
-            className="w-full max-w-none"
-          />
-        </div>
-      )}
-      
       {attachments.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhum anexo adicional disponível</p>
+        <p className="text-sm text-muted-foreground">Nenhum anexo disponível</p>
       ) : (
         <div className="space-y-2">
           {attachments.map((attachment, index) => (
@@ -147,17 +118,6 @@ const ContractAttachments = ({
                   <Download size={14} />
                   <span className="hidden sm:inline">Baixar</span>
                 </Button>
-                {showRemoveButton && onRemoveAttachment && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => onRemoveAttachment(index)}
-                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <X size={14} />
-                    <span className="hidden sm:inline">Remover</span>
-                  </Button>
-                )}
               </div>
             </div>
           ))}

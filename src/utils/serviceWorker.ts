@@ -3,7 +3,7 @@
  * Registra, atualiza e controla cache offline
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 
 export interface ServiceWorkerConfig {
   onUpdate?: (registration: ServiceWorkerRegistration) => void;
@@ -266,12 +266,12 @@ export const serviceWorkerManager = new ServiceWorkerManager();
  * Hook para usar Service Worker em componentes React
  */
 export function useServiceWorker(config: ServiceWorkerConfig = {}) {
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+  const [cacheStats, setCacheStats] = React.useState<CacheStats | null>(null);
+  const [updateAvailable, setUpdateAvailable] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const registerSW = async () => {
       await serviceWorkerManager.register({
         ...config,
@@ -296,13 +296,13 @@ export function useServiceWorker(config: ServiceWorkerConfig = {}) {
     return cleanup;
   }, []);
 
-  const updateServiceWorker = useCallback(() => {
+  const updateServiceWorker = React.useCallback(() => {
     serviceWorkerManager.skipWaiting();
     setUpdateAvailable(false);
     window.location.reload();
   }, []);
 
-  const refreshCacheStats = useCallback(async () => {
+  const refreshCacheStats = React.useCallback(async () => {
     try {
       const stats = await serviceWorkerManager.getCacheStats();
       setCacheStats(stats);
@@ -311,7 +311,7 @@ export function useServiceWorker(config: ServiceWorkerConfig = {}) {
     }
   }, []);
 
-  const clearCache = useCallback(async () => {
+  const clearCache = React.useCallback(async () => {
     try {
       await serviceWorkerManager.clearCache();
       setCacheStats(null);
@@ -373,4 +373,4 @@ export const devUtils = {
   }
 };
 
-// Service Worker está pronto para uso
+// Service Worker está pronto para uso 

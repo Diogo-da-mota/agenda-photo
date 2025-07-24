@@ -23,19 +23,22 @@ export const CSRFProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (window as any).__CSRF_TOKEN__ = newToken;
     }
     
-    // Log removido por segurança - não expor informações sobre tokens CSRF
+    securityLog('CSRF token gerado', { tokenLength: newToken.length });
   }, []);
 
   const getToken = () => token;
 
   const validateToken = (requestToken: string): boolean => {
     if (!token || !requestToken) {
-      // Log removido por segurança - não expor informações sobre validação de tokens
+      securityLog('CSRF validation failed - missing tokens', { 
+        hasServerToken: !!token, 
+        hasRequestToken: !!requestToken 
+      });
       return false;
     }
 
     const isValid = token === requestToken;
-    // Log removido por segurança - não expor resultado de validação de tokens
+    securityLog('CSRF validation', { valid: isValid });
     return isValid;
   };
 

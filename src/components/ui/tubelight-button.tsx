@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
@@ -17,7 +17,7 @@ export function TubelightButton({
   className,
   onClick 
 }: TubelightButtonProps) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = React.useState(false)
 
   return (
     <motion.button
@@ -53,4 +53,4 @@ export function TubelightButton({
       />
     </motion.button>
   )
-}
+} 

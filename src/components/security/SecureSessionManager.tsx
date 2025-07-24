@@ -25,12 +25,18 @@ export const SecureSessionManager: React.FC = () => {
     setMinutesRemaining(Math.max(minutesLeft, 1));
     setShowTimeoutWarning(true);
     
-    // Log removido por segurança - não expor informações de timeout e userId
+    securityLog('SESSION_TIMEOUT_WARNING_SHOWN', {
+      minutesRemaining: minutesLeft,
+      userId: user?.id || 'unknown'
+    });
   }, [session, user]);
 
   // Callback para expiração da sessão
   const handleSessionExpired = useCallback(() => {
-    // Log removido por segurança - não expor informações de expiração e userId
+    securityLog('SESSION_EXPIRED', {
+      userId: user?.id || 'unknown',
+      forced: true
+    });
     
     forceSecureLogout('Session expired due to inactivity');
   }, [user]);
@@ -74,7 +80,10 @@ export const SecureSessionManager: React.FC = () => {
         extendSession();
         setShowTimeoutWarning(false);
         
-        // Log removido por segurança - não expor informações de extensão e userId
+        securityLog('SESSION_EXTENDED', {
+          userId: user?.id || 'unknown',
+          method: 'user_action'
+        });
       } else {
         // Se falhou ao renovar, forçar logout
         handleSessionExpired();
@@ -87,7 +96,10 @@ export const SecureSessionManager: React.FC = () => {
 
   // Handler para logout manual
   const handleLogout = useCallback(() => {
-    // Log removido por segurança - não expor informações de logout e userId
+    securityLog('SESSION_LOGOUT', {
+      userId: user?.id || 'unknown',
+      method: 'user_choice'
+    });
     
     forceSecureLogout('User chose to logout during timeout warning');
   }, [user]);

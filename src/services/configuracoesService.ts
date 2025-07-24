@@ -15,7 +15,7 @@ export interface ConfiguracoesApp {
 export const configuracoesService = {
   async getConfiguracoes(userId: string): Promise<ConfiguracoesApp | null> {
     try {
-      // Log removido por segurança - não expor userId
+      console.log('Buscando configurações para usuário:', userId);
       
       // Mock configuration data
       return {
@@ -36,7 +36,7 @@ export const configuracoesService = {
 
   async updateConfiguracoes(userId: string, configuracoes: Partial<ConfiguracoesApp>): Promise<boolean> {
     try {
-      // Log removido por segurança - não expor userId e dados de configuração
+      console.log('Atualizando configurações para usuário:', userId, configuracoes);
       return true;
     } catch (error) {
       console.error('Erro ao atualizar configurações:', error);
@@ -46,7 +46,7 @@ export const configuracoesService = {
 
   async createConfiguracoes(userId: string, configuracoes: Partial<ConfiguracoesApp>): Promise<ConfiguracoesApp | null> {
     try {
-      // Log removido por segurança - não expor userId e dados de configuração
+      console.log('Criando configurações para usuário:', userId, configuracoes);
       
       return {
         id: `config-${userId}`,

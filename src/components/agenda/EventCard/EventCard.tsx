@@ -1,95 +1,57 @@
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { EventCardProps, eventStatusColors } from './types';
-import { hasPendingPayment } from './utils';
-import { useEventCardLogic } from './useEventCardLogic';
-import EventCardHeader from './EventCardHeader';
-import EventCardContent from './EventCardContent';
-import EventCardActions from './EventCardActions';
-import EventCardDialogs from './EventCardDialogs';
+import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, Clock, MapPin } from 'lucide-react';
 
-/**
- * Componente principal do EventCard refatorado
- * Coordena todos os sub-componentes e a lógica de negócio
- */
-const EventCard: React.FC<EventCardProps> = ({ 
-  event, 
-  onStatusChange, 
-  onReschedule, 
-  onSendReminder, 
-  onGenerateReceipt,
-  onDelete,
-  onEventUpdate
+interface EventCardProps {
+  id?: string;
+  title?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  status?: string;
+}
+
+const EventCard: React.FC<EventCardProps> = ({
+  title = "Evento",
+  date = "Data não definida",
+  time = "Horário não definido", 
+  location = "Local não definido",
+  status = "agendado"
 }) => {
-  const {
-    state,
-    updateState,
-    handleDeleteEvent,
-    handleEventUpdated,
-    handleRegisterPayment,
-    handleProcessPayment,
-    handleGenerateReceipt,
-  } = useEventCardLogic(event, onEventUpdate);
-
-  // Determinar a cor com base no status
-  const statusColorClass = eventStatusColors[event.status];
-  
-  // Verificar se o evento tem pagamento pendente
-  const eventHasPendingPayment = hasPendingPayment(event);
-
-  // Handlers para os sub-componentes
-  const handleSendReminder = () => {
-    onSendReminder(event.id);
-  };
-
-  const handleMarkAsCompleted = () => {
-    onStatusChange(event.id, 'completed');
-  };
-
-  const handlePaymentAmountChange = (value: string) => {
-    updateState({ paymentAmount: value });
-  };
-  const handleDeleteConfirm = async () => {
-    await handleDeleteEvent(onDelete);
-  };
-
   return (
-    <>
-      <Card className={`mb-4 border-l-4 ${statusColorClass}`}>
-        <EventCardHeader
-          event={event}
-          onEdit={() => updateState({ isEditDialogOpen: true })}
-          onDelete={() => updateState({ isDeleteDialogOpen: true })}
-          onReschedule={() => updateState({ isRescheduleOpen: true })}
-          onMarkAsCompleted={handleMarkAsCompleted}
-          isDeleting={state.isDeleting}
-        />
-        
-        <EventCardContent event={event} />
-        
-        <EventCardActions
-          event={event}
-          hasPendingPayment={eventHasPendingPayment}
-          onSendReminder={handleSendReminder}
-          onRegisterPayment={handleRegisterPayment}
-          onGenerateReceipt={handleGenerateReceipt}
-          onStatusChange={onStatusChange}
-        />
-      </Card>
-
-      <EventCardDialogs
-        event={event}
-        state={state}
-        onStateChange={updateState}
-        onEventUpdate={handleEventUpdated}
-        onReschedule={onReschedule}
-        onDelete={handleDeleteConfirm}
-        paymentAmount={state.paymentAmount}
-        onPaymentAmountChange={handlePaymentAmountChange}
-        onRegisterPayment={handleProcessPayment}
-        isProcessingPayment={state.isProcessingPayment}
-      />
-    </>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            <span>{date}</span>
+          </div>
+          
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>{time}</span>
+          </div>
+          
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <span>{location}</span>
+          </div>
+          
+          <div className="mt-2">
+            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+              status === 'agendado' ? 'bg-blue-100 text-blue-800' :
+              status === 'confirmado' ? 'bg-green-100 text-green-800' :
+              status === 'cancelado' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {status}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

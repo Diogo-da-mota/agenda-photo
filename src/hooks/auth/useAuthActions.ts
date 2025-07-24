@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { SecureLogger } from '@/utils/SecureLogger';
-import { securityLogger } from '@/utils/securityLogger';
 
 // Interfaces para tipagem
 interface UserMetadata {
@@ -20,12 +19,15 @@ interface UserUpdateData {
 export const useAuthActions = () => {
   const signIn = async (email: string, password: string) => {
     try {
+      SecureLogger.info('[AUTH] Tentativa de login.', { email });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
 
       if (error) {
+        SecureLogger.warn('[AUTH] Erro no login:', error, { email });
         let errorMessage = 'Erro no login. Verifique suas credenciais.';
         
         if (error.message.includes('Invalid login credentials')) {
@@ -34,24 +36,26 @@ export const useAuthActions = () => {
           errorMessage = 'E-mail não confirmado. Verifique sua caixa de entrada.';
         }
         
-        securityLogger.logLoginAttempt(email, false, errorMessage);
         return { success: false, error: errorMessage };
       }
 
       if (data.user) {
-        securityLogger.logLoginAttempt(email, true);
+        SecureLogger.info('[AUTH] Login bem-sucedido.', { userId: data.user.id });
+
         return { success: true };
       }
 
       return { success: false, error: 'Falha na autenticação' };
     } catch (error: unknown) {
-      securityLogger.logSuspiciousActivity('login_exception', { error: error instanceof Error ? error.message : 'Unknown error' }, email);
+      SecureLogger.error('[AUTH] Exceção no login:', error, { email });
       return { success: false, error: 'Erro de conexão. Tente novamente.' };
     }
   };
 
   const signUp = async (email: string, password: string, metadata?: UserMetadata) => {
     try {
+      SecureLogger.info('[AUTH] Tentativa de criar conta.', { email, metadata });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -61,6 +65,8 @@ export const useAuthActions = () => {
       });
 
       if (error) {
+        SecureLogger.warn('[AUTH] Erro na criação de conta:', error, { email });
+        
         let errorMessage = error.message;
         if (error.message.includes('User already registered')) {
           errorMessage = 'Este e-mail já está cadastrado. Tente fazer login.';
@@ -68,7 +74,6 @@ export const useAuthActions = () => {
           errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
         }
         
-        securityLogger.logSuspiciousActivity('signup_error', { error: errorMessage, metadata }, email);
         return { success: false, error: errorMessage };
       }
 
@@ -77,7 +82,6 @@ export const useAuthActions = () => {
           title: "Confirmação necessária",
           description: "Verifique seu e-mail para confirmar sua conta.",
         });
-        SecureLogger.info('[AUTH] Conta criada - confirmação pendente.', { userId: data.user.id });
       } else if (data.user && data.session) {
         toast({
           title: "Conta criada com sucesso",
@@ -88,7 +92,7 @@ export const useAuthActions = () => {
 
       return { success: true, data };
     } catch (error: unknown) {
-      securityLogger.logSuspiciousActivity('signup_exception', { error: error instanceof Error ? error.message : 'Unknown error', metadata }, email);
+      SecureLogger.error('[AUTH] Exceção na criação de conta:', error, { email });
       return { success: false, error: 'Erro de conexão. Tente novamente.' };
     }
   };
@@ -134,19 +138,19 @@ export const useAuthActions = () => {
 
   const resetPassword = async (email: string) => {
     try {
+      SecureLogger.info('[AUTH] Tentativa de reset de senha.', { email });
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/update-password`,
       });
 
       if (error) {
-        securityLogger.logSuspiciousActivity('password_reset_error', { error: error.message }, email);
+        SecureLogger.error('[AUTH] Erro no reset de senha:', error, { email });
         return { success: false, error: error.message };
       }
 
-      SecureLogger.info('[AUTH] Reset de senha solicitado com sucesso.');
       return { success: true };
     } catch (error: unknown) {
-      securityLogger.logSuspiciousActivity('password_reset_exception', { error: error instanceof Error ? error.message : 'Unknown error' }, email);
+      SecureLogger.error('[AUTH] Exceção no reset de senha:', error, { email });
       return { success: false, error: 'Erro de conexão. Tente novamente.' };
     }
   };

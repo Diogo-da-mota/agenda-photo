@@ -7,7 +7,6 @@ import { Send, Ban, Pen, Files } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { generateContractUrl } from '@/utils/slugify';
 
 interface ContractStatusProps {
   status: string;
@@ -16,10 +15,9 @@ interface ContractStatusProps {
   onCancel: () => void;
   contractId: string;
   onCopyContract?: () => void;
-  contractTitle?: string;
 }
 
-const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCopyContract, contractTitle }: ContractStatusProps) => {
+const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCopyContract }: ContractStatusProps) => {
   const navigate = useNavigate();
   
   // Status display helpers
@@ -54,10 +52,7 @@ const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCo
   };
 
   const handleSignDigitally = () => {
-    // Para a assinatura digital, sempre usar o formato de contrato público
-    const contractUrl = generateContractUrl(contractId, contractTitle || 'Contrato');
-    // Navegar diretamente para a URL do contrato público
-    window.open(`${window.location.origin}${contractUrl}`, '_blank');
+    navigate(`/cliente/contrato/${contractId}`);
   };
 
   return (

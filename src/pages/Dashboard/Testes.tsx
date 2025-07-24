@@ -69,13 +69,13 @@ const Testes: React.FC = () => {
       console.log("user_id:", id);
       console.log("Upload result (URL):", resultUrl);
       console.log("storeImageMetadata: OK (handled internamente no handleImageUpload)");
-    } catch (err: Error) {
+    } catch (err: any) {
       // Erro pode vir do Storage OU do banco
       // handleImageUpload lança o erro correspondente!
       setUploadState("error");
       setUploadMsg("❌ Falha no upload da imagem.");
       setPublicUrl(null);
-      let errorMsg = err?.message || JSON.stringify(err);
+      let errorMsg = typeof err?.message === "string" ? err.message : JSON.stringify(err);
       // Identifica erro de Storage (supondo que mensagem contenha)
       if (errorMsg.toLowerCase().includes("storage")) {
         setStorageError(errorMsg);

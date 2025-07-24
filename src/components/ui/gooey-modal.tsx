@@ -32,7 +32,7 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/70 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -62,7 +62,7 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Gooey Background with blur */}
-              <div className="absolute inset-0 bg-white dark:bg-[#111827] rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-[#111827] rounded-2xl overflow-hidden">
                 <div className="absolute -inset-[100px] flex justify-center items-center opacity-60">
                   <div className="absolute w-72 h-72 bg-blue-600 rounded-full filter blur-3xl" 
                        style={{ top: '-10%', left: '10%', animation: 'float 8s ease-in-out infinite' }} />
@@ -73,13 +73,13 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
               </div>
 
               {/* Content Container */}
-              <div className="relative bg-white/90 dark:bg-[#111827]/60 backdrop-blur-sm border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative bg-[#111827]/60 backdrop-blur-sm border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                  <h2 className="text-xl font-semibold text-white">{title}</h2>
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-1 rounded-full text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -92,7 +92,7 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
 
                 {/* Footer if provided */}
                 {footerContent && (
-                  <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+                  <div className="px-6 py-4 border-t border-gray-800">
                     {footerContent}
                   </div>
                 )}
@@ -103,4 +103,4 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
       )}
     </AnimatePresence>
   );
-};
+}; 

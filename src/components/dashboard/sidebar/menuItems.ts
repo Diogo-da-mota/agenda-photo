@@ -47,16 +47,19 @@ export const createMenuItems = (unreadMessages: number = 0, pendingContracts: nu
     path: "/mensagens",
     badge: unreadMessages > 0 ? unreadMessages : undefined,
     iconColor: "#A142F4", // Roxo da marca (mantém cor original)
-    category: "ATIVIDADES"
+    category: "ATIVIDADES",
+    roles: ["admin"], // Visível apenas para admin
+    isAdminOnly: true // Para aplicar background vermelho
   },
   {
     name: "Contratos",
     icon: FileText,
     path: "/contratos",
     badge: pendingContracts > 0 ? pendingContracts : undefined,
-    newBadge: "Novo", // Adicionando o badge "Novo"
-    iconColor: "#F39C12", // Laranja para contratos
-    category: "CONTRATOS"
+    iconColor: "#F39C12", // Laranja para contratos (mantém cor original)
+    category: "CONTRATOS",
+    roles: ["admin"], // Visível apenas para admin
+    isAdminOnly: true // Para aplicar background vermelho
   },
   {
     name: "Financeiro",

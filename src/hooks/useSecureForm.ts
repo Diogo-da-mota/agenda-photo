@@ -31,7 +31,12 @@ export const useSecureForm = (options: SecureFormOptions = {}) => {
         
       if (!csrfToken || !validateToken(csrfToken)) {
         errors.push('Token de segurança inválido');
-        // Log removido por segurança - não expor falhas de validação CSRF
+        securityLog('CSRF validation failed in form', { 
+          hasToken: !!csrfToken,
+          formKeys: formData instanceof FormData 
+            ? Array.from(formData.keys()) 
+            : Object.keys(formData)
+        });
       }
     }
     
@@ -44,7 +49,9 @@ export const useSecureForm = (options: SecureFormOptions = {}) => {
       for (const value of values) {
         if (typeof value === 'string' && !validateInput(value)) {
           errors.push('Dados contêm conteúdo não permitido');
-          // Log removido por segurança - não expor tentativas de XSS
+          securityLog('XSS attempt detected in form', { 
+            suspiciousValue: value.substring(0, 50) + '...'
+          });
           break;
         }
       }
@@ -62,7 +69,7 @@ export const useSecureForm = (options: SecureFormOptions = {}) => {
       if (typeof value === 'string') {
         // Sanitizar string removendo caracteres perigosos
         sanitized[key] = value
-          .replace(/[<>"'&]/g, '')
+          .replace(/[<>\"'&]/g, '')
           .replace(/\s+/g, ' ')
           .trim();
       } else {
@@ -104,10 +111,14 @@ export const useSecureForm = (options: SecureFormOptions = {}) => {
       // Submeter formulário
       await submitFn(sanitizedData);
       
-      // Log removido por segurança - não expor campos de formulário
+      securityLog('Secure form submitted successfully', {
+        fields: Object.keys(sanitizedData)
+      });
       
     } catch (error) {
-      // Log removido por segurança - não expor erros de submissão
+      securityLog('Secure form submission failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       throw error;
     } finally {
       setIsSubmitting(false);

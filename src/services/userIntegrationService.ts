@@ -269,7 +269,7 @@ export const updateUserIntegrations = async (updates: Partial<UserIntegration>):
       // Log apenas em desenvolvimento
       if (import.meta.env.MODE === 'development') {
         console.error('Erro ao atualizar integrações do usuário:', error);
-        // Log removido por segurança - não expor dados de integração com userId
+        console.log('Dados de integração salvos apenas em memória:', updatesWithUserId);
       }
       
       // Fornecer dados salvos em memória

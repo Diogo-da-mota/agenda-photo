@@ -2,8 +2,6 @@
  * Funções utilitárias para o EventCard
  */
 
-import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from '@/utils/emojiUtils';
-
 /**
  * Formatar telefone com DDD
  */
@@ -28,17 +26,7 @@ export const hasPendingPayment = (event: any): boolean => {
  */
 export const generateWhatsAppUrl = (phone: string): string => {
   const cleanPhone = phone.replace(/\D/g, '');
-  
-  // Mensagem padrão com emojis
-  const mensagemTexto = "Olá! Entrando em contato sobre seu evento agendado. 😊🎉";
-  
-  // Processar emojis para garantir compatibilidade com WhatsApp
-  const mensagemProcessada = processEmojisForWhatsApp(mensagemTexto);
-  
-  // Codificar mensagem preservando emojis
-  const mensagemCodificada = encodeTextWithEmojisForURL(mensagemProcessada);
-  
-  return `https://wa.me/55${cleanPhone}?text=${mensagemCodificada}`;
+  return `https://wa.me/55${cleanPhone}`;
 };
 
 /**

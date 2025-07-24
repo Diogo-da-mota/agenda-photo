@@ -16,7 +16,7 @@ interface ImageStats {
 export const monitoringService = {
   async getImageStats(userId: string): Promise<ImageStats> {
     try {
-      // Log removido por segurança - não expor userId
+      console.log('Obtendo estatísticas de imagens para usuário:', userId);
       
       return {
         total: 0,

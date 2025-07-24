@@ -63,22 +63,13 @@ export const sanitizeURL = (dirty: string): string => {
 export const sanitizeContractContent = (content: string): string => {
   if (!content || typeof content !== 'string') return '';
   
-  // Configuração específica para contratos - mais permissiva para preservar formatação
-  const CONTRACT_PURIFY_CONFIG = {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'span', 'p', 'br', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-    ALLOWED_ATTR: ['class'],
-    ALLOW_DATA_ATTR: false,
-    RETURN_TRUSTED_TYPE: false, // Retorna string para preservar formatação
-    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'option'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onkeyup', 'onkeydown'],
-    KEEP_CONTENT: true // Preserva o conteúdo de texto
-  };
-  
-  // Sanitizar com configuração específica para contratos
-  const sanitized = DOMPurify.sanitize(content, CONTRACT_PURIFY_CONFIG);
+  // Sanitizar primeiro
+  const sanitized = sanitizeHTML(content);
   
   // Procurar por linhas que contenham "CONTRATO" em maiúsculas
-  return sanitized.replace(
+  // O DOMPurify com RETURN_TRUSTED_TYPE retorna um objeto, não uma string.
+  // Precisamos converter para string antes de usar .replace()
+  return sanitized.toString().replace(
     /(^.*CONTRATO.*$)/gm, 
     '<div class="contract-title">$1</div>'
   );

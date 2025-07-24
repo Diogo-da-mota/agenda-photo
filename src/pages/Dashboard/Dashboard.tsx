@@ -7,7 +7,7 @@ import { CalendarDays, Users, CreditCard, TrendingUp, Gift, MessageSquare, Histo
 import { Link } from 'react-router-dom';
 import ClientLoginModal from '@/components/client/ClientLoginModal';
 import RecentActivities from '@/components/dashboard/RecentActivities';
-import { PortalErrorBoundary } from '@/components/ui/PortalErrorBoundary';
+// import { PortalErrorBoundary } from '@/components/ui/PortalErrorBoundary'; // Temporarily commented
 import { 
   buscarContagemProximosEventos,
   buscarTotalEventosCriados,
@@ -19,12 +19,12 @@ import {
   buscarEventosComValoresEntradas,
   buscarEventosComValoresRestantes
 } from '@/services/agendaService';
-import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/auth/useUserProfile';
 import { logger } from '@/utils/logger';
 
 const Dashboard = () => {
   const [isClientLoginOpen, setIsClientLoginOpen] = useState(false);
-  const { user } = useAuth();
+  const { user } = useUserProfile();
   const userId = user?.id;
   const queryClient = useQueryClient();
 
@@ -104,9 +104,7 @@ const Dashboard = () => {
   
   return (
     <div className="space-y-6 p-4 pt-0">
-      <PortalErrorBoundary>
-        <ClientLoginModal isOpen={isClientLoginOpen} onOpenChange={setIsClientLoginOpen} />
-      </PortalErrorBoundary>
+      <ClientLoginModal isOpen={isClientLoginOpen} onOpenChange={setIsClientLoginOpen} />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Bem-vindo(a) de volta!</h1>

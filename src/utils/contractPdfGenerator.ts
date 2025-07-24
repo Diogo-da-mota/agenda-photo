@@ -1,193 +1,158 @@
 import { jsPDF } from 'jspdf';
 
+export interface ClientData {
+  nome: string;
+  telefone: string;
+  email: string;
+  tipoEvento: string;
+}
+
+export interface EventoData {
+  data: string;
+  local: string;
+}
+
+export interface PagamentoData {
+  valorTotal: string;
+  sinal: string;
+  valorRestante: string;
+}
+
 export interface ContractPdfOptions {
+  clientData: ClientData;
+  eventoData: EventoData;
+  pagamentoData: PagamentoData;
   conteudoContrato: string;
+  contractId: string;
+  contractStatus: string;
   includeSignature?: boolean;
   signatureDate?: string;
   nomeContratado?: string;
-  clientName?: string; // Apenas para assinatura, se necessário
 }
 
 /**
- * Gera um PDF do contrato contendo APENAS o conteúdo legal do contrato
- * Remove dados sensíveis como informações pessoais, financeiras e do evento
+ * Gera um PDF completo do contrato com todas as informações
  */
 export const generateContractPdf = (options: ContractPdfOptions): Blob => {
   const {
+    clientData,
+    eventoData,
+    pagamentoData,
     conteudoContrato,
+    contractId,
+    contractStatus,
     includeSignature = false,
     signatureDate = '',
-    nomeContratado = 'Agenda Pro',
-    clientName = ''
+    nomeContratado = 'Agenda Pro'
   } = options;
 
   // Criar nova instância do PDF
   const doc = new jsPDF();
   
-  // Configurações de página - Otimizado com rodapé mais baixo
+  // Configurações de página
   const pageWidth = doc.internal.pageSize.width;
-  const pageHeight = doc.internal.pageSize.height;
-  const margin = 18; // 1cm = aproximadamente 28 pontos
-  const lineHeight = 5;
-  const footerHeight = 5; // Reduzido para aproveitar melhor o espaço com rodapé mais baixo
-  const maxContentHeight = pageHeight - margin - footerHeight;
+  const margin = 20;
+  const lineHeight = 7;
   
-  // Título simples - sem dados sensíveis
+  // Título
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", pageWidth/2, margin, { align: "center" });
+  doc.text(`CONTRATO #${contractId}`, pageWidth/2, margin, { align: "center" });
+  doc.text(`${clientData.tipoEvento}`, pageWidth/2, margin + lineHeight, { align: "center" });
   
-  let currentY = margin + lineHeight * 3; // Reduzido de 4 para 3 para economizar espaço
+  let y = margin + lineHeight * 3;
   
-  // Detectar e separar assinaturas do conteúdo principal
-  const signatureRegex = /\n\n______________________________________________________\n([^\n]+)\n([^\n]+)\n\n______________________________________________________\n([^\n]+)\n([^\n]+)$/;
-  const signatureMatch = conteudoContrato.match(signatureRegex);
+  // Status do contrato
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(`Status: ${contractStatus}`, pageWidth - margin, y, { align: "right" });
+  doc.text(`Data de exportação: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y + lineHeight, { align: "right" });
   
-  let mainContent = conteudoContrato;
-  let signatures = null;
+  // Seção: Informações do Cliente
+  y += lineHeight * 3;
+  doc.setFont("helvetica", "bold");
+  doc.text("Informações de Contato", margin, y);
+  y += lineHeight;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Nome: ${clientData.nome}`, margin, y);
+  y += lineHeight;
+  doc.text(`Telefone: ${clientData.telefone}`, margin, y);
+  y += lineHeight;
+  doc.text(`Email: ${clientData.email}`, margin, y);
   
-  if (signatureMatch) {
-    // Separar conteúdo principal das assinaturas
-    mainContent = conteudoContrato.replace(signatureRegex, '');
-    signatures = {
-      clientName: signatureMatch[1],
-      clientRole: signatureMatch[2],
-      photographerName: signatureMatch[3],
-      photographerRole: signatureMatch[4]
-    };
-  }
+  // Seção: Detalhes do Evento
+  y += lineHeight * 2;
+  doc.setFont("helvetica", "bold");
+  doc.text("Detalhes do Evento", margin, y);
+  y += lineHeight;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Data: ${eventoData.data}`, margin, y);
+  y += lineHeight;
+  doc.text(`Local: ${eventoData.local}`, margin, y);
   
-  // Conteúdo do contrato - ÚNICO conteúdo que deve aparecer
+  // Seção: Informações de Pagamento
+  y += lineHeight * 2;
+  doc.setFont("helvetica", "bold");
+  doc.text("Informações de Pagamento", margin, y);
+  y += lineHeight;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Valor Total: ${pagamentoData.valorTotal}`, margin, y);
+  y += lineHeight;
+  doc.text(`Sinal: ${pagamentoData.sinal}`, margin, y);
+  y += lineHeight;
+  doc.text(`Valor Restante: ${pagamentoData.valorRestante}`, margin, y);
+  
+  // Conteúdo do contrato
+  y += lineHeight * 2;
+  doc.setFont("helvetica", "bold");
+  doc.text("Conteúdo do Contrato", margin, y);
+  y += lineHeight;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   
   // Função para quebrar o texto em múltiplas linhas
-  const splitText = doc.splitTextToSize(mainContent, pageWidth - margin * 2);
-  
-  // Implementar paginação automática
-  for (let i = 0; i < splitText.length; i++) {
-    // Verificar se precisa de nova página
-    if (currentY + lineHeight > maxContentHeight) {
-      // Nova página (sem rodapé nas páginas intermediárias)
-      doc.addPage();
-      currentY = margin;
-      
-      // Resetar cor do texto
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-    }
-    
-    // Adicionar linha de texto
-    doc.text(splitText[i], margin, currentY);
-    currentY += lineHeight;
-  }
-  
-  // Renderizar assinaturas centralizadas se detectadas
-  if (signatures) {
-    // Espaço antes das assinaturas - aumentado para dar mais espaço visual
-    currentY += lineHeight * 3.5;
-    
-    // Verificar se há espaço suficiente para as assinaturas (aproximadamente 55 pontos)
-    const signatureSpaceNeeded = 55;
-    if (currentY + signatureSpaceNeeded > maxContentHeight) {
-      // Nova página para assinaturas (sem rodapé na página anterior)
-      doc.addPage();
-      currentY = margin + lineHeight;
-    }
-    
-    // Resetar formatação
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    
-    // Primeira assinatura (Contratante) - CENTRALIZADA
-    const lineWidth = 120;
-    const lineX = (pageWidth - lineWidth) / 2;
-    
-    // Linha de assinatura 1
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(.5);
-    doc.line(lineX, currentY, lineX + lineWidth, currentY);
-    currentY += lineHeight * 1.5;
-    
-    // Nome do contratante - CENTRALIZADO
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(signatures.clientName, pageWidth / 2, currentY, { align: "center" });
-    currentY += lineHeight;
-    
-    // Papel do contratante - CENTRALIZADO
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(signatures.clientRole, pageWidth / 2, currentY, { align: "center" });
-    currentY += lineHeight * 4.5; // Aumentado para dar mais espaço entre as assinaturas
-    
-    // Segunda assinatura (Contratado) - CENTRALIZADA
-    // Linha de assinatura 2
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.line(lineX, currentY, lineX + lineWidth, currentY);
-    currentY += lineHeight * 1.5;
-    
-    // Nome do contratado - CENTRALIZADO
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(signatures.photographerName, pageWidth / 2, currentY, { align: "center" });
-    currentY += lineHeight;
-    
-    // Papel do contratado - CENTRALIZADO
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(signatures.photographerRole, pageWidth / 2, currentY, { align: "center" });
-    currentY += lineHeight * 1; // Otimizado de 1.5 para 1
-  }
+  const splitText = doc.splitTextToSize(conteudoContrato, pageWidth - margin * 2);
+  doc.text(splitText, margin, y);
   
   // Adicionar informações de assinatura para contratos assinados
-  if (includeSignature && clientName) {
-    // Espaço adicional antes da assinatura - otimizado
-    currentY += lineHeight * 1;
+  if (includeSignature && contractStatus.toLowerCase() === 'assinado') {
+    // Calcular nova posição Y para a assinatura
+    const approximateTextHeight = splitText.length * 4;
+    let signatureY = y + approximateTextHeight + lineHeight * 3;
     
-    // Verificar se há espaço suficiente para a seção de assinatura (aproximadamente 45 pontos)
-    const signatureSpaceNeeded = 45;
-    if (currentY + signatureSpaceNeeded > maxContentHeight) {
-      // Nova página para assinatura (sem rodapé na página anterior)
+    // Se ultrapassar o tamanho da página, adiciona nova página
+    if (signatureY > 250) {
       doc.addPage();
-      currentY = margin;
+      signatureY = margin;
     }
     
-    // Resetar formatação
-    doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text("Assinatura Digital", margin, currentY);
-    currentY += lineHeight * 1.2; // Otimizado de 1.5 para 1.2
+    doc.text("Assinatura Digital", margin, signatureY);
+    signatureY += lineHeight;
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Contrato assinado digitalmente por ${clientName}`, margin, currentY);
-    currentY += lineHeight * 1; // Otimizado de 1.2 para 1
+    doc.text(`Contrato assinado digitalmente por ${clientData.nome}`, margin, signatureY);
+    signatureY += lineHeight;
     
-    doc.text(`Data da assinatura: ${signatureDate || new Date().toLocaleDateString('pt-BR')}`, margin, currentY);
-    currentY += lineHeight * 1.2; // Otimizado de 1.5 para 1.2
+    doc.text(`Data da assinatura: ${signatureDate || new Date().toLocaleDateString('pt-BR')}`, margin, signatureY);
+    signatureY += lineHeight;
     
     // Adicionar "carimbo" de assinatura
     doc.setDrawColor(66, 133, 244);
     doc.setLineWidth(0.5);
-    doc.rect(margin, currentY, 100, 25);
+    doc.rect(margin, signatureY, 100, 25);
     
     doc.setFont("helvetica", "bold");
     doc.setTextColor(66, 133, 244);
-    doc.text("DOCUMENTO ASSINADO DIGITALMENTE", margin + 50, currentY + 12.5, { align: "center" });
-    
-    // Atualizar posição Y após o carimbo
-    currentY += 25;
+    doc.text("DOCUMENTO ASSINADO DIGITALMENTE", margin + 50, signatureY + 12.5, { align: "center" });
   }
   
-  // Rodapé final na última página - posicionado mais baixo (10 pontos da borda)
+  // Rodapé
   doc.setFontSize(10);
-  doc.setTextColor(128, 128, 128);
-  doc.text(`${nomeContratado} - Agenda Pro 2025`, pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.setTextColor(0, 0, 0);
+  doc.text(`${nomeContratado} - Agenda Pro`, pageWidth / 2, 285, { align: "center" });
   
   // Retornar o blob do PDF
   return doc.output('blob');

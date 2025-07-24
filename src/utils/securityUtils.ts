@@ -96,14 +96,18 @@ export const validateAuth = (user: any): boolean => {
   return !!(user && user.id && typeof user.id === 'string');
 };
 
-// Log de segurança (simplificado) - Dados sensíveis removidos por segurança
+// Log de segurança (simplificado)
 export const securityLog = (event: string, details: any = {}): void => {
-  // Logs de segurança desabilitados para evitar exposição de dados sensíveis
-  // Como tokens CSRF, user agents e outros dados que podem comprometer a segurança
+  const logData = {
+    timestamp: new Date().toISOString(),
+    event,
+    details: typeof details === 'object' ? JSON.stringify(details) : details,
+    userAgent: navigator.userAgent.substring(0, 100)
+  };
   
-  // Log apenas eventos críticos em desenvolvimento (sem dados sensíveis)
-  if (import.meta.env.MODE === 'development' && event.includes('ERROR')) {
-    console.warn('[SECURITY]', { event: event.replace(/token|csrf|agent/gi, '[MASKED]') });
+  // Log apenas em desenvolvimento
+  if (import.meta.env.MODE === 'development') {
+    console.info('[SECURITY]', logData);
   }
 };
 

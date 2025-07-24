@@ -69,8 +69,8 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
               align-items: center;
               justify-content: center;
               text-align: center !important;
-              margin: 3rem auto 1rem auto;
-              padding: 2rem 1rem 0.5rem 1rem;
+              margin: 3rem auto;
+              padding: 2rem 0;
               width: 100%;
               max-width: 600px;
             }
@@ -80,19 +80,10 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
               align-items: center;
               margin: 1.5rem 0;
               width: 100%;
-              max-width: 400px;
-            }
-            .signature-block:first-child {
-              margin-bottom: 3rem;
-            }
-            .signature-block:last-child {
-              margin-bottom: 0;
             }
             .signature-line {
               border-bottom: 1px solid #9CA3AF;
-              width: 100%;
-              max-width: 350px;
-              min-width: 250px;
+              width: 350px;
               margin: 0 auto 0.5rem auto;
               height: 1px;
             }
@@ -100,60 +91,12 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
               font-weight: 500;
               margin: 0.5rem 0 0.25rem 0;
               text-align: center;
-              font-size: 1rem;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
             }
             .signature-role {
               font-size: 0.875rem;
               color: #6B7280;
               margin: 0;
               text-align: center;
-              font-weight: 400;
-            }
-            
-            /* Responsividade para dispositivos móveis */
-            @media (max-width: 768px) {
-              .contract-signatures {
-                padding: 1.5rem 0.5rem;
-                margin: 2rem auto;
-              }
-              .signature-block {
-                margin: 1.5rem 0;
-                max-width: 100%;
-              }
-              .signature-line {
-                min-width: 200px;
-                max-width: 300px;
-              }
-              .signature-name {
-                font-size: 0.95rem;
-                padding: 0 0.5rem;
-              }
-              .signature-role {
-                font-size: 0.8rem;
-              }
-            }
-            
-            @media (max-width: 480px) {
-              .contract-signatures {
-                padding: 1rem 0.25rem;
-                margin: 1.5rem auto;
-              }
-              .signature-block {
-                margin: 1rem 0;
-              }
-              .signature-line {
-                min-width: 180px;
-                max-width: 250px;
-              }
-              .signature-name {
-                font-size: 0.9rem;
-                padding: 0 0.25rem;
-              }
-              .signature-role {
-                font-size: 0.75rem;
-              }
             }
           `
         }} />

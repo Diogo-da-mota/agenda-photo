@@ -39,7 +39,7 @@ export interface S3UploadProgress {
 
 export interface S3UploadOptions {
   concurrent?: boolean;         // Upload concorrente (padrão: true)
-  maxConcurrent?: number;       // Máximo simultâneo (padrão: 20)
+  maxConcurrent?: number;       // Máximo simultâneo (padrão: 3)
   retryAttempts?: number;       // Tentativas de retry (padrão: 3)
   compressionQuality?: number;  // Qualidade compressão (padrão: 0.8)
   enableCompression?: boolean;  // Ativar compressão (padrão: true)
@@ -64,7 +64,7 @@ export interface S3FileMetadata {
 
 const S3_CONFIG = {
   maxFileSize: 10 * 1024 * 1024,           // 10MB por arquivo
-  maxConcurrentUploads: 5,                  // Máximo de uploads simultâneos
+  maxConcurrentUploads: 5,                  // Máximo concorrente
   maxUserStorage: 3 * 1024 * 1024 * 1024,  // 3GB por usuário
   allowedTypes: [
     'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
@@ -172,7 +172,10 @@ export const validateFiles = (files: File[]): { isValid: boolean; errors: string
     return { isValid: false, errors };
   }
 
-  // ✅ CORREÇÃO: Removida limitação de 50 arquivos para permitir uploads ilimitados
+  if (files.length > 50) {
+    errors.push('Máximo 50 arquivos por upload');
+    return { isValid: false, errors };
+  }
 
   // Validar cada arquivo
   files.forEach(file => {
@@ -523,4 +526,4 @@ export const extractFileNameFromS3Url = (url: string): string => {
     const parts = url.split('/');
     return parts[parts.length - 1] || '';
   }
-};
+}; 

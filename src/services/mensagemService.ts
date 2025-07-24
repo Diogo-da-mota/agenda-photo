@@ -1,7 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
-import { processEmojisForWhatsApp, encodeTextWithEmojisForURL } from '@/utils/emojiUtils';
-import { formatarValorMonetario } from '@/utils/formatters';
 
 // Tipos para mensagens e templates
 export interface MensagemTemplate {
@@ -53,7 +51,7 @@ Local: {local_evento}
 Qualquer dúvida, estou à disposição.
 
 Atenciosamente,
-{nome_empresa}`
+{nome_fotografo}`
   },
   {
     titulo: "Confirmação de Agendamento",
@@ -61,14 +59,14 @@ Atenciosamente,
     tags: ["agenda", "confirmacao"],
     conteudo: `Olá {nome_cliente}!
 
-Seu agendamento foi confirmado com sucesso! \u2705
+Seu agendamento foi confirmado com sucesso! ✅
 
 Detalhes da sessão:
-\u{1F4CB} Serviço: {titulo_evento}
-\u{1F4C5} Data: {data_evento}
-\u{1F557} Horário: {hora_evento}
-\u{1F4CD} Local: {local_evento}
-\u{1F4B0} Valor: R$ {valor_entrada}
+📋 Serviço: {titulo_evento}
+📅 Data: {data_evento}
+🕒 Horário: {hora_evento}
+📍 Local: {local_evento}
+💰 Valor: R$ {valor_entrada}
 
 Aguardamos você!
 
@@ -81,13 +79,13 @@ Aguardamos você!
     tags: ["financeiro", "pagamento"],
     conteudo: `Olá {nome_cliente}!
 
-Confirmamos o recebimento do seu pagamento! \u2705
+Confirmamos o recebimento do seu pagamento! ✅
 
-\u{1F4CB} Detalhes do pagamento:
-\u{1F4B0} Valor: R$ {valor_entrada}
-\u{1F4C5} Data: {data_atual}
-\u{1F4CB} Referente: {titulo_evento}
-\u{1F9FE} Comprovante: {data_atual}
+📋 Detalhes do pagamento:
+💰 Valor: R$ {valor_entrada}
+📅 Data: {data_atual}
+📋 Referente: {titulo_evento}
+🧾 Comprovante: #{data_atual}
 
 Obrigado pela confiança!
 
@@ -98,13 +96,13 @@ Obrigado pela confiança!
     titulo: "Entrega de Fotos",
     categoria: "geral",
     tags: ["fotos", "entrega"],
-    conteudo: `Olá {nome_cliente}! \u{1F4F8}
+    conteudo: `Olá {nome_cliente}! 📸
 
-Suas fotos estão prontas! \u{1F389}
+Suas fotos estão prontas! 🎉
 
-\u{1F4C5} Sessão: {data_evento}
-\u{1F517} Link para download: [Suas fotos aqui]
-\u{1F4C5} Total de fotos: 30 imagens editadas
+📅 Sessão: {data_evento}
+🔗 Link para download: [Suas fotos aqui]
+📅 Total de fotos: 30 imagens editadas
 
 As fotos ficarão disponíveis por 30 dias.
 
@@ -115,13 +113,13 @@ As fotos ficarão disponíveis por 30 dias.
     titulo: "Promoção Personalizada",
     categoria: "geral",
     tags: ["promocao", "marketing"],
-    conteudo: `Olá {nome_cliente}! \u2728
+    conteudo: `Olá {nome_cliente}! ✨
 
 Temos uma promoção especial para você!
 
-\u{1F3AF} Oferta exclusiva para nossos clientes
-\u{1F4B0} Condições especiais disponíveis
-\u{1F4DE} Entre em contato para mais detalhes
+🎯 Oferta exclusiva para nossos clientes
+💰 Condições especiais disponíveis
+📞 Entre em contato para mais detalhes
 
 Não perca essa oportunidade!
 
@@ -134,27 +132,17 @@ Não perca essa oportunidade!
 export const VARIAVEIS_DISPONIVEIS = {
   cliente: [
     { placeholder: '{nome_cliente}', descricao: 'Nome do cliente' },
-    { placeholder: '{telefone}', descricao: 'Telefone do cliente' },
-    { placeholder: '{endereco_cliente}', descricao: 'Endereço do cliente' },
-    { placeholder: '{cpf_cliente}', descricao: 'CPF do cliente' },
   ],
   evento: [
     { placeholder: '{data_evento}', descricao: 'Data do evento' },
     { placeholder: '{hora_evento}', descricao: 'Horário do evento' },
-    { placeholder: '{data_inicio}', descricao: 'Data de início do evento' },
-    { placeholder: '{data_fim}', descricao: 'Data de fim do evento' },
     { placeholder: '{local_evento}', descricao: 'Local do evento' },
     { placeholder: '{titulo_evento}', descricao: 'Título/descrição do evento' },
-    { placeholder: '{descricao}', descricao: 'Descrição detalhada do evento' },
-    { placeholder: '{observacoes}', descricao: 'Observações do evento' },
-    { placeholder: '{valor_entrada}', descricao: 'Valor de entrada do evento' },
-  ],
-  financeiro: [
-    { placeholder: '{valor_total}', descricao: 'Valor total do serviço' },
-    { placeholder: '{valor_restante}', descricao: 'Valor restante a receber' },
+    { placeholder: '{valor_entrada}', descricao: 'Valor do evento' },
   ],
   empresa: [
     { placeholder: '{nome_empresa}', descricao: 'Nome da empresa' },
+    { placeholder: '{nome_fotografo}', descricao: 'Nome do profissional/fotógrafo' },
     { placeholder: '{telefone_empresa}', descricao: 'Telefone da empresa' },
     { placeholder: '{email_empresa}', descricao: 'E-mail da empresa' },
   ],
@@ -274,47 +262,6 @@ export const buscarTemplatePorId = async (id: string, userId: string): Promise<M
     return data;
   } catch (error) {
     logger.error('Exceção ao buscar template por ID', error, 'mensagemService');
-    throw error;
-  }
-};
-
-/**
- * Buscar template por título (para verificar duplicatas)
- */
-export const buscarTemplatePorTitulo = async (titulo: string, userId: string): Promise<MensagemTemplate | null> => {
-  try {
-    logger.debug('Buscando template por título', { titulo, userId }, 'mensagemService');
-    
-    // Verificar se existe no cache primeiro
-    const cacheKey = userId;
-    if (templateCache[cacheKey]) {
-      const templateCached = templateCache[cacheKey].data.find(t => t.titulo === titulo);
-      if (templateCached) {
-        logger.debug('Template encontrado no cache por título', { titulo }, 'mensagemService');
-        return templateCached;
-      }
-    }
-    
-    // Buscar do banco
-    const { data, error } = await supabase
-      .from('mensagens_modelos')
-      .select('*')
-      .eq('titulo', titulo)
-      .eq('user_id', userId)
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') {
-        logger.debug('Template não encontrado por título', { titulo }, 'mensagemService');
-        return null;
-      }
-      logger.error('Erro ao buscar template por título', error, 'mensagemService');
-      throw error;
-    }
-    
-    return data;
-  } catch (error) {
-    logger.error('Exceção ao buscar template por título', error, 'mensagemService');
     throw error;
   }
 };
@@ -624,70 +571,24 @@ export const restaurarTemplatePadrao = async (categoria: string, userId: string)
  * Renderizar preview do template com dados de teste
  */
 export const renderizarPreview = async (conteudo: string): Promise<string> => {
-  return await substituirVariaveis(conteudo);
-};
-
-/**
- * Preparar mensagem para envio via WhatsApp com encoding correto
- * @param conteudo - Conteúdo da mensagem com variáveis
- * @param eventoSelecionado - Dados do evento (opcional)
- * @returns Mensagem processada e codificada para WhatsApp
- */
-export const prepararMensagemWhatsApp = async (
-  conteudo: string, 
-  eventoSelecionado?: any
-): Promise<{ mensagemProcessada: string; mensagemCodificada: string }> => {
-  try {
-    // 1. Substituir variáveis e processar emojis
-    const mensagemProcessada = await substituirVariaveis(conteudo, eventoSelecionado);
-    
-    // 2. Codificar para URL preservando emojis Unicode
-    const mensagemCodificada = encodeTextWithEmojisForURL(mensagemProcessada);
-    
-    logger.debug('Mensagem preparada para WhatsApp', {
-      original: conteudo.substring(0, 100) + '...',
-      processada: mensagemProcessada.substring(0, 100) + '...',
-      codificada: mensagemCodificada.substring(0, 100) + '...'
-    }, 'mensagemService');
-    
-    return {
-      mensagemProcessada,
-      mensagemCodificada
-    };
-  } catch (error) {
-    logger.error('Erro ao preparar mensagem para WhatsApp', error, 'mensagemService');
-    throw error;
-  }
-};
-
-/**
- * Função unificada para substituição de variáveis
- * Busca dados reais da empresa e usa dados de teste para cliente/evento quando não fornecidos
- */
-export const substituirVariaveis = async (
-  conteudo: string, 
-  eventoSelecionado?: any
-): Promise<string> => {
   // Primeiro, substituir caracteres \n literais por quebras de linha reais
   let conteudoProcessado = conteudo.replace(/\\n/g, '\n');
   
   // Converter formato antigo {{variavel}} para formato novo {variavel}
   conteudoProcessado = conteudoProcessado.replace(/{{([^}]+)}}/g, '{$1}');
   
-  // 1. BUSCAR DADOS DA EMPRESA (sempre dados reais)
-  let dadosEmpresa = {
-    nome_empresa: 'Sua Empresa',
-    telefone_empresa: '(00)0 0000-0000',
-    email_empresa: 'contato@empresa.com',
-    nome_fotografo: 'Profissional'
-  };
+  // Buscar configurações da empresa para usar dados reais onde possível
+  let nomeEmpresa = 'Sua Empresa';
+  let telefoneEmpresa = '(00) 00000-0000';
+  let emailEmpresa = 'contato@empresa.com';
+  let nomeFotografo = 'Profissional';
   
   try {
     // Obter o usuário logado
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-      // Buscar dados da empresa com todos os campos necessários
+      // Buscar dados da empresa
       const { data, error } = await supabase
         .from('configuracoes_empresa')
         .select('nome_empresa, telefone, email_empresa')
@@ -695,207 +596,37 @@ export const substituirVariaveis = async (
         .maybeSingle();
       
       if (!error && data) {
-        // Função para formatar telefone
-        const formatarTelefone = (telefone: string | null): string => {
-          if (!telefone) return dadosEmpresa.telefone_empresa;
-          
-          // Remove todos os caracteres não numéricos
-          const numeroLimpo = telefone.replace(/\D/g, '');
-          
-          // Se não tem números suficientes, retorna o padrão
-          if (numeroLimpo.length < 10) return dadosEmpresa.telefone_empresa;
-          
-          // Formatar telefone brasileiro
-          if (numeroLimpo.length === 11) {
-            // Celular: (XX) 9XXXX-XXXX
-            return `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2, 7)}-${numeroLimpo.slice(7)}`;
-          } else if (numeroLimpo.length === 10) {
-            // Fixo: (XX) XXXX-XXXX
-            return `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2, 6)}-${numeroLimpo.slice(6)}`;
-          }
-          
-          return telefone; // Retorna como está se não conseguir formatar
-        };
-        
-        // Mapear corretamente os campos da empresa
-        dadosEmpresa.nome_empresa = data.nome_empresa || dadosEmpresa.nome_empresa;
-        dadosEmpresa.telefone_empresa = formatarTelefone(data.telefone);
-        dadosEmpresa.email_empresa = data.email_empresa || dadosEmpresa.email_empresa;
-        dadosEmpresa.nome_fotografo = data.nome_empresa || dadosEmpresa.nome_fotografo;
-        
-        // Log para debug
-        logger.info('Dados da empresa carregados:', {
-          nome_empresa: dadosEmpresa.nome_empresa,
-          telefone_empresa: dadosEmpresa.telefone_empresa,
-          email_empresa: dadosEmpresa.email_empresa
-        }, 'mensagemService');
-      } else if (error) {
-        logger.error('Erro ao buscar configurações da empresa:', error, 'mensagemService');
-      } else {
-        logger.warn('Nenhuma configuração de empresa encontrada para o usuário', null, 'mensagemService');
+        nomeEmpresa = data.nome_empresa || nomeEmpresa;
+        telefoneEmpresa = data.telefone || telefoneEmpresa;
+        emailEmpresa = data.email_empresa || emailEmpresa;
+        // O nome do fotógrafo pode ser o mesmo da empresa se não houver específico
+        nomeFotografo = data.nome_empresa || nomeFotografo;
       }
-    } else {
-      logger.warn('Usuário não autenticado ao buscar dados da empresa', null, 'mensagemService');
     }
   } catch (error) {
-    logger.error('Erro ao buscar dados da empresa', error, 'mensagemService');
+    logger.error('Erro ao buscar dados da empresa para preview', error, 'mensagemService');
+    // Em caso de erro, continuaremos com os valores padrão definidos acima
   }
   
-  // 2. BUSCAR DADOS DO EVENTO (dados reais se evento selecionado, senão dados de teste)
-  let dadosEvento = {
-    nome_cliente: 'João Silva',
-    telefone: '(11)9 9999-9999',
-    endereco_cliente: 'Rua das Flores, 123 - Centro',
-    cpf_cliente: '123.456.789-00',
-    data_evento: '15/01/2025',
-    hora_evento: '14:30',
-    data_inicio: '15/01/2025 14:30',
-    data_fim: '15/01/2025 16:30',
-    local_evento: 'Consultório - Sala 1',
-    titulo_evento: 'Consulta Psicológica',
-    descricao: 'Sessão de terapia individual com foco em ansiedade',
-    observacoes: 'Cliente prefere horário da tarde',
-    valor_entrada: formatarValorMonetario(150),
-    valor_total: formatarValorMonetario(500),
-    valor_restante: formatarValorMonetario(350)
+  const dadosTeste = {
+    '{nome_cliente}': 'João Silva',
+    '{data_evento}': '15/01/2025',
+    '{hora_evento}': '14:30',
+    '{local_evento}': 'Consultório - Sala 1',
+    '{titulo_evento}': 'Consulta Psicológica',
+    '{valor_entrada}': '150,00',
+    '{nome_empresa}': nomeEmpresa,
+    '{nome_fotografo}': nomeFotografo,
+    '{telefone_empresa}': telefoneEmpresa,
+    '{email_empresa}': emailEmpresa,
+    '{data_atual}': new Date().toLocaleDateString('pt-BR'),
+    '{hora_atual}': new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   };
   
-  if (eventoSelecionado) {
-    try {
-      // Buscar dados adicionais do evento se existir ID
-      let dadosEventoCompleto = eventoSelecionado;
-      
-      if (eventoSelecionado.id) {
-        const { data, error } = await supabase
-          .from('agenda_eventos')
-          .select('*')
-          .eq('id', eventoSelecionado.id)
-          .single();
-        
-        if (!error && data) {
-          dadosEventoCompleto = { ...eventoSelecionado, ...data };
-        }
-      }
-      
-      // Função para formatar data
-      const formatarData = (data: string | undefined | null) => {
-        if (!data) return dadosEvento.data_evento;
-        try {
-          return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        } catch (e) {
-          return data;
-        }
-      };
-      
-      // Função para formatar hora
-      const formatarHora = (data: string | undefined | null) => {
-        if (!data) return dadosEvento.hora_evento;
-        try {
-          if (typeof data === 'string' && /^\d{1,2}:\d{2}$/.test(data)) {
-            return data;
-          }
-          return new Date(data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-        } catch (e) {
-          return dadosEvento.hora_evento;
-        }
-      };
-      
-      // Função para formatar telefone do cliente
-      const formatarTelefoneCliente = (telefone: string | null): string => {
-        if (!telefone) return dadosEvento.telefone;
-        
-        // Remove todos os caracteres não numéricos
-        const numeroLimpo = telefone.replace(/\D/g, '');
-        
-        // Se não tem números suficientes, retorna o padrão
-        if (numeroLimpo.length < 10) return dadosEvento.telefone;
-        
-        // Formatar telefone brasileiro no formato (00)0 0000-0000
-        if (numeroLimpo.length === 11) {
-          // Celular: (00)0 0000-0000
-          return `(${numeroLimpo.slice(0, 2)})${numeroLimpo.slice(2, 3)} ${numeroLimpo.slice(3, 7)}-${numeroLimpo.slice(7)}`;
-        } else if (numeroLimpo.length === 10) {
-          // Fixo: (00) 0000-0000
-          return `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2, 6)}-${numeroLimpo.slice(6)}`;
-        }
-        
-        return telefone; // Retorna como está se não conseguir formatar
-      };
-
-      // Atualizar dados do evento com dados reais
-      dadosEvento = {
-        nome_cliente: dadosEventoCompleto.clientName || dadosEventoCompleto.titulo || dadosEvento.nome_cliente,
-        telefone: formatarTelefoneCliente(dadosEventoCompleto.phone || dadosEventoCompleto.telefone),
-        endereco_cliente: dadosEventoCompleto.endereco_cliente || dadosEvento.endereco_cliente,
-        cpf_cliente: dadosEventoCompleto.cpf_cliente || dadosEvento.cpf_cliente,
-        data_evento: formatarData(dadosEventoCompleto.date || dadosEventoCompleto.data_inicio),
-        hora_evento: formatarHora(dadosEventoCompleto.time || dadosEventoCompleto.data_inicio),
-        data_inicio: `${formatarData(dadosEventoCompleto.date || dadosEventoCompleto.data_inicio)} ${formatarHora(dadosEventoCompleto.time || dadosEventoCompleto.data_inicio)}`,
-        data_fim: formatarData(dadosEventoCompleto.data_fim),
-        local_evento: dadosEventoCompleto.location || dadosEventoCompleto.local || dadosEvento.local_evento,
-        titulo_evento: dadosEventoCompleto.eventType || dadosEventoCompleto.tipo || dadosEvento.titulo_evento,
-        descricao: dadosEventoCompleto.descricao || dadosEvento.descricao,
-        observacoes: dadosEventoCompleto.notes || dadosEventoCompleto.observacoes || dadosEvento.observacoes,
-        valor_entrada: formatarValorMonetario(dadosEventoCompleto.downPayment || dadosEventoCompleto.valor_entrada || 0),
-        valor_total: formatarValorMonetario(dadosEventoCompleto.totalValue || dadosEventoCompleto.valor_total || 0),
-        valor_restante: formatarValorMonetario(dadosEventoCompleto.remainingValue || dadosEventoCompleto.valor_restante || 0)
-      };
-    } catch (error) {
-      logger.error('Erro ao buscar dados do evento', error, 'mensagemService');
-    }
-  }
-  
-  // 3. DADOS DO SISTEMA (sempre atuais)
-  const dadosSistema = {
-    data_atual: new Date().toLocaleDateString('pt-BR'),
-    hora_atual: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  };
-  
-  // 4. MAPEAMENTO COMPLETO DE VARIÁVEIS
-  const variaveis = {
-    // Dados do cliente
-    '{nome_cliente}': dadosEvento.nome_cliente,
-    '{telefone}': dadosEvento.telefone,
-    '{endereco_cliente}': dadosEvento.endereco_cliente,
-    '{cpf_cliente}': dadosEvento.cpf_cliente,
-    
-    // Dados do evento
-    '{data_evento}': dadosEvento.data_evento,
-    '{hora_evento}': dadosEvento.hora_evento,
-    '{data_inicio}': dadosEvento.data_inicio,
-    '{data_fim}': dadosEvento.data_fim,
-    '{local_evento}': dadosEvento.local_evento,
-    '{titulo_evento}': dadosEvento.titulo_evento,
-    '{descricao}': dadosEvento.descricao,
-    '{observacoes}': dadosEvento.observacoes,
-    
-    // Dados financeiros
-    '{valor_entrada}': dadosEvento.valor_entrada,
-    '{valor_total}': dadosEvento.valor_total,
-    '{valor_restante}': dadosEvento.valor_restante,
-    
-    // Dados da empresa
-    '{nome_empresa}': dadosEmpresa.nome_empresa,
-    '{nome_fotografo}': dadosEmpresa.nome_fotografo,
-    '{telefone_empresa}': dadosEmpresa.telefone_empresa,
-    '{email_empresa}': dadosEmpresa.email_empresa,
-    
-    // Dados do sistema
-    '{data_atual}': dadosSistema.data_atual,
-    '{hora_atual}': dadosSistema.hora_atual
-  };
-  
-  // 5. SUBSTITUIR VARIÁVEIS NO CONTEÚDO
-  Object.entries(variaveis).forEach(([placeholder, valor]) => {
-    conteudoProcessado = conteudoProcessado.replace(
-      new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), 
-      valor || placeholder
-    );
+  // Substituir variáveis
+  Object.entries(dadosTeste).forEach(([placeholder, valor]) => {
+    conteudoProcessado = conteudoProcessado.replace(new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), valor);
   });
-  
-  // 6. PROCESSAR EMOJIS PARA COMPATIBILIDADE COM WHATSAPP
-  // Aplicar processamento de emoji após substituição de variáveis
-  conteudoProcessado = processEmojisForWhatsApp(conteudoProcessado);
   
   return conteudoProcessado;
 };
@@ -923,34 +654,33 @@ export const testarRenderizacaoMensagem = async (mensagem: string): Promise<stri
 
 /**
  * Inicializa templates padrão para novos usuários
- * Esta função SEMPRE cria os templates padrão, independente de já existirem ou não
- * Use apenas quando o usuário explicitamente solicitar a criação dos templates padrão
+ * Esta função verifica se o usuário já tem templates, e se não tiver, cria os templates padrão
  */
 export const inicializarTemplatesPadrao = async (userId: string): Promise<MensagemTemplate[]> => {
   try {
-    logger.info('Iniciando criação de templates padrão por solicitação do usuário', { userId, totalTemplates: TEMPLATES_PADRAO.length }, 'mensagemService');
+    logger.debug('Verificando necessidade de inicializar templates padrão', { userId }, 'mensagemService');
     
-    // Limpar cache primeiro para garantir dados atualizados
-    limparCacheTemplates(userId);
+    // Verificar se o usuário já tem templates
+    const templatesExistentes = await buscarTemplates(userId);
     
-    const templatesNovos: MensagemTemplate[] = [];
-    
-    // Criar templates um por um para melhor controle de erros
-    for (const templatePadrao of TEMPLATES_PADRAO) {
-      try {
-        const novoTemplate = await criarTemplate({
-          ...templatePadrao,
-          user_id: userId
-        }, userId);
-        templatesNovos.push(novoTemplate);
-        logger.debug('Template criado', { titulo: novoTemplate.titulo, id: novoTemplate.id }, 'mensagemService');
-      } catch (error) {
-        logger.error('Erro ao criar template individual', { titulo: templatePadrao.titulo, error }, 'mensagemService');
-        // Continuar criando os outros templates mesmo se um falhar
-      }
+    if (templatesExistentes.length > 0) {
+      logger.debug('Usuário já possui templates, pulando inicialização', { count: templatesExistentes.length }, 'mensagemService');
+      return templatesExistentes;
     }
     
-    // Limpar cache novamente para garantir que os templates recém-criados sejam retornados
+    // Usuário não tem templates, vamos criar os padrão
+    logger.info('Criando templates padrão para novo usuário', { userId }, 'mensagemService');
+    
+    const promisesTemplates = TEMPLATES_PADRAO.map(templatePadrao => 
+      criarTemplate({
+        ...templatePadrao,
+        user_id: userId
+      }, userId)
+    );
+    
+    const templatesNovos = await Promise.all(promisesTemplates);
+    
+    // Limpar cache para garantir que os templates recém-criados sejam retornados
     limparCacheTemplates(userId);
     
     logger.info('Templates padrão criados com sucesso', { count: templatesNovos.length, userId }, 'mensagemService');
@@ -959,50 +689,4 @@ export const inicializarTemplatesPadrao = async (userId: string): Promise<Mensag
     logger.error('Erro ao inicializar templates padrão', error, 'mensagemService');
     throw error;
   }
-};
-
-/**
- * Função de debug para forçar recriação dos templates padrão
- */
-export const forcarRecriacaoTemplatesPadrao = async (userId: string): Promise<MensagemTemplate[]> => {
-  try {
-    logger.info('Forçando recriação dos templates padrão', { userId }, 'mensagemService');
-    
-    // Limpar cache
-    limparCacheTemplates(userId);
-    
-    // Deletar todos os templates existentes do usuário
-    const { error: errorDelete } = await supabase
-      .from('mensagens_modelos')
-      .delete()
-      .eq('user_id', userId);
-    
-    if (errorDelete) {
-      logger.error('Erro ao deletar templates existentes', errorDelete, 'mensagemService');
-    }
-    
-    // Criar novos templates
-    const templatesNovos: MensagemTemplate[] = [];
-    
-    for (const templatePadrao of TEMPLATES_PADRAO) {
-      try {
-        const novoTemplate = await criarTemplate({
-          ...templatePadrao,
-          user_id: userId
-        }, userId);
-        templatesNovos.push(novoTemplate);
-        logger.debug('Template recriado', { titulo: novoTemplate.titulo, id: novoTemplate.id }, 'mensagemService');
-      } catch (error) {
-        logger.error('Erro ao recriar template individual', { titulo: templatePadrao.titulo, error }, 'mensagemService');
-      }
-    }
-    
-    limparCacheTemplates(userId);
-    
-    logger.info('Templates padrão recriados com sucesso', { count: templatesNovos.length, userId }, 'mensagemService');
-    return templatesNovos;
-  } catch (error) {
-    logger.error('Erro ao forçar recriação dos templates padrão', error, 'mensagemService');
-    throw error;
-  }
-};
+}; 

@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { SecureLogger } from '@/utils/SecureLogger';
 
 /**
  * Verifica se já existe um usuário cadastrado com o email informado de forma segura
@@ -32,7 +31,7 @@ export const checkUserExistsByEmail = async (email: string): Promise<boolean> =>
       
       // Para outros tipos de erro, assumimos que o email pode existir,
       // mas ocorreu um problema de comunicação
-      SecureLogger.warn('[AUTH_UTILS] Erro ao verificar existência do usuário.', { error: error.message });
+      console.error('[AUTH_UTILS] Erro ao verificar existência do usuário:', error);
       return false;
     }
     
@@ -40,7 +39,7 @@ export const checkUserExistsByEmail = async (email: string): Promise<boolean> =>
     return true;
     
   } catch (error) {
-    SecureLogger.error('[AUTH_UTILS] Exceção ao verificar existência do usuário.', { error: error instanceof Error ? error.message : 'Unknown error' });
+    console.error('[AUTH_UTILS] Erro ao verificar existência do usuário:', error);
     // Em caso de erro de conexão, não bloquear o processo
     return false;
   }
@@ -63,4 +62,4 @@ export const isValidEmailFormat = (email: string): boolean => {
  */
 export const normalizeEmail = (email: string): string => {
   return email.trim().toLowerCase();
-};
+}; 

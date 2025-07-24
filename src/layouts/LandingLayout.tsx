@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import LoginModal from '@/components/auth/LoginModal';
@@ -11,8 +11,8 @@ interface LandingLayoutProps {
 }
 
 const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
 
   const handleLoginClick = () => {
     setIsLoginModalOpen(true);

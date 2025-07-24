@@ -16,7 +16,26 @@ import { ClienteFormData } from '@/types/clients';
 import { useSecureForm } from '@/hooks/useSecureForm';
 import { SecurityErrorBanner } from '@/components/security';
 import { validateEmailSecurity, validatePhoneSecurity, sanitizeString, validateCurrency } from '@/utils/validation';
-import { aplicarMascaraTelefone } from '@/utils/formatters';
+
+// Função para formatar telefone no padrão (00) 0 0000-0000
+const formatarTelefone = (telefone: string): string => {
+  // Remove todos os caracteres não numéricos
+  const numeroLimpo = telefone.replace(/\D/g, '');
+  
+  // Limita a 11 dígitos
+  const numeroLimitado = numeroLimpo.slice(0, 11);
+  
+  // Aplica a formatação de acordo com o número de dígitos
+  if (numeroLimitado.length <= 2) {
+    return numeroLimitado;
+  } else if (numeroLimitado.length <= 3) {
+    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2)}`;
+  } else if (numeroLimitado.length <= 7) {
+    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3)}`;
+  } else {
+    return `(${numeroLimitado.slice(0, 2)}) ${numeroLimitado.slice(2, 3)} ${numeroLimitado.slice(3, 7)}-${numeroLimitado.slice(7)}`;
+  }
+};
 
 // Definir esquema de validação com sanitização aprimorada
 const clienteSchema = z.object({
@@ -24,7 +43,7 @@ const clienteSchema = z.object({
     .min(1, "Nome é obrigatório")
     .max(100, "Nome muito longo")
     .trim()
-    .refine(val => !/[<>"'&\n\r\t]/.test(val), "Nome contém caracteres inválidos")
+    .refine(val => !/[<>\"'&\n\r\t]/.test(val), "Nome contém caracteres inválidos")
     .refine(val => val.length >= 2, "Nome deve ter pelo menos 2 caracteres")
     .refine(val => /^[a-zA-ZÀ-ÿ\s]+$/.test(val), "Nome deve conter apenas letras e espaços"),
   telefone: z.string()
@@ -39,7 +58,7 @@ const clienteSchema = z.object({
   evento: z.string()
     .nullable()
     .optional()
-    .refine(val => !val || !/[<>"'&\n\r\t]/.test(val), "Tipo de evento contém caracteres inválidos")
+    .refine(val => !val || !/[<>\"'&\n\r\t]/.test(val), "Tipo de evento contém caracteres inválidos")
     .refine(val => !val || val.length <= 100, "Tipo de evento muito longo"),
   data_evento: z.string().nullable().optional(),
   valor_evento: z.string()
@@ -142,10 +161,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               <FormLabel>Telefone</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="(00)0 0000-0000" 
+                  placeholder="(00) 0 0000-0000" 
                   value={field.value || ''} 
                   onChange={(e) => {
-                    const formattedPhone = aplicarMascaraTelefone(e.target.value);
+                    const formattedPhone = formatarTelefone(e.target.value);
                     field.onChange(formattedPhone);
                   }}
                   maxLength={17}

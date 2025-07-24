@@ -1,27 +1,10 @@
 import { supabase } from "@/lib/supabase";
-import { createClient, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import { registrarContratoCriado } from './atividadeService';
-
-// Cliente Supabase para consultas públicas (sem RLS)
-const publicSupabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-      }
-    }
-  }
-);
 
 // Interface para dados do contrato
 export interface Contract {
-  id_contrato: string;
+  id: string;
   user_id: string;
   cliente_id: string;
   titulo: string;
@@ -38,7 +21,6 @@ export interface Contract {
   data_assinatura?: string;
   data_expiracao?: string;
   criado_em: string;
-  id_amigavel?: number;
   clientes?: {
     id: string;
     nome: string;
@@ -59,7 +41,6 @@ export interface ContractTemplate {
 
 // Interface para criação de contrato
 export interface CreateContractData {
-  id_contrato?: string;
   cliente_id: string;
   titulo: string;
   descricao?: string;
@@ -158,15 +139,11 @@ export const getContract = async (id: string, user: User) => {
     const { data, error } = await supabase
       .from('contratos')
       .select('*, clientes(*)')
-      .eq('id_contrato', id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
-    if (error) {
-      console.error('Erro ao buscar contrato:', error);
-      throw error;
-    }
-    
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Erro ao buscar contrato:', error);
@@ -176,21 +153,16 @@ export const getContract = async (id: string, user: User) => {
 
 /**
  * Busca um contrato público (sem autenticação) - usado para visualização pública
- * Usa um cliente Supabase específico para consultas públicas
  */
 export const getPublicContract = async (id: string) => {
   try {
-    // Usar o cliente público que não tem sessão de usuário
-    const { data, error } = await publicSupabase
+    const { data, error } = await supabase
       .from('contratos')
       .select('*, clientes(*)')
-      .eq('id_contrato', id)
+      .eq('id', id)
       .single();
 
-    if (error) {
-      console.error('Erro ao buscar contrato público:', error);
-      throw error;
-    }
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Erro ao buscar contrato público:', error);
@@ -217,7 +189,7 @@ export const createContract = async (contractData: CreateContractData, user: Use
     
     // Registrar atividade de criação do contrato
     try {
-      await registrarContratoCriado(user.id, data.titulo, data.id_contrato);
+      await registrarContratoCriado(user.id, data.titulo, data.id);
     } catch (activityError) {
       console.warn('Erro ao registrar atividade de criação do contrato:', activityError);
       // Não falhar a criação do contrato por causa do log de atividade
@@ -238,7 +210,7 @@ export const updateContract = async (id: string, contractData: UpdateContractDat
     const { data, error } = await supabase
       .from('contratos')
       .update(contractData)
-      .eq('id_contrato', id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single();
@@ -262,7 +234,7 @@ export const updateContractStatus = async (id: string, status: Contract['status'
         status,
         data_assinatura: status === 'assinado' ? new Date().toISOString() : undefined
       })
-      .eq('id_contrato', id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single();
@@ -283,7 +255,7 @@ export const deleteContract = async (id: string, user: User) => {
     const { error } = await supabase
       .from('contratos')
       .delete()
-      .eq('id_contrato', id)
+      .eq('id', id)
       .eq('user_id', user.id);
 
     if (error) throw error;
@@ -419,13 +391,13 @@ export const updateContractTemplate = async (
   user: User
 ): Promise<ContractTemplate> => {
   try {
-    // Logs removidos por segurança - não expor userId e dados de template
+    console.log('🔧 updateContractTemplate - Iniciando:', { templateId, templateData, userId: user.id });
     
     const updateData: any = {};
     
     // Se estamos atualizando o nome, verificar se já existe outro template com o mesmo nome
     if (templateData.nome !== undefined) {
-      // Log removido por segurança
+      console.log('🔍 Verificando se nome já existe:', templateData.nome);
       const nameExists = await checkTemplateNameExists(templateData.nome, user, templateId);
       if (nameExists) {
         console.log('❌ Nome já existe, lançando erro');

@@ -38,7 +38,7 @@ export const auditService = {
     try {
       // Log apenas em desenvolvimento
       if (import.meta.env.MODE === 'development') {
-        // Log removido por segurança - não expor userId
+        console.log('Buscando logs de auditoria para usuário:', userId);
       }
       const { data, error } = await supabase
         .from('audit_logs')

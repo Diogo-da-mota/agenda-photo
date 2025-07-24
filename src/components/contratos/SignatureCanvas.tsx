@@ -43,26 +43,12 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({ onSign, signat
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        
-        // Dynamic stroke color based on theme
-        const isDarkMode = document.documentElement.classList.contains('dark');
-        ctx.strokeStyle = isDarkMode ? '#ffffff' : '#000000';
+        ctx.strokeStyle = '#000000';
       }
     };
     
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
-    
-    // Listen for theme changes
-    const observer = new MutationObserver(() => {
-      const isDarkMode = document.documentElement.classList.contains('dark');
-      ctx.strokeStyle = isDarkMode ? '#ffffff' : '#000000';
-    });
-    
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
     
     // If there's a saved signature, restore it
     if (signature) {
@@ -75,7 +61,6 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({ onSign, signat
     
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
-      observer.disconnect();
     };
   }, [signature]);
   
@@ -177,7 +162,7 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({ onSign, signat
       </div>
       <canvas
         ref={canvasRef}
-        className="w-full cursor-crosshair touch-none border rounded-md bg-white dark:bg-gray-800"
+        className="w-full cursor-crosshair touch-none border rounded-md bg-white"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}

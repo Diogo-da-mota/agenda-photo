@@ -3,14 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import TransactionForm from './TransactionForm';
-import EventForm from '@/components/agenda/EventForm';
-import type { Event, EventStatus } from '@/components/agenda/types';
+
 import { Transacao, criarTransacao, atualizarTransacao } from '@/services/financeiroService';
 import { criarDespesa, atualizarDespesa, Despesa } from '@/services/financeiroDespesasService';
 import { logger } from '@/utils/logger';
-import { format } from 'date-fns';
 
 interface TransactionModalProps {
   transaction?: Transacao;
@@ -32,7 +30,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isOpen, setIsOpen] = useState(controlledIsOpen || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user } = useUserProfile();
   
   // Determinar se o modal está controlado externamente
   const isControlled = controlledIsOpen !== undefined;
@@ -47,8 +45,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   // Determinar se é uma despesa específica (do botão Despesas)
   const isDespesaEspecifica = initialType === 'despesa' && !transaction;
   
-  // Determinar se é uma transação vinculada a um evento
-  const isEventTransaction = transaction?.tipo === 'receita' && (transaction?.evento_id || transaction?.categoria === 'Entrada de Evento' || transaction?.categoria === 'Ensaio');
   
   // Funções para abrir/fechar o modal
   const open = () => {
@@ -170,8 +166,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
   
-  // Para edição de evento, o status é sempre 'completed'
-  const eventStatus = 'completed' as EventStatus;
   
   return (
     <Dialog 
@@ -188,42 +182,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         <DialogHeader>
           <DialogTitle>
             {transaction ? 'Editar ' : 'Nova '}
-            {isDespesaEspecifica || (transaction?.tipo === 'despesa' || transaction?.isDespesaEspecifica) ? 'Despesa' : isEventTransaction ? 'Evento' : 'Transação'}
+            {isDespesaEspecifica || (transaction?.tipo === 'despesa' || transaction?.isDespesaEspecifica) ? 'Despesa' : 'Transação'}
           </DialogTitle>
         </DialogHeader>
         
-        {isEventTransaction ? (
-          <EventForm
-            event={{
-              id: transaction.evento_id,
-              clientName: transaction.descricao,
-              phone: transaction.telefone || '',
-              birthday: null,
-              eventType: transaction.categoria || '',
-              date: new Date(transaction.data_evento || transaction.data_transacao),
-              time: format(new Date(transaction.data_evento || transaction.data_transacao), 'HH:mm'),
-              location: transaction.local || '',
-              totalValue: transaction.valor,
-              downPayment: transaction.valor_entrada || 0,
-              remainingValue: transaction.valor - (transaction.valor_entrada || 0),
-              notes: transaction.observacoes || '',
-              status: eventStatus,
-              reminderSent: false
-            }}
-            onClose={close}
-            onEventCreated={(event) => {
-              onSuccess?.(transaction);
-              close();
-            }}
-          />
-        ) : (
-          <TransactionForm
-            transaction={transaction}
-            onSubmit={handleSubmit}
-            onCancel={close}
-            isSubmitting={isSubmitting}
-          />
-        )}
+        <TransactionForm
+          transaction={transaction}
+          onSubmit={handleSubmit}
+          onCancel={close}
+          isSubmitting={isSubmitting}
+        />
       </DialogContent>
     </Dialog>
   );
