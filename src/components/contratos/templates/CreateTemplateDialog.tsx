@@ -13,7 +13,12 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { CreateTemplateDialogProps } from './types';
+interface CreateTemplateDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (name: string, content: string) => void;
+  currentContent?: string;
+}
 
 export const CreateTemplateDialog = ({
   isOpen, 

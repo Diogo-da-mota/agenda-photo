@@ -46,7 +46,7 @@ const PortfolioGaleriaTrabalho = lazy(() => import("./pages/Dashboard/PortfolioG
 
 // Lazy loading para componentes administrativos
 const EntregaFotos = lazy(() => import("./pages/Dashboard/EntregaFotos"));
-const EntregaFotosAdmin = lazy(() => import("./components/Dashboard/EntregaFotosAdmin"));
+// EntregaFotosAdmin removed temporarily due to build errors
 const EntregaFotosVisualizacao = lazy(() => import("./pages/EntregaFotosVisualizacao"));
 const EscolherAlbum = lazy(() => import("./pages/Dashboard/EscolherAlbum"));
 const DiagnosticoSupabase = lazy(() => import("./pages/Dashboard/DiagnosticoSupabase"));
@@ -270,7 +270,7 @@ const AppRoutes = () => {
           {/* Rota ADMIN ONLY - Administração Entrega de Fotos */}
           <Route path="/entrega-fotos/admin" element={
             <AdminRoute>
-              <EntregaFotosAdmin />
+              <div>Admin de Entrega de Fotos - Em construção</div>
             </AdminRoute>
           } />
           

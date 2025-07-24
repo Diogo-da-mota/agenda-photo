@@ -49,13 +49,11 @@ export interface BulkDownloadState {
 
 // Configurações da barra de ações
 export interface ActionBarConfig {
-  showSelectAll: boolean;
-  showDeselectAll: boolean;
-  showDownloadSelected: boolean;
-  showDownloadAll: boolean;
-  showCancel: boolean;
-  selectedCount: number;
-  totalCount: number;
+  showSelectAll?: boolean;
+  showDownloadAll?: boolean;
+  showProgress?: boolean;
+  showStats?: boolean;
+  position?: 'top' | 'bottom';
 }
 
 // Eventos de callback

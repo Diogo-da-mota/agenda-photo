@@ -388,8 +388,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
       // Corrigir nomes vindos do evento para camelCase esperado pelo formulário
       const updatedValues = {
         ...initialData,
-        cpfCliente: initialData.cpfCliente || initialData.cpf_cliente || '',
-        enderecoCliente: initialData.enderecoCliente || initialData.endereco_cliente || '',
+        cpfCliente: initialData.cpfCliente || (initialData as any).cpf_cliente || '',
+        enderecoCliente: initialData.enderecoCliente || (initialData as any).endereco_cliente || '',
         termsAndConditions: initialData?.termsAndConditions || getCurrentTemplate()
       };
       // Os dados já são processados dinamicamente na função generateContractTemplate
