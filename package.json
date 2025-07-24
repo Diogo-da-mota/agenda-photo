@@ -22,7 +22,11 @@
     "security:audit": "node scripts/security-audit.js",
     "security:config": "node scripts/security-config-check.js",
     "security:fix": "node scripts/apply-security-fixes.js",
-    "security:full": "npm run security:audit && npm run security:config"
+    "security:full": "npm run security:audit && npm run security:config",
+    "fix:supabase": "node scripts/fix-supabase-env.js",
+    "fix:env": "npm run fix:supabase",
+    "dev:clean": "npm run fix:supabase && npm run dev",
+    "test:supabase": "node scripts/test-supabase-setup.js"
   },
   "dependencies": {
     "@21st-dev/magic": "^0.1.0",
