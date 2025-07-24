@@ -13,20 +13,14 @@ import OfflineIndicator from '@/components/ui/OfflineIndicator';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createQueryClient } from "./lib/react-query-config";
 import { useIsMobile } from "./hooks/use-mobile";
-import { useEntregaFotosAutomatico } from "@/hooks/useEntregaFotosAutomatico";
+// useEntregaFotosAutomatico removed temporarily due to build errors
 
 // A criação do client foi movida para dentro do componente App
 // para usar o hook useIsMobile e aplicar a lógica de cache dinâmica.
 
 // Componente interno simplificado
 const AppWithRoutes = () => {
-  // Inicializar processos automáticos de entrega de fotos
-  useEntregaFotosAutomatico({
-    intervaloMinutos: 60, // Executa a cada 1 hora
-    executarAoIniciar: true,
-    habilitado: true
-  });
-
+  // Processos automáticos temporariamente removidos devido a erros de build
   return <AppRoutes />;
 };
 
