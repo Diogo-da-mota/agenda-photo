@@ -4,21 +4,6 @@ import App from './App'
 import './index.css'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-// Desabilitar React DevTools em desenvolvimento para evitar conflitos
-if (import.meta.env && import.meta.env.MODE === 'development') {
-  // Prevenir erros do React DevTools
-  if (typeof window !== 'undefined') {
-    // Desabilitar React DevTools temporariamente
-    (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
-      isDisabled: true,
-      supportsFiber: true,
-      inject: () => {},
-      onCommitFiberRoot: () => {},
-      onCommitFiberUnmount: () => {},
-    };
-  }
-}
-
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />

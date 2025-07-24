@@ -32,22 +32,6 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
-    // Configuração para SPA - evita redirecionamento no F5
-    historyApiFallback: {
-      index: '/index.html',
-      rewrites: [
-        { from: /^\/entrega-fotos\/.*$/, to: '/index.html' },
-        { from: /^\/dashboard\/.*$/, to: '/index.html' },
-        { from: /^\/portfolio\/.*$/, to: '/index.html' },
-        { from: /^\/clientes\/.*$/, to: '/index.html' },
-        { from: /^\/agenda\/.*$/, to: '/index.html' },
-        { from: /^\/financeiro\/.*$/, to: '/index.html' },
-        { from: /^\/contratos\/.*$/, to: '/index.html' },
-        { from: /^\/configuracoes\/.*$/, to: '/index.html' },
-        { from: /^\/r\/.*$/, to: '/index.html' }
-      ]
-    },
-    
   },
   preview: {
     headers: securityHeaders
@@ -61,60 +45,27 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Build config otimizado para evitar constructor errors
+  // Build config otimizado para produção
   build: {
     sourcemap: false,
     target: 'es2020',
-    minify: mode === 'production' ? 'esbuild' : false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        // Ofuscar nomes de chunks em produção para segurança
-        chunkFileNames: mode === 'production' ? '[hash].js' : '[name]-[hash].js',
-        assetFileNames: mode === 'production' ? '[hash].[ext]' : '[name]-[hash].[ext]',
         manualChunks: {
-          // Core React libraries
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'query-vendor': ['@tanstack/react-query'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          
-          // UI Components (separados por tamanho)
-          'radix-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-tooltip'
-          ],
-          'icons-vendor': ['lucide-react'],
-          
-          // Charts (carregamento sob demanda)
-          'charts-vendor': ['recharts', 'd3-scale', 'd3-shape'],
-          
-          // Utilities
-          'utils-vendor': ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
-          
-          // Form libraries
-          'forms-vendor': ['react-hook-form', '@hookform/resolvers', 'zod']
+          'vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', 'lucide-react']
         }
       }
     },
-    cssCodeSplit: false,
     emptyOutDir: true,
   },
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
-      'react-router-dom',
-      '@tanstack/react-query',
-      '@supabase/supabase-js',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      'lucide-react',
-      'class-variance-authority',
-      'clsx',
-      'tailwind-merge'
+      'react-router-dom'
     ],
     exclude: ['lovable-tagger']
   },
