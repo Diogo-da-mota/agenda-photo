@@ -18,10 +18,6 @@ import LGPD from "./pages/LGPD";
 import Carreiras from "./pages/Carreiras";
 import ReferralPage from "./pages/r/[code]";
 
-
-// Import direto para componente de teste (temporário)
-import { TesteBugCorrecao } from "./components/debug/TesteBugCorrecao";
-
 // Lazy loading para componentes principais (otimização de performance)
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Portfolio = lazy(() => import("./pages/Dashboard/Portfolio"));
@@ -49,15 +45,11 @@ const EntregaFotos = lazy(() => import("./pages/Dashboard/EntregaFotos"));
 const EntregaFotosAdmin = lazy(() => import("./components/dashboard/EntregaFotosAdmin"));
 const EntregaFotosVisualizacao = lazy(() => import("./pages/EntregaFotosVisualizacao"));
 const EscolherAlbum = lazy(() => import("./pages/Dashboard/EscolherAlbum"));
-const DiagnosticoSupabase = lazy(() => import("./pages/Dashboard/DiagnosticoSupabase"));
 
 // Lazy loading para área do cliente
-const ClientDashboard = lazy(() => import("./pages/Client/ClientDashboard"));
 const ClientAgenda = lazy(() => import("./pages/Client/ClientAgenda"));
-const ClientPayments = lazy(() => import("./pages/Client/ClientPayments"));
 const ClientQuote = lazy(() => import("./pages/Client/ClientQuote"));
 const ClientContract = lazy(() => import("./pages/Client/ClientContract"));
-const ClientContracts = lazy(() => import("./pages/Client/ClientContracts"));
 const ClientNotifications = lazy(() => import("./pages/Client/ClientNotifications"));
 
 // Imports diretos apenas para componentes pequenos e críticos
@@ -66,7 +58,6 @@ import Roadmap from "./pages/Dashboard/Roadmap";
 import SimpleClientes from "./pages/Dashboard/SimpleClientes";
 import Testes from "./pages/Dashboard/Testes";
 import Info from "./pages/Dashboard/Info";
-import SupabaseUploadTest from "./components/testing/SupabaseUploadTest";
 import DashboardLayout from "./layouts/DashboardLayout";
 import ClientLayout from "./layouts/ClientLayout";
 import AgendaLayout from "./layouts/AgendaLayout";
@@ -179,12 +170,6 @@ const AppRoutes = () => {
         {/* Carreiras - Rota pública */}
         <Route path="/carreiras" element={<Carreiras />} />
         
-        {/* ROTA TEMPORÁRIA - Teste de Correção do Bug */}
-        <Route path="/teste-bug-templates" element={<TesteBugCorrecao />} />
-        
-        {/* ROTA TEMPORÁRIA - Teste F5 */}
-        
-        
         {/* Vitrine Pública do Portfólio */}
         <Route path="/portfolio/galeria" element={<PortfolioGaleria />} />
         <Route path="/portfolio/galeria/:id" element={<PortfolioGaleriaTrabalho />} />
@@ -251,7 +236,6 @@ const AppRoutes = () => {
           <Route path="/atividades-filtros" element={<HistoricoAtividades />} />
           <Route path="/relatorios" element={<Reports />} />
           <Route path="/dashboard/testes" element={<Testes />} />
-          <Route path="/dashboard/teste-supabase" element={<SupabaseUploadTest />} />
           <Route path="/info" element={<Info />} />
           
           {/* Novas rotas para Portfólio - PROTEGIDAS */}
@@ -284,28 +268,11 @@ const AppRoutes = () => {
           <Route path="/portfolio/novo" element={<PortfolioNovo />} />
           <Route path="/portfolio/:id" element={<PortfolioDetalhes />} />
           
-          {/* Diagnóstico Supabase - PROTEGIDA */}
-          <Route path="/diagnostico-supabase" element={<DiagnosticoSupabase />} />
-          
           {/* Client Portal Routes - ADMIN ONLY - Com navegação por abas */}
-          <Route path="/cliente" element={
-            <AdminRoute>
-              <ClientTabLayout>
-                <ClientDashboard />
-              </ClientTabLayout>
-            </AdminRoute>
-          } />
           <Route path="/cliente/agenda" element={
             <AdminRoute>
               <ClientTabLayout>
                 <ClientAgenda />
-              </ClientTabLayout>
-            </AdminRoute>
-          } />
-          <Route path="/cliente/pagamentos" element={
-            <AdminRoute>
-              <ClientTabLayout>
-                <ClientPayments />
               </ClientTabLayout>
             </AdminRoute>
           } />
@@ -321,13 +288,6 @@ const AppRoutes = () => {
             <AdminRoute>
               <ClientTabLayout>
                 <ClientContract />
-              </ClientTabLayout>
-            </AdminRoute>
-          } />
-          <Route path="/cliente/contratos" element={
-            <AdminRoute>
-              <ClientTabLayout>
-                <ClientContracts />
               </ClientTabLayout>
             </AdminRoute>
           } />

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
-import { handleImageUpload } from "@/features/images/services"; // Importação corrigida
+import { handleImageUpload } from "@/services/image/imageService"; // Importação corrigida
 import { supabase } from "@/lib/supabase";
 
 const Testes: React.FC = () => {

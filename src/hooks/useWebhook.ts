@@ -1,68 +1,72 @@
-
 import { useState, useEffect } from 'react';
 
-export interface WebhookSettings {
-  id: string;
+interface WebhookSettings {
+  id?: string;
   enabled: boolean;
   webhookUrl: string;
   customDomain: string;
   isLoading: boolean;
 }
 
-export const useWebhook = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+interface UseWebhookReturn {
+  settings: WebhookSettings;
+  updateSettings: (updates: Partial<WebhookSettings>) => Promise<void>;
+}
 
-  // Mock settings para evitar erros de tipo
-  const settings: WebhookSettings = {
-    id: 'mock-webhook-id',
+export const useWebhook = (): UseWebhookReturn => {
+  const [settings, setSettings] = useState<WebhookSettings>({
     enabled: false,
     webhookUrl: '',
     customDomain: '',
-    isLoading: loading
-  };
+    isLoading: false,
+  });
 
-  const updateSettings = async (update: Partial<Omit<WebhookSettings, 'id' | 'isLoading'>>) => {
-    setLoading(true);
-    try {
-      // Mock update - em um ambiente real, seria uma chamada para o Supabase
-      console.log('Atualizando configurações do webhook:', update);
-      
-      // Simula delay de rede
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      return true;
-    } catch (err) {
-      setError('Erro ao atualizar configurações');
-      console.error(err);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Carrega as configurações do webhook do localStorage na inicialização
+  useEffect(() => {
+    const loadSettings = () => {
+      try {
+        const savedSettings = localStorage.getItem('webhook-settings');
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          setSettings(prev => ({
+            ...prev,
+            ...parsed,
+            isLoading: false,
+          }));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configurações do webhook:', error);
+      }
+    };
 
-  const fetchUserIntegration = async () => {
-    setLoading(true);
+    loadSettings();
+  }, []);
+
+  const updateSettings = async (updates: Partial<WebhookSettings>): Promise<void> => {
+    setSettings(prev => ({ ...prev, isLoading: true }));
+
     try {
-      // Mock fetch - em um ambiente real, seria uma busca no Supabase
-      console.log('Buscando integrações do usuário...');
+      const newSettings = { ...settings, ...updates };
       
-      // Simula delay de rede
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Salva no localStorage
+      localStorage.setItem('webhook-settings', JSON.stringify(newSettings));
       
-    } catch (err) {
-      setError('Erro ao carregar integrações');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setSettings(prev => ({
+        ...prev,
+        ...updates,
+        isLoading: false,
+      }));
+
+      console.log('Configurações do webhook atualizadas:', newSettings);
+    } catch (error) {
+      console.error('Erro ao atualizar configurações do webhook:', error);
+      setSettings(prev => ({ ...prev, isLoading: false }));
+      throw error;
     }
   };
 
   return {
     settings,
     updateSettings,
-    loading,
-    error,
-    fetchUserIntegration
   };
 };

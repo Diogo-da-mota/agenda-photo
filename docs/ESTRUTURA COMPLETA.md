@@ -2295,3 +2295,26 @@ Perfeito! Agora vou mostrar como replicar o efeito neon colorido. Aqui está a *
 ```
 
 **Substitua `{SUA_COR}` pela cor desejada** e você terá o mesmo efeito neon! 🚀
+
+
+
+
+
+# Supabase Configuration
+VITE_SUPABASE_URL=https://adxwgpfkvizpqdvortpu.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkeHdncGZrdml6cHFkdm9ydHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyODU5OTksImV4cCI6MjA2Mzg2MTk5OX0.L79cLQdkA8_PLE2QQ4nGM1i8M0rESZWK7HlfrugIk0o
+
+# Server Configuration (for backend)
+SUPABASE_URL=https://adxwgpfkvizpqdvortpu.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkeHdncGZrdml6cHFkdm9ydHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyODU5OTksImV4cCI6MjA2Mzg2MTk5OX0.L79cLQdkA8_PLE2QQ4nGM1i8M0rESZWK7HlfrugIk0o
+
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkeHdncGZrdml6cHFkdm9ydHB1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODI4NTk5OSwiZXhwIjoyMDYzODYxOTk5fQ.example_service_key_here
+
+# Development Configuration
+VITE_APP_ENV=development
+
+# Security Configuration
+VITE_ENABLE_DEBUG=false
+
+# API Configuration
+VITE_API_TIMEOUT=10000

@@ -89,9 +89,9 @@ if (fs.existsSync(serverConfigPath)) {
   
   // Verificar middlewares de segurança
   const securityMiddlewares = [
-    { name: 'helmet', pattern: /helmet\(\)/ },
+    { name: 'helmet', pattern: /helmet\(/ },
     { name: 'cors', pattern: /cors\(/ },
-    { name: 'csurf', pattern: /csurf\(/ },
+    { name: 'csurf', pattern: /(csurf\(|csrf\(|csrf\.)/},
     { name: 'rate-limit', pattern: /(rateLimit|express-rate-limit)/ },
     { name: 'cookie-parser', pattern: /cookieParser\(\)/ }
   ];
