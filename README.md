@@ -74,3 +74,5 @@ Para mais detalhes sobre a arquitetura e implementação do projeto, consulte no
 - [Multiusuário com Supabase](docs/MULTIUSUARIO-SUPABASE.md)
 - [Configuração CORS N8N](docs/CORS-N8N-Config.md)
 
+---
+*Este projeto foi desenvolvido com ❤️ e muito café!*

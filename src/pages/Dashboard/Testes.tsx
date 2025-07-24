@@ -1,114 +1,152 @@
-import React from 'react';
-import ResponsiveContainer from '@/components/ResponsiveContainer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { TestTube, Code, Database, Settings } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Upload } from "lucide-react";
+import { handleImageUpload } from "@/features/images/services"; // Importação corrigida
+import { supabase } from "@/lib/supabase";
 
-const Testes = () => {
+const Testes: React.FC = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadState, setUploadState] = useState<"idle"|"uploading"|"success"|"error">("idle");
+  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+  const [publicUrl, setPublicUrl] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const [dbError, setDbError] = useState<string | null>(null);
+
+  // Recupera o userId sempre que a tela monta
+  useEffect(() => {
+    fetchUserId();
+  }, []);
+
+  // Função para obter o ID do usuário autenticado
+  const fetchUserId = async () => {
+    const userResp = await supabase.auth.getUser();
+    if (userResp?.data?.user) {
+      setUserId(userResp.data.user.id);
+      return userResp.data.user.id;
+    }
+    setUserId(null);
+    return null;
+  };
+
+  const handleFileChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    if (ev.target.files && ev.target.files.length > 0) {
+      setFile(ev.target.files[0]);
+      setUploadState("idle");
+      setPublicUrl(null);
+      setUploadMsg(null);
+      setDbError(null);
+      setStorageError(null);
+    }
+  };
+
+  const handleUpload = async () => {
+    setUploadState("uploading");
+    setPublicUrl(null);
+    setUploadMsg(null);
+    setDbError(null);
+    setStorageError(null);
+
+    const id = await fetchUserId();
+    if (!file || !id) {
+      setUploadState("error");
+      setUploadMsg("Selecione um arquivo e tenha certeza de estar autenticado.");
+      return;
+    }
+
+    let resultUrl: string | null = null;
+    try {
+      // UPA A IMAGEM USANDO O FLUXO NORMAL
+      resultUrl = await handleImageUpload(file);
+      setPublicUrl(resultUrl);
+      setUploadState("success");
+      setUploadMsg("✅ Upload realizado com sucesso!");
+      setDbError(null);
+      setStorageError(null);
+      // Registro no console
+      console.log("user_id:", id);
+      console.log("Upload result (URL):", resultUrl);
+      console.log("storeImageMetadata: OK (handled internamente no handleImageUpload)");
+    } catch (err: Error) {
+      // Erro pode vir do Storage OU do banco
+      // handleImageUpload lança o erro correspondente!
+      setUploadState("error");
+      setUploadMsg("❌ Falha no upload da imagem.");
+      setPublicUrl(null);
+      let errorMsg = err?.message || JSON.stringify(err);
+      // Identifica erro de Storage (supondo que mensagem contenha)
+      if (errorMsg.toLowerCase().includes("storage")) {
+        setStorageError(errorMsg);
+        setDbError(null);
+        console.log("user_id:", id);
+        console.log("Upload Storage ERROR:", errorMsg);
+      } else {
+        setStorageError(null);
+        setDbError(errorMsg);
+        console.log("user_id:", id);
+        console.log("DB insert ERROR:", errorMsg);
+      }
+    }
+  };
+
   return (
-    <ResponsiveContainer>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Área de Testes</h1>
-          <p className="text-muted-foreground">
-            Ferramentas e utilitários para testes e desenvolvimento
-          </p>
-        </div>
+    <div className="max-w-xl mx-auto mt-10">
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5" /> Teste de Upload de Imagem
+          </CardTitle>
+          <CardDescription>
+            Teste funcional do upload com feedback de Storage, banco e debug de RLS.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            <Input 
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
+              onChange={handleFileChange}
+              disabled={uploadState === "uploading"}
+            />
+            <Button 
+              onClick={handleUpload}
+              disabled={!file || uploadState === "uploading"}
+            >
+              Enviar Imagem
+            </Button>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Teste de Componentes
-              </CardTitle>
-              <TestTube className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">UI Tests</div>
-              <p className="text-xs text-muted-foreground">
-                Testes de interface e componentes
-              </p>
-              <Button variant="outline" size="sm" className="mt-2">
-                Executar Testes
-              </Button>
-            </CardContent>
-          </Card>
+            {userId && (
+              <div className="text-sm text-gray-400">user_id autenticado: <span className="text-white">{userId}</span></div>
+            )}
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Teste de API
-              </CardTitle>
-              <Code className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">API Tests</div>
-              <p className="text-xs text-muted-foreground">
-                Testes de endpoints e integração
-              </p>
-              <Button variant="outline" size="sm" className="mt-2">
-                Testar APIs
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Teste de Banco
-              </CardTitle>
-              <Database className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">DB Tests</div>
-              <p className="text-xs text-muted-foreground">
-                Testes de conexão e queries
-              </p>
-              <Button variant="outline" size="sm" className="mt-2">
-                Testar Banco
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Configurações de Teste
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <h3 className="font-medium mb-2">Ambiente de Teste</h3>
-                <p className="text-sm text-muted-foreground">
-                  Configurações específicas para o ambiente de desenvolvimento e testes.
-                </p>
+            {uploadState === "success" && publicUrl && (
+              <div className="p-3 bg-green-900/30 border border-green-800 rounded text-green-300 text-sm">
+                ✅ Upload realizado! URL pública: <br/>
+                <a href={publicUrl} className="break-all underline text-green-300" target="_blank" rel="noopener noreferrer">{publicUrl}</a>
               </div>
-              <div>
-                <h3 className="font-medium mb-2">Logs de Debug</h3>
-                <p className="text-sm text-muted-foreground">
-                  Visualização de logs e informações de debug do sistema.
-                </p>
+            )}
+            {uploadState === "error" && (
+              <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-300 text-sm">
+                {uploadMsg}
+                {storageError && (
+                  <div className="mt-1">
+                    <b>Erro do Storage:</b> <span className="text-red-200">{storageError}</span>
+                  </div>
+                )}
+                {dbError && (
+                  <div className="mt-1">
+                    <b>Erro do Banco:</b> <span className="text-red-200">{dbError}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button variant="default">
-                Limpar Cache
-              </Button>
-              <Button variant="outline">
-                Exportar Logs
-              </Button>
-              <Button variant="outline">
-                Reset Configurações
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </ResponsiveContainer>
+            )}
+            {uploadState === "uploading" && <div className="text-blue-400 text-sm">Enviando imagem...</div>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -1,29 +1,36 @@
 import { createClient } from '@supabase/supabase-js';
-import { envConfig, validateEnvConfig } from './env-config';
 
-// Validar configuração antes de criar o cliente
-try {
-  validateEnvConfig(envConfig);
-  
-  if (envConfig.isDevelopment) {
-    console.log('🚀 Inicializando cliente Supabase...');
-    console.log('  - URL configurada:', envConfig.supabaseUrl.substring(0, 30) + '...');
-    console.log('  - Key configurada:', envConfig.supabaseAnonKey.substring(0, 20) + '...');
+// Validação rigorosa de variáveis de ambiente
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Função para validar credenciais de forma segura
+const validateCredentials = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    const error = new Error('ERRO CRÍTICO: Credenciais Supabase não configuradas');
+    console.error('❌', error.message);
+    
+    if (import.meta.env.PROD) {
+      // Em produção, mostrar interface de erro amigável
+      throw error;
+    } else {
+      console.warn('⚠️ Executando em modo desenvolvimento sem credenciais');
+      return false;
+    }
   }
-} catch (error) {
-  console.error('❌ ERRO CRÍTICO na configuração do Supabase:', error);
-  throw error;
-}
+  return true;
+};
 
-// Criar cliente Supabase
-export const supabase = createClient(envConfig.supabaseUrl, envConfig.supabaseAnonKey, {
+// Validar credenciais antes de criar cliente
+validateCredentials();
+
+// SEGURANÇA: Usar apenas variáveis de ambiente - NUNCA hardcode credenciais
+const finalUrl = supabaseUrl;
+const finalKey = supabaseAnonKey;
+
+export const supabase = createClient(finalUrl, finalKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
   },
 });
-
-// Log de sucesso apenas em desenvolvimento
-if (envConfig.isDevelopment) {
-  console.log('✅ Cliente Supabase inicializado com sucesso');
-}

@@ -3,11 +3,9 @@ import React, { lazy, Suspense } from "react";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AdminRoute from "./components/auth/AdminRoute";
 import NotFound from "./pages/NotFound";
+import { useLazyLoading, useNetworkAwareLoading } from "./hooks/useLazyLoading";
 
-// ========================================
-// IMPORTS DIRETOS - PÁGINAS CRÍTICAS
-// ========================================
-// Páginas públicas carregadas diretamente para melhor performance
+// Imports diretos para páginas críticas (evita React Error #31)
 import Index from "./pages/Index";
 import SystemInfo from "./pages/SystemInfo";
 import SobreNos from "./pages/SobreNos";
@@ -20,65 +18,40 @@ import LGPD from "./pages/LGPD";
 import Carreiras from "./pages/Carreiras";
 import ReferralPage from "./pages/r/[code]";
 
-// Componentes pequenos e críticos
-import Indicacoes from "./pages/Dashboard/Indicacoes";
-import Roadmap from "./pages/Dashboard/Roadmap";
-import SimpleClientes from "./pages/Dashboard/SimpleClientes";
-import Testes from "./pages/Dashboard/Testes";
-import Info from "./pages/Dashboard/Info";
-import SupabaseUploadTest from "./components/testing/SupabaseUploadTest";
 
-// Layouts
-import DashboardLayout from "./layouts/DashboardLayout";
-import ClientLayout from "./layouts/ClientLayout";
-import AgendaLayout from "./layouts/AgendaLayout";
-import ClientTabLayout from "./layouts/ClientTabLayout";
-
-// Componente de teste temporário
+// Import direto para componente de teste (temporário)
 import { TesteBugCorrecao } from "./components/debug/TesteBugCorrecao";
 
-// ========================================
-// LAZY LOADING - DASHBOARD PRINCIPAL
-// ========================================
+// Lazy loading para componentes principais (otimização de performance)
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const Portfolio = lazy(() => import("./pages/Dashboard/Portfolio"));
+const Financeiro = lazy(() => import("./pages/Dashboard/Financeiro"));
 const Agenda = lazy(() => import("./pages/Dashboard/Agenda"));
 const Clientes = lazy(() => import("./pages/Dashboard/Clientes"));
-const Financeiro = lazy(() => import("./pages/Dashboard/Financeiro"));
-const Mensagens = lazy(() => import("./pages/Dashboard/Mensagens"));
+const Configuracoes = lazy(() => import("./pages/Dashboard/Configuracoes"));
 const Contratos = lazy(() => import("./pages/Dashboard/Contratos"));
 const ContractDetails = lazy(() => import("./pages/Dashboard/ContractDetails"));
-const Configuracoes = lazy(() => import("./pages/Dashboard/Configuracoes"));
+const HistoricoAtividades = lazy(() => import("./pages/Dashboard/HistoricoAtividades"));
+const Reports = lazy(() => import("./pages/Dashboard/Reports"));
+const Mensagens = lazy(() => import("./pages/Dashboard/Mensagens"));
 
-// ========================================
-// LAZY LOADING - PORTFÓLIO
-// ========================================
-const Portfolio = lazy(() => import("./pages/Dashboard/Portfolio"));
-const PortfolioNovo = lazy(() => import("./pages/Dashboard/PortfolioNovo"));
-const PortfolioDetalhes = lazy(() => import("./pages/Dashboard/PortfolioDetalhes"));
+// Lazy loading para componentes de portfólio
 const PortfolioDesign = lazy(() => import("./pages/Dashboard/PortfolioDesign"));
 const PortfolioIntegracoes = lazy(() => import("./pages/Dashboard/PortfolioIntegracoes"));
 const PortfolioDominio = lazy(() => import("./pages/Dashboard/PortfolioDominio"));
+const PortfolioNovo = lazy(() => import("./pages/Dashboard/PortfolioNovo"));
+const PortfolioDetalhes = lazy(() => import("./pages/Dashboard/PortfolioDetalhes"));
 const PortfolioGaleria = lazy(() => import("./pages/Dashboard/PortfolioGaleria"));
 const PortfolioGaleriaTrabalho = lazy(() => import("./pages/Dashboard/PortfolioGaleriaTrabalho"));
 
-// ========================================
-// LAZY LOADING - RELATÓRIOS E ATIVIDADES
-// ========================================
-const Reports = lazy(() => import("./pages/Dashboard/Reports"));
-const HistoricoAtividades = lazy(() => import("./pages/Dashboard/HistoricoAtividades"));
-
-// ========================================
-// LAZY LOADING - ADMINISTRATIVO
-// ========================================
+// Lazy loading para componentes administrativos
 const EntregaFotos = lazy(() => import("./pages/Dashboard/EntregaFotos"));
 const EntregaFotosAdmin = lazy(() => import("./components/Dashboard/EntregaFotosAdmin"));
 const EntregaFotosVisualizacao = lazy(() => import("./pages/EntregaFotosVisualizacao"));
 const EscolherAlbum = lazy(() => import("./pages/Dashboard/EscolherAlbum"));
 const DiagnosticoSupabase = lazy(() => import("./pages/Dashboard/DiagnosticoSupabase"));
 
-// ========================================
-// LAZY LOADING - PORTAL DO CLIENTE
-// ========================================
+// Lazy loading para área do cliente
 const ClientDashboard = lazy(() => import("./pages/Client/ClientDashboard"));
 const ClientAgenda = lazy(() => import("./pages/Client/ClientAgenda"));
 const ClientPayments = lazy(() => import("./pages/Client/ClientPayments"));
@@ -87,9 +60,17 @@ const ClientContract = lazy(() => import("./pages/Client/ClientContract"));
 const ClientContracts = lazy(() => import("./pages/Client/ClientContracts"));
 const ClientNotifications = lazy(() => import("./pages/Client/ClientNotifications"));
 
-// ========================================
-// COMPONENTES DE LOADING E ERROR HANDLING
-// ========================================
+// Imports diretos apenas para componentes pequenos e críticos
+import Indicacoes from "./pages/Dashboard/Indicacoes";
+import Roadmap from "./pages/Dashboard/Roadmap";
+import SimpleClientes from "./pages/Dashboard/SimpleClientes";
+import Testes from "./pages/Dashboard/Testes";
+import Info from "./pages/Dashboard/Info";
+import SupabaseUploadTest from "./components/testing/SupabaseUploadTest";
+import DashboardLayout from "./layouts/DashboardLayout";
+import ClientLayout from "./layouts/ClientLayout";
+import AgendaLayout from "./layouts/AgendaLayout";
+import ClientTabLayout from "./layouts/ClientTabLayout";
 
 // Componente de Loading seguro e otimizado
 const PageLoader = ({ message = "Carregando página..." }: { message?: string }) => (
@@ -148,24 +129,10 @@ class LazyLoadErrorBoundary extends React.Component<
   }
 }
 
-// ========================================
-// COMPONENTE PRINCIPAL DE ROTAS
-// ========================================
-
 const AppRoutes = () => {
-  // Simple connection speed detection (fallback implementation)
-  const getConnectionSpeed = () => {
-    // @ts-ignore - navigator.connection is experimental
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!connection) return 'medium';
-    
-    const effectiveType = connection.effectiveType;
-    if (effectiveType === 'slow-2g' || effectiveType === '2g') return 'slow';
-    if (effectiveType === '3g') return 'medium';
-    return 'fast';
-  };
-
-  const connectionSpeed = getConnectionSpeed();
+  // Hooks para lazy loading inteligente
+  const { currentPath } = useLazyLoading();
+  const { connectionSpeed, shouldPreload, loadingStrategy } = useNetworkAwareLoading();
 
   // Ajusta a mensagem de loading baseado na conexão
   const getLoadingMessage = () => {
@@ -185,223 +152,196 @@ const AppRoutes = () => {
     <LazyLoadErrorBoundary>
       <Suspense fallback={<PageLoader message={getLoadingMessage()} />}>
         <Routes>
+        {/* Landing Page - Rota pública */}
+        <Route path="/" element={<Index />} />
+        
+        {/* Rota de Indicação - Rota pública */}
+        <Route path="/r/:code" element={<ReferralPage />} />
+        
+        {/* System Info - Rota pública */}
+        <Route path="/funcionalidades" element={<SystemInfo />} />
+        
+        {/* Sobre Nós - Rota pública */}
+        <Route path="/sobre-nos" element={<SobreNos />} />
+        
+        {/* Blog - Rota pública */}
+        <Route path="/blog" element={<Blog />} />
+        
+        {/* Contato - Rota pública */}
+        <Route path="/contact" element={<Contact />} />
+        
+        {/* Páginas Legais - Rotas públicas */}
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/lgpd" element={<LGPD />} />
+        
+        {/* Carreiras - Rota pública */}
+        <Route path="/carreiras" element={<Carreiras />} />
+        
+        {/* ROTA TEMPORÁRIA - Teste de Correção do Bug */}
+        <Route path="/teste-bug-templates" element={<TesteBugCorrecao />} />
+        
+        {/* ROTA TEMPORÁRIA - Teste F5 */}
+        
+        
+        {/* Vitrine Pública do Portfólio */}
+        <Route path="/portfolio/galeria" element={<PortfolioGaleria />} />
+        <Route path="/portfolio/galeria/:id" element={<PortfolioGaleriaTrabalho />} />
+        
+        {/* Visualização Pública de Galeria de Fotos */}
+        <Route path="/entrega-fotos/:slug" element={<EntregaFotosVisualizacao />} />
+        
+        {/* Visualização Pública de Contrato - SEM layout do site */}
+        {/* Rota unificada que suporta tanto slug quanto ID direto */}
+        <Route path="/contrato/:slug" element={<ClientContract />} />
+        
+        {/* Rota Agenda com layout específico sem cabeçalho */}
+        <Route path="/agenda" element={
+          <ProtectedRoute>
+            <AgendaLayout>
+              <Agenda />
+            </AgendaLayout>
+          </ProtectedRoute>
+        } />
+                {/* Nova rota para agenda do cliente - Acesso direto sem autenticação */}
+        <Route path="/agenda/cliente" element={<ClientAgenda />} />
+        
+        {/* Dashboard Routes - PROTEGIDAS */}
+        <Route element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/clientes-simples" element={<SimpleClientes />} />
+          <Route path="/financeiro" element={<Financeiro />} />
+          <Route path="/indique-ganhe" element={<Indicacoes />} />
+          <Route path="/indicacoes" element={<Navigate to="/indique-ganhe" replace />} />
           
-          {/* ========================================
-              ROTAS PÚBLICAS (SEM AUTENTICAÇÃO)
-              ======================================== */}
-          
-          {/* Landing Page */}
-          <Route path="/" element={<Index />} />
-          
-          {/* Páginas Institucionais */}
-          <Route path="/funcionalidades" element={<SystemInfo />} />
-          <Route path="/sobre-nos" element={<SobreNos />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/carreiras" element={<Carreiras />} />
-          
-          {/* Páginas Legais */}
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/cookies" element={<Cookies />} />
-          <Route path="/lgpd" element={<LGPD />} />
-          
-          {/* Sistema de Indicações */}
-          <Route path="/r/:code" element={<ReferralPage />} />
-          
-          {/* Portfólio Público */}
-          <Route path="/portfolio/galeria" element={<PortfolioGaleria />} />
-          <Route path="/portfolio/galeria/:id" element={<PortfolioGaleriaTrabalho />} />
-          
-          {/* Entrega de Fotos Pública */}
-          <Route path="/entrega-fotos/:slug" element={<EntregaFotosVisualizacao />} />
-          
-          {/* Contrato Público */}
-          <Route path="/contrato/:slug" element={<ClientContract />} />
-          
-          {/* Agenda Cliente (Acesso direto sem autenticação) */}
-          <Route path="/agenda/cliente" element={<ClientAgenda />} />
-          
-          {/* Rota Temporária - Teste de Correção */}
-          <Route path="/teste-bug-templates" element={<TesteBugCorrecao />} />
-          
-          {/* ========================================
-              AGENDA COM LAYOUT ESPECÍFICO
-              ======================================== */}
-          
-          <Route path="/agenda" element={
-            <ProtectedRoute>
-              <AgendaLayout>
-                <Agenda />
-              </AgendaLayout>
-            </ProtectedRoute>
+          {/* Rota ADMIN ONLY - Roadmap */}
+          <Route path="/roadmap" element={
+            <AdminRoute>
+              <Roadmap />
+            </AdminRoute>
           } />
           
-          {/* ========================================
-              DASHBOARD PRINCIPAL (PROTEGIDO)
-              ======================================== */}
+          <Route path="/configuracoes" element={<Navigate to="/configuracoes-empresa" replace />} />
+          {/* Rotas amigáveis para seções de configurações */}
+          <Route path="/configuracoes-empresa" element={<Configuracoes />} />
+          <Route path="/configuracoes-preferencias" element={<Configuracoes />} />
+          <Route path="/configuracoes-integracoes" element={<Configuracoes />} />
+          <Route path="/configuracoes-imagens" element={<Configuracoes />} />
+          <Route path="/configuracoes-seguranca" element={<Configuracoes />} />
           
-          <Route element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }>
-            
-            {/* Dashboard Home */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            
-            {/* Gestão de Clientes */}
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/clientes-simples" element={<SimpleClientes />} />
-            
-            {/* Financeiro */}
-            <Route path="/financeiro" element={<Financeiro />} />
-            
-            {/* Sistema de Mensagens */}
-            <Route path="/mensagens" element={<Mensagens />} />
-            
-            {/* Gestão de Contratos */}
-            <Route path="/contratos" element={<Contratos />} />
-            <Route path="/contratos/:slug" element={<ContractDetails />} />
-            
-            {/* Sistema de Indicações */}
-            <Route path="/indique-ganhe" element={<Indicacoes />} />
-            <Route path="/indicacoes" element={<Navigate to="/indique-ganhe" replace />} />
-            
-            {/* Configurações */}
-            <Route path="/configuracoes" element={<Navigate to="/configuracoes-empresa" replace />} />
-            <Route path="/configuracoes-empresa" element={<Configuracoes />} />
-            <Route path="/configuracoes-preferencias" element={<Configuracoes />} />
-            <Route path="/configuracoes-integracoes" element={<Configuracoes />} />
-            <Route path="/configuracoes-imagens" element={<Configuracoes />} />
-            <Route path="/configuracoes-seguranca" element={<Configuracoes />} />
-            
-            {/* Relatórios e Atividades */}
-            <Route path="/relatorios" element={<Reports />} />
-            <Route path="/atividades" element={<Navigate to="/atividades-linha-do-tempo" replace />} />
-            <Route path="/atividades-linha-do-tempo" element={<HistoricoAtividades />} />
-            <Route path="/atividades-notificacoes" element={<HistoricoAtividades />} />
-            <Route path="/atividades-filtros" element={<HistoricoAtividades />} />
-            
-            {/* Informações do Sistema */}
-            <Route path="/info" element={<Info />} />
-            
-            {/* Diagnóstico */}
-            <Route path="/diagnostico-supabase" element={<DiagnosticoSupabase />} />
-            
-            {/* Área de Testes */}
-            <Route path="/dashboard/testes" element={<Testes />} />
-            <Route path="/dashboard/teste-supabase" element={<SupabaseUploadTest />} />
-            
-            {/* ========================================
-                PORTFÓLIO (PROTEGIDO)
-                ======================================== */}
-            
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/portfolio/novo" element={<PortfolioNovo />} />
-            <Route path="/portfolio/:id" element={<PortfolioDetalhes />} />
-            <Route path="/portfolio/design" element={<PortfolioDesign />} />
-            <Route path="/portfolio/integracoes" element={<PortfolioIntegracoes />} />
-            <Route path="/portfolio/dominio" element={<PortfolioDominio />} />
-            
-            {/* ========================================
-                ÁREA ADMINISTRATIVA (ADMIN ONLY)
-                ======================================== */}
-            
-            {/* Roadmap */}
-            <Route path="/roadmap" element={
-              <AdminRoute>
-                <Roadmap />
-              </AdminRoute>
-            } />
-            
-            {/* Entrega de Fotos */}
-            <Route path="/entrega-fotos" element={
-              <AdminRoute>
-                <EntregaFotos />
-              </AdminRoute>
-            } />
-            
-            <Route path="/entrega-fotos/admin" element={
-              <AdminRoute>
-                <EntregaFotosAdmin />
-              </AdminRoute>
-            } />
-            
-            <Route path="/escolher-album" element={
-              <AdminRoute>
-                <EscolherAlbum />
-              </AdminRoute>
-            } />
-            
-            {/* ========================================
-                PORTAL DO CLIENTE (ADMIN ONLY)
-                ======================================== */}
-            
-            <Route path="/cliente" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientDashboard />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/agenda" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientAgenda />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/pagamentos" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientPayments />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/orcamento" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientQuote />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/contratos" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientContracts />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/contrato/:slug" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientContract />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-            <Route path="/cliente/notificacoes" element={
-              <AdminRoute>
-                <ClientTabLayout>
-                  <ClientNotifications />
-                </ClientTabLayout>
-              </AdminRoute>
-            } />
-            
-          </Route>
+          {/* Rota Mensagens - Acessível para todos */}
+          <Route path="/mensagens" element={<Mensagens />} />
+
+          {/* Rota Contratos - Acessível para todos */}
+          <Route path="/contratos" element={<Contratos />} />
           
-          {/* ========================================
-              FALLBACK - PÁGINA NÃO ENCONTRADA
-              ======================================== */}
+          {/* Rota Detalhes do Contrato - Acessível para todos */}
+          {/* Rota unificada que suporta tanto slug quanto ID direto */}
+          <Route path="/contratos/:slug" element={<ContractDetails />} />
           
+          <Route path="/atividades" element={<Navigate to="/atividades-linha-do-tempo" replace />} />
+          <Route path="/atividades-linha-do-tempo" element={<HistoricoAtividades />} />
+          <Route path="/atividades-notificacoes" element={<HistoricoAtividades />} />
+          <Route path="/atividades-filtros" element={<HistoricoAtividades />} />
+          <Route path="/relatorios" element={<Reports />} />
+          <Route path="/dashboard/testes" element={<Testes />} />
+          <Route path="/dashboard/teste-supabase" element={<SupabaseUploadTest />} />
+          <Route path="/info" element={<Info />} />
+          
+          {/* Novas rotas para Portfólio - PROTEGIDAS */}
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/portfolio/design" element={<PortfolioDesign />} />
+          <Route path="/portfolio/integracoes" element={<PortfolioIntegracoes />} />
+          <Route path="/portfolio/dominio" element={<PortfolioDominio />} />
+          
+          {/* Rota ADMIN ONLY - Entrega de Fotos */}
+          <Route path="/entrega-fotos" element={
+            <AdminRoute>
+              <EntregaFotos />
+            </AdminRoute>
+          } />
+          
+          {/* Rota ADMIN ONLY - Administração Entrega de Fotos */}
+          <Route path="/entrega-fotos/admin" element={
+            <AdminRoute>
+              <EntregaFotosAdmin />
+            </AdminRoute>
+          } />
+          
+          {/* Rota ADMIN ONLY - Escolher Album */}
+          <Route path="/escolher-album" element={
+            <AdminRoute>
+              <EscolherAlbum />
+            </AdminRoute>
+          } />
+          
+          <Route path="/portfolio/novo" element={<PortfolioNovo />} />
+          <Route path="/portfolio/:id" element={<PortfolioDetalhes />} />
+          
+          {/* Diagnóstico Supabase - PROTEGIDA */}
+          <Route path="/diagnostico-supabase" element={<DiagnosticoSupabase />} />
+          
+          {/* Client Portal Routes - ADMIN ONLY - Com navegação por abas */}
+          <Route path="/cliente" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientDashboard />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/agenda" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientAgenda />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/pagamentos" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientPayments />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/orcamento" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientQuote />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          {/* Rota unificada que suporta tanto slug quanto ID direto */}
+          <Route path="/cliente/contrato/:slug" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientContract />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/contratos" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientContracts />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/notificacoes" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientNotifications />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+        </Route>
+        
+          {/* Fallback route */}
           <Route path="*" element={<NotFound />} />
-          
         </Routes>
       </Suspense>
     </LazyLoadErrorBoundary>
