@@ -32,6 +32,11 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
+    // Configuração HMR para resolver problema de WebSocket
+    hmr: {
+      port: 8080, // Usar a mesma porta que o servidor
+      host: 'localhost'
+    },
     // Configuração para SPA - evita redirecionamento no F5
     historyApiFallback: {
       index: '/index.html',

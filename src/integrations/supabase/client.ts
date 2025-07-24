@@ -2,13 +2,34 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://adxwgpfkvizpqdvortpu.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkeHdncGZrdml6cHFkdm9ydHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyODU5OTksImV4cCI6MjA2Mzg2MTk5OX0.L79cLQdkA8_PLE2QQ4nGM1i8M0rESZWK7HlfrugIk0o";
+// Função para validar e obter as credenciais do Supabase
+function getSupabaseCredentials() {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  // Validação das credenciais
+  if (!supabaseUrl) {
+    const error = 'VITE_SUPABASE_URL não definida no arquivo .env';
+    console.error('❌ ERRO CRÍTICO:', error);
+    throw new Error(error);
+  }
+
+  if (!supabaseAnonKey) {
+    const error = 'VITE_SUPABASE_ANON_KEY não definida no arquivo .env';
+    console.error('❌ ERRO CRÍTICO:', error);
+    throw new Error(error);
+  }
+
+  return { supabaseUrl, supabaseAnonKey };
+}
+
+// Obter e validar credenciais
+const { supabaseUrl, supabaseAnonKey } = getSupabaseCredentials();
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: localStorage,
     persistSession: true,

@@ -1,5 +1,15 @@
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_SCRIPT_CONFIG } from './supabase-config.js';
+
+// Configuração do cliente Supabase para scripts
+const supabase = createClient(SUPABASE_SCRIPT_CONFIG.url, SUPABASE_SCRIPT_CONFIG.anonKey);
+
+// Logger simples para scripts
+const logger = {
+  info: (message: string, ...args: any[]) => console.log(`[INFO] ${message}`, ...args),
+  error: (message: string, ...args: any[]) => console.error(`[ERROR] ${message}`, ...args),
+  warn: (message: string, ...args: any[]) => console.warn(`[WARN] ${message}`, ...args)
+};
 
 export const corrigirClienteIds = async (userId: string): Promise<{
   eventosProcessados: number;

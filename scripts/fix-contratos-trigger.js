@@ -5,7 +5,7 @@
  * Execute este script para aplicar a correção via Supabase client
  */
 
-import { supabase } from '../src/integrations/supabase/client.js';
+import { supabase } from '../src/lib/supabase.js';
 
 const fixContratosTriger = async () => {
   try {
