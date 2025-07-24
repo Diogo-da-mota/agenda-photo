@@ -46,7 +46,7 @@ const PortfolioGaleriaTrabalho = lazy(() => import("./pages/Dashboard/PortfolioG
 
 // Lazy loading para componentes administrativos
 const EntregaFotos = lazy(() => import("./pages/Dashboard/EntregaFotos"));
-const EntregaFotosAdmin = lazy(() => import("./components/Dashboard/EntregaFotosAdmin"));
+const EntregaFotosAdmin = lazy(() => import("./components/dashboard/EntregaFotosAdmin"));
 const EntregaFotosVisualizacao = lazy(() => import("./pages/EntregaFotosVisualizacao"));
 const EscolherAlbum = lazy(() => import("./pages/Dashboard/EscolherAlbum"));
 const DiagnosticoSupabase = lazy(() => import("./pages/Dashboard/DiagnosticoSupabase"));

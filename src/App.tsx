@@ -1,69 +1,35 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { CSRFProvider } from "@/components/security";
+import { CSRFProvider } from "@/components/security/CSRFProtection";
 import AppRoutes from "./AppRoutes";
-import { useState } from 'react';
-
-import OfflineIndicator from '@/components/ui/OfflineIndicator';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { createQueryClient } from "./lib/react-query-config";
-import { useIsMobile } from "./hooks/use-mobile";
-import { useEntregaFotosAutomatico } from "@/hooks/useEntregaFotosAutomatico";
-
-// A criação do client foi movida para dentro do componente App
-// para usar o hook useIsMobile e aplicar a lógica de cache dinâmica.
-
-// Componente interno simplificado
-const AppWithRoutes = () => {
-  // Inicializar processos automáticos de entrega de fotos
-  useEntregaFotosAutomatico({
-    intervaloMinutos: 60, // Executa a cada 1 hora
-    executarAoIniciar: true,
-    habilitado: true
-  });
-
-  return <AppRoutes />;
-};
+import { useMemo } from "react";
+import { createQueryClient } from "@/lib/react-query-config";
 
 const App = () => {
-  const isMobile = useIsMobile();
-  
-  // Usamos useState para garantir que a instância do QueryClient seja criada
-  // apenas uma vez durante o ciclo de vida do componente.
-  const [queryClient] = useState(() => createQueryClient(isMobile));
-
-  // Log apenas em desenvolvimento
-  if (import.meta.env.MODE === 'development') {
-    console.log('App inicializando...', { isMobile });
-  }
+  // Criar QueryClient uma única vez
+  const queryClient = useMemo(() => createQueryClient(), []);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <BrowserRouter future={{ 
-            v7_startTransition: true,
-            v7_relativeSplatPath: true 
-          }}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <BrowserRouter>
+          <AuthProvider>
             <CSRFProvider>
-              <AuthProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <OfflineIndicator />
-                  <AppWithRoutes />
-                </TooltipProvider>
-              </AuthProvider>
+              <TooltipProvider>
+                <AppRoutes />
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
             </CSRFProvider>
-          </BrowserRouter>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

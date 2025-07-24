@@ -23,6 +23,7 @@
     "noFallthroughCasesInSwitch": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
 
     /* Paths */
     "baseUrl": ".",
