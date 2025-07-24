@@ -27,11 +27,15 @@ const securityHeaders = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  // FORÇAR MODO DESENVOLVIMENTO para carregar .env
+  const isDev = true; // SEMPRE DESENVOLVIMENTO
+  
+  return {
   server: {
     host: "::",
     port: 8080,
-    headers: mode === 'development' ? {} : securityHeaders,
+    headers: isDev ? {} : securityHeaders,
     // Configuração HMR para resolver problema de WebSocket
     hmr: {
       port: 8080, // Usar a mesma porta que o servidor
@@ -84,7 +88,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
+    isDev && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -95,12 +99,12 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: false,
     target: 'es2020',
-    minify: mode === 'production' ? 'esbuild' : false,
+    minify: isDev ? false : 'esbuild',
     rollupOptions: {
       output: {
         // Ofuscar nomes de chunks em produção para segurança
-        chunkFileNames: mode === 'production' ? '[hash].js' : '[name]-[hash].js',
-        assetFileNames: mode === 'production' ? '[hash].[ext]' : '[name]-[hash].[ext]',
+        chunkFileNames: isDev ? '[name]-[hash].js' : '[hash].js',
+        assetFileNames: isDev ? '[name]-[hash].[ext]' : '[hash].[ext]',
         manualChunks: {
           // Core React libraries
           'react-vendor': ['react', 'react-dom'],
@@ -151,4 +155,5 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
-}));
+  }; // Fechamento da função
+});
