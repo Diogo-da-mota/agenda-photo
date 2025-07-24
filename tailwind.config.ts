@@ -71,6 +71,7 @@ export default {
           secondary: '#34A853', // Verde confiável
           tertiary: '#FBBC05',  // Amarelo energético
           alert: '#EA4335',     // Vermelho assertivo
+          dark: '#0F1729',      // Azul escuro original
         },
         // Cores da marca para uso mais simples
         brand: {

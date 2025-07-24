@@ -6,17 +6,20 @@ export const useDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
   
-  // Auto-close sidebar on mobile
+  // Auto-close sidebar on mobile, always open on desktop
   useEffect(() => {
     if (isMobile) {
       setSidebarOpen(false);
     } else {
-      setSidebarOpen(true);
+      setSidebarOpen(true); // Sempre aberta em desktop
     }
   }, [isMobile]);
   
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    // Só permite toggle em mobile
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+    }
   };
 
   return {

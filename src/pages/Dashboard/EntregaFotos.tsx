@@ -56,18 +56,6 @@ export default function EntregaFotos() {
     }
   }, [activeTab]);
 
-  // Função para lidar com mudanças no formulário
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
   // Função para lidar com seleção de arquivos
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -226,11 +214,17 @@ export default function EntregaFotos() {
                 selectedImages={selectedImages}
                 isUploading={isUploading}
                 uploadProgress={uploadProgress}
-                onChange={handleChange}
+                galeriaSlug={formData.titulo ? formData.titulo.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : ''}
+                galeriaSenha={formData.senha_acesso || ''}
+                onInputChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
                 onFileSelect={handleFileSelect}
                 onDrop={handleDrop}
                 onRemoveImage={removeImage}
                 onSubmit={handleSubmit}
+                onClearImages={() => {
+                  selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+                  setSelectedImages([]);
+                }}
               />
             )}
           </TabsContent>
