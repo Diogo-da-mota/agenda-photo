@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+// Importar diagnósticos para verificação automática
+import './utils/env/envDiagnostic';
+import './utils/dom/selectorUtils';
 
 // Desabilitar React DevTools em desenvolvimento para evitar conflitos
 if (import.meta.env && import.meta.env.MODE === 'development') {

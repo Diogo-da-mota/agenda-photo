@@ -1,0 +1,291 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+supabase.ts:34 ✅ Configuração do Supabase validada com sucesso
+supabase.ts:35 🔗 URL: https://adxwgpfkvizpqdvortpu.supabase.co
+supabase.ts:36 🔑 Chave: eyJhbGciOiJIUzI1NiIs...
+contractService.ts:6 Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+_GoTrueClient @ @supabase_supabase-js.js?v=389affe6:5142
+SupabaseAuthClient @ @supabase_supabase-js.js?v=389affe6:7121
+_initSupabaseAuthClient @ @supabase_supabase-js.js?v=389affe6:7319
+SupabaseClient @ @supabase_supabase-js.js?v=389affe6:7192
+createClient @ @supabase_supabase-js.js?v=389affe6:7359
+(anonymous) @ contractService.ts:6Understand this warning
+selectorUtils.ts:144 🔍 Auditoria de Seletores CSS
+selectorUtils.ts:148 ❌ Seletor problemático detectado: .flex.items-center.gap-2, .flex.items-center.gap-1.5
+auditPageSelectors @ selectorUtils.ts:148
+(anonymous) @ selectorUtils.ts:162Understand this warning
+selectorUtils.ts:149 💡 Sugestão: Use querySelectorAll ou safeQuerySelectorAll
+react-router-dom.js?v=389affe6:4393 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=389affe6:4393
+logDeprecation @ react-router-dom.js?v=389affe6:4396
+logV6DeprecationWarnings @ react-router-dom.js?v=389affe6:4399
+(anonymous) @ react-router-dom.js?v=389affe6:5271
+commitHookEffectListMount @ chunk-276SZO74.js?v=389affe6:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=389affe6:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=389affe6:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=389affe6:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=389affe6:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=389affe6:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=389affe6:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=389affe6:9119
+commitRootImpl @ chunk-276SZO74.js?v=389affe6:19432
+commitRoot @ chunk-276SZO74.js?v=389affe6:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=389affe6:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18718
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this warning
+react-router-dom.js?v=389affe6:4393 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=389affe6:4393
+logDeprecation @ react-router-dom.js?v=389affe6:4396
+logV6DeprecationWarnings @ react-router-dom.js?v=389affe6:4402
+(anonymous) @ react-router-dom.js?v=389affe6:5271
+commitHookEffectListMount @ chunk-276SZO74.js?v=389affe6:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=389affe6:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=389affe6:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=389affe6:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=389affe6:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=389affe6:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=389affe6:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=389affe6:9119
+commitRootImpl @ chunk-276SZO74.js?v=389affe6:19432
+commitRoot @ chunk-276SZO74.js?v=389affe6:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=389affe6:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18718
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this warning
+inspector.b9415ea5.js:1 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at lX (inspector.b9415ea5.js:1:127164)
+    at l (inspector.b9415ea5.js:1:68514)
+    at ol (inspector.b9415ea5.js:1:82233)
+    at i (inspector.b9415ea5.js:1:132348)
+    at lM (inspector.b9415ea5.js:1:110198)
+    at inspector.b9415ea5.js:1:110064
+    at lO (inspector.b9415ea5.js:1:110072)
+    at lC (inspector.b9415ea5.js:1:106823)
+    at lw (inspector.b9415ea5.js:1:105378)
+    at C (inspector.b9415ea5.js:1:141367)
+s7 @ inspector.b9415ea5.js:1
+r.callback @ inspector.b9415ea5.js:1
+nW @ inspector.b9415ea5.js:1
+oX @ inspector.b9415ea5.js:1
+e @ inspector.b9415ea5.js:1
+(anonymous) @ inspector.b9415ea5.js:1
+lR @ inspector.b9415ea5.js:1
+lw @ inspector.b9415ea5.js:1
+C @ inspector.b9415ea5.js:1
+T @ inspector.b9415ea5.js:1Understand this error
+inspector.b9415ea5.js:1 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at lX (inspector.b9415ea5.js:1:127164)
+    at l (inspector.b9415ea5.js:1:68514)
+    at ol (inspector.b9415ea5.js:1:82233)
+    at i (inspector.b9415ea5.js:1:132348)
+    at lM (inspector.b9415ea5.js:1:110198)
+    at inspector.b9415ea5.js:1:110064
+    at lO (inspector.b9415ea5.js:1:110072)
+    at lC (inspector.b9415ea5.js:1:106823)
+    at lw (inspector.b9415ea5.js:1:105378)
+    at C (inspector.b9415ea5.js:1:141367)
+lX @ inspector.b9415ea5.js:1
+l @ inspector.b9415ea5.js:1
+ol @ inspector.b9415ea5.js:1
+i @ inspector.b9415ea5.js:1
+lM @ inspector.b9415ea5.js:1
+(anonymous) @ inspector.b9415ea5.js:1
+lO @ inspector.b9415ea5.js:1
+lC @ inspector.b9415ea5.js:1
+lw @ inspector.b9415ea5.js:1
+C @ inspector.b9415ea5.js:1
+T @ inspector.b9415ea5.js:1Understand this error
+envDiagnostic.ts:131 🔍 Diagnóstico Completo do Ambiente
+envDiagnostic.ts:66 🔧 Status das Variáveis de Ambiente
+envDiagnostic.ts:75 VITE_SUPABASE_URL: https://adxwgpfkvizpqdvortpu.supabase.co
+envDiagnostic.ts:75 VITE_SUPABASE_ANON_KEY: eyJhbGciOi...
+envDiagnostic.ts:75 VITE_APP_ENV: development
+envDiagnostic.ts:75 MODE: development
+envDiagnostic.ts:75 DEV: true
+envDiagnostic.ts:75 PROD: ❌ NÃO DEFINIDA
+envDiagnostic.ts:88 ✅ Todas as variáveis obrigatórias estão definidas
+envDiagnostic.ts:137 🌐 Testando conectividade com Supabase...
+serviceWorkerRegistration.ts:8 Service Worker registered with scope: http://localhost:8080/
+lazyPreloader.ts:24 ✅ Componente Clientes precarregado com sucesso
+envDiagnostic.ts:141 ✅ Conectividade com Supabase OK
+envDiagnostic.ts:147 🏗️ Modo: development
+envDiagnostic.ts:148 🔧 Desenvolvimento: true
+envDiagnostic.ts:149 🚀 Produção: false
+ThemeProvider.tsx:15 Uncaught Error: useTheme must be used within a ThemeProvider
+    at useTheme (ThemeProvider.tsx:15:11)
+    at ThemeToggle (ThemeToggle.tsx:7:31)
+    at renderWithHooks (chunk-276SZO74.js?v=389affe6:11548:26)
+    at mountIndeterminateComponent (chunk-276SZO74.js?v=389affe6:14926:21)
+    at beginWork (chunk-276SZO74.js?v=389affe6:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=389affe6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=389affe6:3699:24)
+    at invokeGuardedCallback (chunk-276SZO74.js?v=389affe6:3733:39)
+    at beginWork$1 (chunk-276SZO74.js?v=389affe6:19765:15)
+    at performUnitOfWork (chunk-276SZO74.js?v=389affe6:19198:20)
+useTheme @ ThemeProvider.tsx:15
+ThemeToggle @ ThemeToggle.tsx:7
+renderWithHooks @ chunk-276SZO74.js?v=389affe6:11548
+mountIndeterminateComponent @ chunk-276SZO74.js?v=389affe6:14926
+beginWork @ chunk-276SZO74.js?v=389affe6:15914
+callCallback2 @ chunk-276SZO74.js?v=389affe6:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=389affe6:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=389affe6:3733
+beginWork$1 @ chunk-276SZO74.js?v=389affe6:19765
+performUnitOfWork @ chunk-276SZO74.js?v=389affe6:19198
+workLoopSync @ chunk-276SZO74.js?v=389affe6:19137
+renderRootSync @ chunk-276SZO74.js?v=389affe6:19116
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18678
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this error
+content.js:5213 Uncaught (in promise) {name: 'i', httpError: false, httpStatus: 200, httpStatusText: '', code: 403, …}
+init @ content.js:5213
+await in init
+init @ content.js:5177
+init @ content.js:5183
+initFirstLevelControllers @ content.js:5229
+await in initFirstLevelControllers
+init @ content.js:5768
+(anonymous) @ content.js:5768
+Promise.then
+xBt @ content.js:5768
+(anonymous) @ content.js:5768
+(anonymous) @ content.js:5768Understand this error
+lazyPreloader.ts:24 ✅ Componente Portfolio precarregado com sucesso
+lazyPreloader.ts:24 ✅ Componente Agenda precarregado com sucesso
+ThemeProvider.tsx:15 Uncaught Error: useTheme must be used within a ThemeProvider
+    at useTheme (ThemeProvider.tsx:15:11)
+    at ThemeToggle (ThemeToggle.tsx:7:31)
+    at renderWithHooks (chunk-276SZO74.js?v=389affe6:11548:26)
+    at mountIndeterminateComponent (chunk-276SZO74.js?v=389affe6:14926:21)
+    at beginWork (chunk-276SZO74.js?v=389affe6:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=389affe6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=389affe6:3699:24)
+    at invokeGuardedCallback (chunk-276SZO74.js?v=389affe6:3733:39)
+    at beginWork$1 (chunk-276SZO74.js?v=389affe6:19765:15)
+    at performUnitOfWork (chunk-276SZO74.js?v=389affe6:19198:20)
+useTheme @ ThemeProvider.tsx:15
+ThemeToggle @ ThemeToggle.tsx:7
+renderWithHooks @ chunk-276SZO74.js?v=389affe6:11548
+mountIndeterminateComponent @ chunk-276SZO74.js?v=389affe6:14926
+beginWork @ chunk-276SZO74.js?v=389affe6:15914
+callCallback2 @ chunk-276SZO74.js?v=389affe6:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=389affe6:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=389affe6:3733
+beginWork$1 @ chunk-276SZO74.js?v=389affe6:19765
+performUnitOfWork @ chunk-276SZO74.js?v=389affe6:19198
+workLoopSync @ chunk-276SZO74.js?v=389affe6:19137
+renderRootSync @ chunk-276SZO74.js?v=389affe6:19116
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18678
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this error
+ThemeProvider.tsx:15 Uncaught Error: useTheme must be used within a ThemeProvider
+    at useTheme (ThemeProvider.tsx:15:11)
+    at ThemeToggle (ThemeToggle.tsx:7:31)
+    at renderWithHooks (chunk-276SZO74.js?v=389affe6:11548:26)
+    at mountIndeterminateComponent (chunk-276SZO74.js?v=389affe6:14926:21)
+    at beginWork (chunk-276SZO74.js?v=389affe6:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=389affe6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=389affe6:3699:24)
+    at invokeGuardedCallback (chunk-276SZO74.js?v=389affe6:3733:39)
+    at beginWork$1 (chunk-276SZO74.js?v=389affe6:19765:15)
+    at performUnitOfWork (chunk-276SZO74.js?v=389affe6:19198:20)
+useTheme @ ThemeProvider.tsx:15
+ThemeToggle @ ThemeToggle.tsx:7
+renderWithHooks @ chunk-276SZO74.js?v=389affe6:11548
+mountIndeterminateComponent @ chunk-276SZO74.js?v=389affe6:14926
+beginWork @ chunk-276SZO74.js?v=389affe6:15914
+callCallback2 @ chunk-276SZO74.js?v=389affe6:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=389affe6:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=389affe6:3733
+beginWork$1 @ chunk-276SZO74.js?v=389affe6:19765
+performUnitOfWork @ chunk-276SZO74.js?v=389affe6:19198
+workLoopSync @ chunk-276SZO74.js?v=389affe6:19137
+renderRootSync @ chunk-276SZO74.js?v=389affe6:19116
+recoverFromConcurrentError @ chunk-276SZO74.js?v=389affe6:18736
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18684
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this error
+chunk-276SZO74.js?v=389affe6:14032 The above error occurred in the <ThemeToggle> component:
+
+    at ThemeToggle (http://localhost:8080/src/components/ThemeToggle.tsx:28:33)
+    at div
+    at div
+    at header
+    at DashboardHeader (http://localhost:8080/src/components/dashboard/DashboardHeader.tsx?t=1753355208636:32:28)
+    at div
+    at DashboardMainContent (http://localhost:8080/src/layouts/components/DashboardMainContent.tsx?t=1753355208636:24:33)
+    at div
+    at DashboardLayout (http://localhost:8080/src/layouts/DashboardLayout.tsx?t=1753355208636:27:28)
+    at ProtectedRoute (http://localhost:8080/src/components/auth/ProtectedRoute.tsx?t=1753355208636:26:27)
+    at RenderedRoute (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=389affe6:4088:5)
+    at Routes (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=389affe6:4558:5)
+    at Suspense
+    at LazyLoadErrorBoundary (http://localhost:8080/src/AppRoutes.tsx?t=1753355208636:345:9)
+    at AppRoutes (http://localhost:8080/src/AppRoutes.tsx?t=1753355208636:354:29)
+    at Provider (http://localhost:8080/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=389affe6:38:15)
+    at TooltipProvider (http://localhost:8080/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=389affe6:63:5)
+    at CSRFProvider (http://localhost:8080/src/components/security/CSRFProtection.tsx:25:32)
+    at AuthProvider (http://localhost:8080/src/hooks/useAuth.tsx?t=1753355208636:41:32)
+    at Router (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=389affe6:4501:15)
+    at BrowserRouter (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=389affe6:5247:5)
+    at O (http://localhost:8080/node_modules/.vite/deps/next-themes.js?v=389affe6:23:25)
+    at z (http://localhost:8080/node_modules/.vite/deps/next-themes.js?v=389affe6:21:18)
+    at QueryClientProvider (http://localhost:8080/node_modules/.vite/deps/@tanstack_react-query.js?v=389affe6:2933:3)
+    at App (http://localhost:8080/src/App.tsx?t=1753355208636:36:25)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, LazyLoadErrorBoundary.
+logCapturedError @ chunk-276SZO74.js?v=389affe6:14032
+callback @ chunk-276SZO74.js?v=389affe6:14078
+callCallback @ chunk-276SZO74.js?v=389affe6:11248
+commitUpdateQueue @ chunk-276SZO74.js?v=389affe6:11265
+commitLayoutEffectOnFiber @ chunk-276SZO74.js?v=389affe6:17075
+commitLayoutMountEffects_complete @ chunk-276SZO74.js?v=389affe6:17980
+commitLayoutEffects_begin @ chunk-276SZO74.js?v=389affe6:17969
+commitLayoutEffects @ chunk-276SZO74.js?v=389affe6:17920
+commitRootImpl @ chunk-276SZO74.js?v=389affe6:19353
+commitRoot @ chunk-276SZO74.js?v=389affe6:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=389affe6:18760
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18718
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this error
+AppRoutes.tsx:107 Erro no lazy loading: Error: useTheme must be used within a ThemeProvider
+    at useTheme (ThemeProvider.tsx:15:11)
+    at ThemeToggle (ThemeToggle.tsx:7:31)
+    at renderWithHooks (chunk-276SZO74.js?v=389affe6:11548:26)
+    at mountIndeterminateComponent (chunk-276SZO74.js?v=389affe6:14926:21)
+    at beginWork (chunk-276SZO74.js?v=389affe6:15914:22)
+    at beginWork$1 (chunk-276SZO74.js?v=389affe6:19753:22)
+    at performUnitOfWork (chunk-276SZO74.js?v=389affe6:19198:20)
+    at workLoopSync (chunk-276SZO74.js?v=389affe6:19137:13)
+    at renderRootSync (chunk-276SZO74.js?v=389affe6:19116:15)
+    at recoverFromConcurrentError (chunk-276SZO74.js?v=389affe6:18736:28) {componentStack: '\n    at ThemeToggle (http://localhost:8080/src/com…localhost:8080/src/App.tsx?t=1753355208636:36:25)'}
+componentDidCatch @ AppRoutes.tsx:107
+callback @ chunk-276SZO74.js?v=389affe6:14084
+callCallback @ chunk-276SZO74.js?v=389affe6:11248
+commitUpdateQueue @ chunk-276SZO74.js?v=389affe6:11265
+commitLayoutEffectOnFiber @ chunk-276SZO74.js?v=389affe6:17075
+commitLayoutMountEffects_complete @ chunk-276SZO74.js?v=389affe6:17980
+commitLayoutEffects_begin @ chunk-276SZO74.js?v=389affe6:17969
+commitLayoutEffects @ chunk-276SZO74.js?v=389affe6:17920
+commitRootImpl @ chunk-276SZO74.js?v=389affe6:19353
+commitRoot @ chunk-276SZO74.js?v=389affe6:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=389affe6:18760
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=389affe6:18718
+workLoop @ chunk-276SZO74.js?v=389affe6:197
+flushWork @ chunk-276SZO74.js?v=389affe6:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=389affe6:384Understand this error
+lazyPreloader.ts:24 ✅ Componente PortfolioIntegracoes precarregado com sucesso
+lazyPreloader.ts:24 ✅ Componente PortfolioDesign precarregado com sucesso
+lazyPreloader.ts:24 ✅ Componente HistoricoAtividades precarregado com sucesso
+lazyPreloader.ts:24 ✅ Componente Configuracoes precarregado com sucesso
+lazyPreloader.ts:24 ✅ Componente Reports precarregado com sucesso
+dashboard:1 Uncaught (in promise) {name: 'i', httpError: false, httpStatus: 200, httpStatusText: '', code: 403, …}Understand this error
+dashboard:1 Uncaught (in promise) {name: 'i', httpError: false, httpStatus: 200, httpStatusText: '', code: 403, …}Understand this error

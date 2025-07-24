@@ -1,36 +1,38 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-// Validação rigorosa de variáveis de ambiente
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Função para validar credenciais de forma segura
-const validateCredentials = () => {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    const error = new Error('ERRO CRÍTICO: Credenciais Supabase não configuradas');
-    console.error('❌', error.message);
-    
-    if (import.meta.env.PROD) {
-      // Em produção, mostrar interface de erro amigável
-      throw error;
-    } else {
-      console.warn('⚠️ Executando em modo desenvolvimento sem credenciais');
-      return false;
-    }
-  }
-  return true;
-};
+// Verificação mais robusta das variáveis de ambiente
+if (!supabaseUrl) {
+  console.error('❌ ERRO CRÍTICO: VITE_SUPABASE_URL não está definida no arquivo .env');
+  console.error('📝 Verifique se o arquivo .env contém: VITE_SUPABASE_URL=sua_url_aqui');
+  throw new Error('VITE_SUPABASE_URL é obrigatória para conectar com o Supabase');
+}
 
-// Validar credenciais antes de criar cliente
-validateCredentials();
+if (!supabaseAnonKey) {
+  console.error('❌ ERRO CRÍTICO: VITE_SUPABASE_ANON_KEY não está definida no arquivo .env');
+  console.error('📝 Verifique se o arquivo .env contém: VITE_SUPABASE_ANON_KEY=sua_chave_aqui');
+  throw new Error('VITE_SUPABASE_ANON_KEY é obrigatória para conectar com o Supabase');
+}
 
-// SEGURANÇA: Usar apenas variáveis de ambiente - NUNCA hardcode credenciais
-const finalUrl = supabaseUrl;
-const finalKey = supabaseAnonKey;
+// Verificar se a URL é válida
+try {
+  new URL(supabaseUrl);
+} catch (error) {
+  console.error('❌ ERRO CRÍTICO: VITE_SUPABASE_URL não é uma URL válida:', supabaseUrl);
+  throw new Error('VITE_SUPABASE_URL deve ser uma URL válida');
+}
 
-export const supabase = createClient(finalUrl, finalKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+// Verificar se a chave parece ser um JWT válido
+if (!supabaseAnonKey.includes('.') || supabaseAnonKey.split('.').length !== 3) {
+  console.error('❌ ERRO CRÍTICO: VITE_SUPABASE_ANON_KEY não parece ser um JWT válido');
+  console.error('💡 A chave deve ter o formato: header.payload.signature');
+  throw new Error('VITE_SUPABASE_ANON_KEY deve ser um JWT válido');
+}
+
+console.log('✅ Configuração do Supabase validada com sucesso');
+console.log('🔗 URL:', supabaseUrl);
+console.log('🔑 Chave:', `${supabaseAnonKey.substring(0, 20)}...`);
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
