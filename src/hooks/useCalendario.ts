@@ -33,7 +33,7 @@ export const useCalendario = () => {
       
       // Formatar eventos para o componente Calendar
       const datasFormatadas = eventos.map(evento => ({
-        date: new Date(evento.data_inicio),
+        date: new Date(evento.dataInicio),
         color: evento.cor || '#3c83f6' // Cor padrão azul se não houver cor definida
       }));
 

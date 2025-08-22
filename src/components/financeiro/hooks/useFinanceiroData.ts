@@ -12,6 +12,8 @@ export const useFinanceiroData = () => {
 
   return {
     transactions,
+    resumoFinanceiro: { receitas: 0, despesas: 0, saldo: 0 },
+    despesas: [],
     isLoading,
     error,
     refetch: () => {}

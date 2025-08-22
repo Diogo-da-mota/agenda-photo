@@ -53,7 +53,8 @@ export const entregaFotosAutomaticService = {
   verificarEventosConcluidos: async (userId: string) => {
     console.log('Verificando eventos concluídos para usuário:', userId);
   },
-  executarProcessosAutomaticos: async (userId: string) => {
+  executarProcessosAutomaticos: async (userId?: string) => {
     console.log('Executando processos automáticos para usuário:', userId);
+    return { sucessos: 0, falhas: 0 };
   }
 };

@@ -1,13 +1,19 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-const ContractList: React.FC = () => {
+interface ContractListProps {
+  filter?: string;
+  searchQuery?: string;
+}
+
+const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery }) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Lista de Contratos</CardTitle>
         <CardDescription>
-          Gerencie seus contratos
+          Gerencie seus contratos {filter && `- ${filter}`}
+          {searchQuery && ` - Busca: "${searchQuery}"`}
         </CardDescription>
       </CardHeader>
       <CardContent>

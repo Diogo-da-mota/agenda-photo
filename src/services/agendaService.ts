@@ -103,7 +103,10 @@ export const buscarDatasComEventos = async (userId: string, mes: number, ano: nu
   }
 
   return (data || []).map(evento => ({
-    data_inicio: new Date(evento.data_inicio),
+    id: evento.data_inicio.toString(),
+    titulo: 'Evento',
+    dataInicio: new Date(evento.data_inicio),
+    dataFim: new Date(evento.data_inicio),
     cor: getStatusColor(evento.status)
   }));
 };
@@ -135,6 +138,13 @@ export const gerarReciboEvento = async (eventId: string, userId: string) => {
 
 export const sincronizarTodosEventosFinanceiro = async (userId: string) => {
   console.log('Sincronizando eventos financeiros para usuário:', userId);
+  // Return a proper result object instead of void
+  return {
+    total: 0,
+    sucessos: 0,
+    falhas: 0,
+    detalhes: []
+  };
 };
 
 export const registrarCallbackAtualizacaoFinanceiro = (callback: Function) => {

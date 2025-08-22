@@ -1,7 +1,16 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const SummaryCards = () => {
+interface SummaryCardsProps {
+  totalEntradas?: number;
+  totalAReceber?: number;
+  totalDespesas?: number;
+  saldo?: number;
+  formatarMoeda?: (valor: number) => string;
+  isAdmin?: boolean;
+}
+
+export const SummaryCards: React.FC<SummaryCardsProps> = (props) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>

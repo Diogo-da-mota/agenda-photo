@@ -300,9 +300,9 @@ export const agendaBusinessService = {
       
       const datasComEventos = await buscarDatasComEventos(user.id, mesParaBuscar, anoParaBuscar);
       
-      // ✅ CORREÇÃO: Usar data_inicio em vez de data
+      // ✅ CORREÇÃO: Usar dataInicio em vez de data_inicio
       const eventDatesFormatted = datasComEventos.map(evento => ({
-        date: evento.data_inicio,
+        date: evento.dataInicio,
         color: evento.cor || undefined
       }));
       

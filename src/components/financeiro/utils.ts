@@ -24,8 +24,10 @@ export const applyAllFilters = (transactions: any[], filters: any) => {
 
 export const calcularTotaisDosFiltros = (transactions: any[]) => {
   return {
-    receitas: 0,
-    despesas: 0,
-    saldo: 0
+    totalReceitas: 0,
+    totalDespesas: 0,
+    saldo: 0,
+    totalAReceber: 0,
+    totalEntradas: 0
   };
 };

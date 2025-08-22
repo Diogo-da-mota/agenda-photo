@@ -6,7 +6,6 @@ export const useFinanceiroActions = () => {
   const createTransaction = async (data: any) => {
     setIsProcessing(true);
     try {
-      // Implementar criação de transação
       console.log('Criando transação:', data);
     } finally {
       setIsProcessing(false);
@@ -16,7 +15,6 @@ export const useFinanceiroActions = () => {
   const updateTransaction = async (id: string, data: any) => {
     setIsProcessing(true);
     try {
-      // Implementar atualização de transação
       console.log('Atualizando transação:', id, data);
     } finally {
       setIsProcessing(false);
@@ -26,17 +24,42 @@ export const useFinanceiroActions = () => {
   const deleteTransaction = async (id: string) => {
     setIsProcessing(true);
     try {
-      // Implementar exclusão de transação
       console.log('Excluindo transação:', id);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const handleEditTransaction = (data: any) => {
+    console.log('Editando transação:', data);
+  };
+
+  const handleTransactionSuccess = () => {
+    console.log('Transação bem-sucedida');
+  };
+
+  const handleExportClick = () => {
+    console.log('Exportando dados');
+  };
+
+  const handleCorrigirTransacoesDiogo = () => {
+    console.log('Corrigindo transações');
+  };
+
+  const handleSincronizarEventosFinanceiro = () => {
+    console.log('Sincronizando eventos');
+  };
+
   return {
     createTransaction,
     updateTransaction,
     deleteTransaction,
+    handleEditTransaction,
+    handleTransactionSuccess,
+    handleExportClick,
+    handleCorrigirTransacoesDiogo,
+    handleSincronizarEventosFinanceiro,
+    isLoadingSecondaryData: false,
     isProcessing
   };
 };

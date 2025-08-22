@@ -58,7 +58,16 @@ export const converterEvento = (eventoDb: EventoSupabase): EventoFinanceiro => {
   
   try {
     const evento = converterDoSupabase(eventoDb);
-    return evento;
+    // Ensure required properties are present for EventoFinanceiro
+    return {
+      id: evento.id,
+      clientName: evento.clientName,
+      eventType: evento.eventType,
+      date: evento.date,
+      totalValue: evento.totalValue || 0,
+      downPayment: evento.downPayment || 0,
+      remainingValue: evento.remainingValue || 0
+    };
   } catch (erro) {
     logger.error(`${LOG_PREFIXES.EVENTS} Erro ao converter evento ${eventoDb.id}:`, erro);
     throw erro;
