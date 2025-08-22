@@ -182,29 +182,49 @@ export const useAutoSave = <T extends Record<string, any>>(
   useEffect(() => {
     if (!enabled) return;
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    // Usar pagehide em vez de beforeunload (mais moderno e confiável)
+    const handlePageHide = (event: PageTransitionEvent) => {
       if (hasPendingChanges()) {
-        event.preventDefault();
-        event.returnValue = 'Você tem alterações não salvas. Deseja realmente sair?';
-        
-        // Tentar salvar rapidamente
-        performSave(dataRef.current).catch(console.error);
+        // Tentar salvar rapidamente usando sendBeacon se disponível
+        try {
+          performSave(dataRef.current).catch(console.error);
+        } catch (error) {
+          console.error('[AutoSave] Erro ao salvar na saída da página:', error);
+        }
       }
     };
 
+    // Melhorar implementação do visibilitychange
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && hasPendingChanges()) {
-        // Salvar quando a página ficar oculta
+      if (document.visibilityState === 'hidden') {
+        if (hasPendingChanges()) {
+          // Salvar quando a página ficar oculta
+          performSave(dataRef.current).catch(console.error);
+        }
+      } else if (document.visibilityState === 'visible') {
+        // Página voltou a ficar visível - pode verificar se há dados para sincronizar
+        if (import.meta.env.MODE === 'development') {
+          console.log('[AutoSave] Página voltou a ficar visível');
+        }
+      }
+    };
+
+    // Adicionar listener para quando a página perde o foco
+    const handlePageFocus = () => {
+      if (hasPendingChanges()) {
+        // Salvar quando a página perde o foco
         performSave(dataRef.current).catch(console.error);
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handlePageFocus);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handlePageFocus);
     };
   }, [enabled, hasPendingChanges, performSave]);
 
