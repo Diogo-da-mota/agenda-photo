@@ -192,7 +192,19 @@
 ├── Pontuação Qualidade: [X/12 critérios aprovados]
 └── Prioridade de Ação: [Alta/Média/Baixa]
 
-
+🎯 ANÁLISE DETALHADA:
+├── 1. DRY: ✅ | ⚠️ | 🔴 - [detalhes específicos]
+├── 2. Código Morto: ✅ | ⚠️ | 🔴 - [arquivos identificados]
+├── 3. TypeScript: ✅ | ⚠️ | 🔴 - [tipos a melhorar]
+├── 4. Componentes: ✅ | ⚠️ | 🔴 - [refatorações sugeridas]
+├── 5. Estado: ✅ | ⚠️ | 🔴 - [otimizações de estado]
+├── 6. Hooks: ✅ | ⚠️ | 🔴 - [correções necessárias]
+├── 7. Separação: ✅ | ⚠️ | 🔴 - [responsabilidades]
+├── 8. Erros: ✅ | ⚠️ | 🔴 - [tratamentos ausentes]
+├── 9. Performance: ✅ | ⚠️ | 🔴 - [otimizações possíveis]
+├── 10. Estrutura: ✅ | ⚠️ | 🔴 - [reorganizações]
+├── 11. A11y: ✅ | ⚠️ | 🔴 - [correções acessibilidade]
+└── 12. Testes: ✅ | ⚠️ | 🔴 - [cobertura a adicionar]
 
 🚨 ALERTAS PRIORITÁRIOS:
 ├── 🔴 CRÍTICO: [problemas que precisam ação imediata]
@@ -312,6 +324,37 @@ com tipagem TypeScript adequada (interface definida para as props)"
 {performance: app/}                # Análise de otimização
 {seguranca: auth/}                 # Validar tratamento de erros
 {manutencao: legacy/}              # Análise de manutenibilidade
+```
+
+## 📈 RELATÓRIOS E MÉTRICAS DE QUALIDADE
+
+### Dashboard de Qualidade
+```
+📊 DASHBOARD DE QUALIDADE TÉCNICA
+
+🎯 PONTUAÇÃO GERAL: [X/120 pontos] (12 critérios × 10 pontos cada)
+
+📈 EVOLUÇÃO:
+├── Semana passada: [Y/120]
+├── Tendência: 📈 Melhorando | 📉 Piorando | ➡️ Estável
+└── Meta próximo sprint: [Z/120]
+
+🏆 RANKING DE CRITÉRIOS:
+├── 🥇 Melhor: [critério com maior pontuação]
+├── 🥈 Bom: [segundo melhor]
+├── 🥉 Regular: [terceiro]
+└── 🔴 Crítico: [pior critério - precisa atenção]
+
+📋 AÇÕES RECOMENDADAS (Prioridade):
+├── 1. [ação com maior impacto]
+├── 2. [segunda prioridade]
+├── 3. [terceira prioridade]
+└── ...
+
+🎯 METAS TÉCNICAS:
+├── Curto prazo (1 semana): [objetivos específicos]
+├── Médio prazo (1 mês): [melhorias estruturais]
+└── Longo prazo (3 meses): [transformação do projeto]
 ```
 
 ### Relatório Pós-Execução Completo

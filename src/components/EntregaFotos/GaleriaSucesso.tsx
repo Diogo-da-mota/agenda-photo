@@ -6,12 +6,16 @@ import { useNavigate } from 'react-router-dom';
 
 interface GaleriaSucessoProps {
   galeriaUrl: string;
+  senha?: string;
   onCopyLink: () => void;
+  onNovaGaleria?: () => void;
 }
 
 const GaleriaSucesso: React.FC<GaleriaSucessoProps> = ({
   galeriaUrl,
-  onCopyLink
+  senha,
+  onCopyLink,
+  onNovaGaleria
 }) => {
   const navigate = useNavigate();
 

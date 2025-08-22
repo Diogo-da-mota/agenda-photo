@@ -149,12 +149,26 @@ const ContractDetails = () => {
   // Carregar anexos salvos do Supabase e buscar PDF salvo
   const loadContractAttachments = React.useCallback(async () => {
     if (!contractId) return;
+
+    const id_contrato = contractId.split('-').pop();
+    const { data: contrato, error: contratoError } = await supabase
+      .from('contratos')
+      .select('id')
+      .eq('id_contrato', id_contrato)
+      .single();
+
+    if (contratoError) {
+      console.error('Erro ao buscar contrato:', contratoError);
+      throw new Error(`Erro ao buscar contrato com id_contrato ${id_contrato}`);
+    }
+
+    const id_contrato_db = contrato.id;
     
     try {
       const { data: anexos, error } = await supabase
         .from('anexos_contrato')
         .select('*')
-        .eq('id_contrato', contractId);
+        .eq('id_contrato', id_contrato_db);
       
       if (error) {
         console.error('Erro ao carregar anexos:', error);
@@ -257,11 +271,25 @@ const ContractDetails = () => {
       for (let i = 0; i < newAttachments.length; i++) {
         const attachment = newAttachments[i];
         const publicUrl = uploadResult.urls[i];
+
+        const id_contrato = contractId.split('-').pop();
+        const { data: contrato, error: contratoError } = await supabase
+          .from('contratos')
+          .select('id')
+          .eq('id_contrato', id_contrato)
+          .single();
+
+        if (contratoError) {
+          console.error('Erro ao buscar contrato:', contratoError);
+          throw new Error(`Erro ao buscar contrato com id_contrato ${id_contrato}`);
+        }
+
+        const id_contrato_db = contrato.id;
         
         const { error: dbError } = await supabase
           .from('anexos_contrato')
           .insert({
-            id_contrato: contractId,
+            id_contrato: id_contrato_db,
             id_user: user.id,
             nome: attachment.name,
             url: publicUrl,
@@ -276,7 +304,7 @@ const ContractDetails = () => {
       }
 
       // Recarregar anexos para mostrar os salvos
-      await loadContractAttachments();
+      // await loadContractAttachments();
       
       toast({
         title: "Anexos salvos com sucesso",
@@ -488,16 +516,66 @@ const ContractDetails = () => {
     }
   };
 
-  const removeAttachment = (index: number) => {
+  const removeAttachment = async (index: number) => {
+    // Get attachment before removing it
+    const attachmentToRemove = attachments[index];
+    
+    if (!attachmentToRemove) {
+      toast({
+        title: "Erro",
+        description: "Anexo não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Log attachment being removed
+    console.log("Removendo anexo:", attachmentToRemove);
+
+    // Update attachments state
     setAttachments(prev => {
       const newAttachments = [...prev];
-      // Liberar URL do objeto se existir
-      if (newAttachments[index].url) {
-        URL.revokeObjectURL(newAttachments[index].url!);
+      // Release object URL if it exists
+      if (attachmentToRemove.url && attachmentToRemove.isNew) {
+        URL.revokeObjectURL(attachmentToRemove.url);
       }
       newAttachments.splice(index, 1);
       return newAttachments;
     });
+
+    const path_file = attachmentToRemove.url.split('contratos/')[1];
+
+    // need remove anexo on storage
+    const { data: dataStorage, error: errorStorage } = await supabase
+      .storage
+      .from('contratos')
+      .remove([`${path_file}`]);
+
+    if (errorStorage) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao remover o anexo do contrato.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const url_file = attachmentToRemove.url;
+
+    // need remove anexos_contrato on database
+    const { data, error } = await supabase
+      .from('anexos_contrato')
+      .delete()
+      .eq('url', url_file);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao remover o anexo do contrato.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     toast({
       title: "Arquivo removido",
@@ -533,6 +611,7 @@ const ContractDetails = () => {
                   clientName={(contract as any).nome_cliente || contract.clientes?.nome || 'N/A'}
                   clientEmail={(contract as any).email_cliente || contract.clientes?.email || 'N/A'}
                   phoneNumber={formatarTelefoneExibicao((contract as any).telefone_cliente || contract.clientes?.telefone) || 'N/A'}
+                  cpf_cliente={(contract as any).cpf_cliente}
                   eventType={(contract as any).tipo_evento || 'N/A'}
                   eventDate={(contract as any).data_evento ? new Date((contract as any).data_evento) : null}
                   eventLocation={eventLocation}
@@ -580,7 +659,7 @@ const ContractDetails = () => {
                         Arraste arquivos aqui ou clique para selecionar
                       </div>
                       <div className="text-sm text-gray-500">
-                        Suporte para PDF, Word, Excel e imagens (máx. 5MB cada)
+                        Suporte para PDF e imagens (máx. 5MB cada)
                       </div>
                       <input
                         type="file"

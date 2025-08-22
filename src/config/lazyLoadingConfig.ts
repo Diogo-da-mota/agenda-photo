@@ -92,7 +92,9 @@ export const defaultLazyLoadingConfig: LazyLoadingConfig = {
   ],
   
   excludeFromPreload: [
-    'Testes'
+    'Testes',
+    'DiagnosticoSupabase',
+    'SupabaseUploadTest'
   ],
   
   monitoring: {

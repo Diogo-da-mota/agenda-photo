@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Lock, Eye, Copy, Trash2, ImageIcon, Loader2, Camera } from 'lucide-react';
+import { Calendar, Lock, Eye, Copy, Trash2, ImageIcon, Loader2, Camera, Key } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface GaleriaExistente {
   slug: string;
@@ -11,6 +12,7 @@ interface GaleriaExistente {
   data_expiracao?: string;
   total_acessos_galeria: number;
   ultima_atualizacao?: string;
+  senha_acesso?: string;
 }
 
 interface GaleriasListaProps {
@@ -32,6 +34,24 @@ const GaleriasLista: React.FC<GaleriasListaProps> = ({
   onApagar,
   onCriarPrimeira
 }) => {
+  const { toast } = useToast();
+
+  const copyPassword = async (senha: string) => {
+    try {
+      await navigator.clipboard.writeText(senha);
+      toast({
+        title: "Senha copiada!",
+        description: "A senha foi copiada para a área de transferência.",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar a senha. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
   if (loadingGalerias) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -106,6 +126,21 @@ const GaleriasLista: React.FC<GaleriasListaProps> = ({
                       <Eye className="h-4 w-4" />
                       {galeria.total_acessos_galeria || 0} visualizações
                     </span>
+                    {galeria.senha_acesso && (
+                      <span className="flex items-center gap-2 font-medium text-blue-600">
+                        <Key className="h-4 w-4" />
+                        <span>Senha: {galeria.senha_acesso}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyPassword(galeria.senha_acesso!)}
+                          className="h-6 w-6 p-0 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
+                          title="Copiar senha"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </span>
+                    )}
                   </div>
                   {galeria.ultima_atualizacao && (
                     <p className="text-sm text-muted-foreground">

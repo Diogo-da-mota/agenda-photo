@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   ci: {
     collect: {
       // URLs para auditar
@@ -53,4 +53,4 @@ export default {
       storage: './lighthouse-server-storage'
     }
   }
-}
+}; 

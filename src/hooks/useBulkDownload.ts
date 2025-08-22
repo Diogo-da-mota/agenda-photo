@@ -1,7 +1,6 @@
 /**
  * Hook customizado para gerenciar downloads múltiplos
  * FASE 2 - Estratégias Inteligentes de Download
- * ATUALIZADO: Compatibilidade com iOS
  */
 
 import { useState, useCallback, useRef } from 'react';
@@ -13,8 +12,6 @@ import {
   DownloadCallbacks,
   BulkDownloadResult 
 } from '@/types/download-multiple';
-import { downloadImageUniversal } from '@/utils/downloadImage';
-import { deviceDetection } from '@/utils/deviceDetection';
 
 export interface ImageDownloadData {
   id: string;
@@ -98,7 +95,7 @@ export const useBulkDownload = ({
     ...config
   };
 
-  // MELHORADO: Download de uma única imagem com retry inteligente e compatibilidade iOS
+  // MELHORADO: Download de uma única imagem com retry inteligente
   const downloadSingleImage = useCallback(async (
     imageData: ImageDownloadData,
     signal?: AbortSignal,
@@ -125,20 +122,42 @@ export const useBulkDownload = ({
 
       callbacks.onProgress?.(progress);
 
-      // Verificar se foi cancelado
-      if (signal?.aborted) {
-        throw new Error('Download cancelado');
+      // MELHORADO: Timeout baseado na velocidade da conexão
+      const timeoutMs = connectionSpeedRef.current === 'slow' ? 30000 : 
+                      connectionSpeedRef.current === 'medium' ? 20000 : 10000;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      // Combinar sinais de abort
+      const combinedSignal = signal?.aborted ? signal : controller.signal;
+
+      // Fazer o download
+      const response = await fetch(imageData.url, { signal: combinedSignal });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      progress.progress = 30;
+      progress.progress = 50;
       callbacks.onProgress?.(progress);
 
-      // NOVO: Usar função universal compatível com iOS
-      await downloadImageUniversal(imageData.url, {
-        filename: imageData.fileName,
-        showInstructions: deviceDetection.isIOS(), // Mostrar instruções apenas no iOS
-        fallbackToNewTab: true
-      });
+      const blob = await response.blob();
+      progress.progress = 80;
+      callbacks.onProgress?.(progress);
+
+      // Criar link de download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = imageData.fileName;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       // Finalizar com sucesso
       progress.status = 'completed';

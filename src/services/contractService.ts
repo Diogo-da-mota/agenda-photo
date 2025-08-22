@@ -1,6 +1,23 @@
 import { supabase } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
+import { createClient, User } from "@supabase/supabase-js";
 import { registrarContratoCriado } from './atividadeService';
+
+// Cliente Supabase para consultas públicas (sem RLS)
+const publicSupabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
+    }
+  }
+);
 
 // Interface para dados do contrato
 export interface Contract {
@@ -89,43 +106,25 @@ export const listContracts = async (user: User) => {
       .from('contratos')
       .select(`
         *,
-        agenda_eventos!inner(
+        agenda_eventos(
           id,
           titulo,
           data_inicio,
           data_fim,
           cliente_id,
           valor_total
+        ),
+        clientes(
+          id,
+          nome,
+          email,
+          telefone
         )
       `)
       .eq('user_id', user.id)
       .order('criado_em', { ascending: false });
 
     if (error) throw error;
-
-    // Se precisar dos dados do cliente, buscar separadamente
-    if (data && data.length > 0) {
-      const clienteIds = data
-        .map((c: any) => c.agenda_eventos?.cliente_id)
-        .filter(Boolean);
-      
-      if (clienteIds.length > 0) {
-        const { data: clientes } = await supabase
-          .from('clientes')
-          .select('*')
-          .in('id', [...new Set(clienteIds)]);
-
-        // Mapear clientes aos contratos
-        data.forEach((contrato: any) => {
-          if (contrato.agenda_eventos?.cliente_id) {
-            contrato.cliente = clientes?.find(
-              c => c.id === contrato.agenda_eventos.cliente_id
-            );
-          }
-        });
-      }
-    }
-
     return data;
   } catch (error) {
     console.error('Erro ao listar contratos:', error);
@@ -159,12 +158,12 @@ export const getContract = async (id: string, user: User) => {
 
 /**
  * Busca um contrato público (sem autenticação) - usado para visualização pública
- * Usa o cliente principal do Supabase
+ * Usa um cliente Supabase específico para consultas públicas
  */
 export const getPublicContract = async (id: string) => {
   try {
-    // Usar o cliente principal - as políticas RLS devem permitir leitura pública
-    const { data, error } = await supabase
+    // Usar o cliente público que não tem sessão de usuário
+    const { data, error } = await publicSupabase
       .from('contratos')
       .select('*, clientes(*)')
       .eq('id_contrato', id)
@@ -491,25 +490,53 @@ export const duplicateContractTemplate = async (
   user: User
 ): Promise<ContractTemplate> => {
   try {
-    // Primeiro, buscar o template original
+    // Buscar o template original
     const { data: originalTemplate, error: fetchError } = await supabase
-      .from('contratos')
-      .select('titulo, conteudo')
+      .from('contract_templates')
+      .select('*')
       .eq('id', templateId)
       .eq('user_id', user.id)
-      .eq('modelos_contrato', true)
       .single();
 
     if (fetchError) throw fetchError;
+    if (!originalTemplate) throw new Error('Template não encontrado');
 
-    // Criar novo template com o conteúdo do original
-    return await createContractTemplate({
-      nome: newName,
-      conteudo: originalTemplate.conteudo || '',
-      padrao: false
-    }, user);
+    // Criar o novo template
+    const { data, error } = await supabase
+      .from('contract_templates')
+      .insert({
+        user_id: user.id,
+        nome: newName,
+        conteudo: originalTemplate.conteudo,
+        padrao: false
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error('Erro ao duplicar template de contrato:', error);
+    console.error('Erro ao duplicar template:', error);
     throw error;
   }
 };
+
+export async function getContractById(id: string): Promise<Contract | null> {
+  try {
+    const { data, error } = await supabase
+      .from('contratos')
+      .select('*, clientes(*)')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Erro ao buscar contrato por ID:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar contrato por ID:', error);
+    return null;
+  }
+}

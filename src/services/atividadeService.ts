@@ -130,12 +130,33 @@ export const buscarHistoricoContrato = async (contratoId: string, userId: string
       return [];
     }
 
+    // Primeiro, buscar o UUID do contrato usando o id_contrato (slug)
+    // Extrair apenas a parte numérica do slug se necessário
+    const idContratoNumerico = contratoId.includes('-') ? contratoId.split('-').pop() : contratoId;
+    
+    const { data: contratoData, error: contratoError } = await supabase
+      .from('contratos')
+      .select('id')
+      .eq('id_contrato', idContratoNumerico)
+      .single();
+
+    if (contratoError) {
+      logger.error('buscarHistoricoContrato: Contrato não encontrado', { contratoId, idContratoNumerico, error: contratoError }, 'atividadeService');
+      return [];
+    }
+
+    if (!contratoData?.id) {
+      logger.error('buscarHistoricoContrato: UUID do contrato não encontrado', { contratoId, idContratoNumerico }, 'atividadeService');
+      return [];
+    }
+
+    // Agora buscar o histórico usando o UUID do contrato
     const { data, error } = await supabase
       .from('sistema_atividades')
       .select('*')
       .eq('user_id', userId)
       .eq('table_name', 'contratos')
-      .eq('record_id', contratoId)
+      .eq('record_id', contratoData.id)
       .order('timestamp', { ascending: false });
 
     if (error) {

@@ -67,22 +67,7 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
     };
   
   const handleViewSite = () => {
-    let contractUrl;
-    
-    if (contract.id_amigavel && contract.nome_cliente) {
-      // Usar novo formato com dados completos
-      contractUrl = generateContractUrl({
-        id_contrato: contractId,
-        id_amigavel: contract.id_amigavel,
-        nome_cliente: contract.nome_cliente
-      });
-    } else {
-      // Fallback para formato antigo
-      contractUrl = generateContractUrl(contractId, contract.tipo_evento);
-    }
-    
-    const link = `${window.location.origin}${contractUrl}`;
-    window.open(link, '_blank');
+    window.open('/agenda/cliente-contratos', '_blank');
   };
   
   return (

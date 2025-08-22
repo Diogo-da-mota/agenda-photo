@@ -17,20 +17,17 @@ const Sidebar = () => {
   // Generate menu items with dynamic badge counts
   const menuItems = createMenuItems(messageCounts.naoLidas, contractCounts.pendentes);
   
-  // Auto-close sidebar on mobile, always open on desktop
+  // Auto-close sidebar on mobile
   useEffect(() => {
     if (isMobile) {
       setIsOpen(false);
     } else {
-      setIsOpen(true); // Sempre aberta em desktop
+      setIsOpen(true);
     }
   }, [isMobile]);
   
   const toggleSidebar = () => {
-    // Só permite toggle em mobile
-    if (isMobile) {
-      setIsOpen(!isOpen);
-    }
+    setIsOpen(!isOpen);
   };
   
   const closeMobileSidebar = () => {

@@ -26,8 +26,6 @@ import {
 } from 'lucide-react';
 import { useImageSelection } from '@/hooks/useImageSelection';
 import { useBulkDownload, ImageDownloadData } from '@/hooks/useBulkDownload';
-import { downloadImageUniversal } from '@/utils/downloadImage';
-import { deviceDetection } from '@/utils/deviceDetection';
 import { MultipleDownloadActionBar, MultipleDownloadActionBarWrapper } from '@/components/MultipleDownloadActionBar';
 import { SelectableImageGrid } from '@/components/SelectableImageCard';
 import { ImprovedLightbox, LightboxImage } from '@/components/ImprovedLightbox';
@@ -35,7 +33,7 @@ import { ImprovedLightbox, LightboxImage } from '@/components/ImprovedLightbox';
 const EntregaFotosVisualizacao = () => {
   const { slug } = useParams<{ slug: string }>();
   const [galeria, setGaleria] = useState<GaleriaCompleta | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [senhaDigitada, setSenhaDigitada] = useState('');
   const [acessoLiberado, setAcessoLiberado] = useState(() => {
     // Verificar se já existe acesso liberado no sessionStorage
@@ -127,7 +125,7 @@ const EntregaFotosVisualizacao = () => {
 
   const buscarGaleria = async (signal?: AbortSignal) => {
     try {
-      setLoading(true);
+      // Loading removido - vai direto para o formulário
       
       console.log('🔍 Buscando galeria por slug:', slug);
       
@@ -270,7 +268,7 @@ const EntregaFotosVisualizacao = () => {
       console.error('Erro inesperado:', error);
       toast.error('Erro ao carregar galeria');
     } finally {
-      setLoading(false);
+      // Loading removido - vai direto para o formulário
     }
   };
 
@@ -302,7 +300,7 @@ const EntregaFotosVisualizacao = () => {
     }
   };
 
-  // Função para download individual (ATUALIZADA: compatível com iOS)
+  // Função para download individual (mantida para compatibilidade)
   const downloadImagem = async (url: string, nomeArquivo: string) => {
     if (!galeria?.permitir_download) {
       toast.error('Downloads não permitidos para esta galeria');
@@ -312,17 +310,23 @@ const EntregaFotosVisualizacao = () => {
     setDownloadingImage(url);
     
     try {
-      // NOVO: Usar função universal compatível com iOS
-      await downloadImageUniversal(url, {
-        filename: nomeArquivo,
-        showInstructions: deviceDetection.isIOS(),
-        fallbackToNewTab: true
-      });
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao baixar imagem');
       
-      // Não mostrar toast de sucesso para iOS (já é mostrado pela função universal)
-      if (!deviceDetection.isIOS()) {
-        toast.success('Imagem baixada com sucesso!');
-      }
+      const blob = await response.blob();
+      const urlBlob = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.download = nomeArquivo;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(urlBlob);
+      toast.success('Imagem baixada com sucesso!');
       
     } catch (error) {
       console.error('Erro ao baixar imagem:', error);
@@ -453,25 +457,11 @@ const EntregaFotosVisualizacao = () => {
     return dias;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mx-auto"></div>
-          <p className="text-lg font-medium">Carregando galeria...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!galeria) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-            <h2 className="text-xl font-semibold text-red-700">Galeria não encontrada</h2>
-            <p className="text-red-600">Esta galeria pode ter expirado ou não existe.</p>
           </CardContent>
         </Card>
       </div>

@@ -16,6 +16,7 @@ interface ContractData {
   nome_cliente?: string;
   email_cliente?: string;
   telefone_cliente?: string;
+  cpf_cliente?: string;
   tipo_evento?: string;
   data_evento?: string;
   valor_total?: number;
@@ -89,6 +90,7 @@ const ContractCopyWithSignature = ({
                     clientName={originalContract.nome_cliente || originalContract.clientes?.nome || 'N/A'}
                     clientEmail={originalContract.email_cliente || originalContract.clientes?.email || 'N/A'}
                     phoneNumber={formatarTelefoneExibicao(originalContract.telefone_cliente || originalContract.clientes?.telefone) || 'N/A'}
+                    cpf_cliente={originalContract.cpf_cliente}
                     eventType={originalContract.tipo_evento || 'N/A'}
                     eventDate={originalContract.data_evento ? new Date(originalContract.data_evento) : new Date()}
                     eventLocation={eventLocation}

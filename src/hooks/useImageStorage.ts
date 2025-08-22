@@ -1,5 +1,5 @@
 
-import { handleImageUpload } from '@/services/image/imageService'; 
+import { handleImageUpload } from '@/features/images/services'; 
 import { generateThumbnail as genThumb } from "@/services/image/uploadService";
 
 export async function uploadSingleImage(file: File, {

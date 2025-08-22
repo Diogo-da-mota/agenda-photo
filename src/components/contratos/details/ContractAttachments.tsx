@@ -41,22 +41,110 @@ const ContractAttachments = ({
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [previewAttachment, setPreviewAttachment] = React.useState<Attachment | null>(null);
   
-  const handleDownload = (attachment: Attachment) => {
-    // Simula a geração de um PDF simples com texto
-    const texto = `PDF gerado via MCP context7: ${attachment.name}\n\nEste é apenas um texto de exemplo.`;
-    const blob = new Blob([texto], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = attachment.name.endsWith(".pdf") ? attachment.name : `${attachment.name}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({
-      title: "Download iniciado",
-      description: `O arquivo ${attachment.name} está sendo baixado.`,
-    });
+  const handleDownload = async (attachment: Attachment) => {
+    // Validar se a URL existe
+    if (!attachment.url) {
+      toast({
+        title: "Erro no download",
+        description: "URL do arquivo não encontrada.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar se a URL é válida
+    try {
+      new URL(attachment.url);
+    } catch {
+      toast({
+        title: "Erro no download",
+        description: "URL do arquivo é inválida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Mostrar toast de início do download
+      toast({
+        title: "Download iniciado",
+        description: `Baixando ${attachment.name}...`,
+      });
+
+      // Fazer fetch do arquivo real do Supabase Storage
+      const response = await fetch(attachment.url);
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+      }
+
+      // Obter o blob do arquivo
+      const blob = await response.blob();
+      
+      // Verificar se o blob tem conteúdo
+      if (blob.size === 0) {
+        throw new Error('Arquivo vazio ou corrompido');
+      }
+      
+      // Detectar tipo MIME do arquivo se não estiver definido
+      let mimeType = attachment.type || blob.type;
+      if (!mimeType || mimeType === 'application/octet-stream') {
+        const extension = attachment.name.split('.').pop()?.toLowerCase();
+        switch (extension) {
+          case 'pdf':
+            mimeType = 'application/pdf';
+            break;
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'doc':
+            mimeType = 'application/msword';
+            break;
+          case 'docx':
+            mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            break;
+          default:
+            mimeType = 'application/octet-stream';
+        }
+      }
+      
+      // Criar blob com tipo MIME correto
+      const typedBlob = new Blob([blob], { type: mimeType });
+      
+      // Criar URL temporária para download
+      const url = URL.createObjectURL(typedBlob);
+      
+      // Criar elemento de download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = attachment.name;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Limpar URL temporária após um pequeno delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast({
+        title: "Download concluído",
+        description: `O arquivo ${attachment.name} foi baixado com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Erro no download:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: "Erro no download",
+        description: `Falha ao baixar ${attachment.name}: ${errorMessage}`,
+        variant: "destructive",
+      });
+    }
   };
   
   const handlePreview = (attachment: Attachment) => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Send, Download, Copy, X, FileSignature, RefreshCw, ArrowLeft, Files, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useCopyLink } from '@/hooks/useCopyLink';
 import { useEmpresa } from '@/hooks/useEmpresa';
@@ -40,24 +41,10 @@ const ContractActionButtons = ({ contractId, contractStatus, contract, onResend,
   const { toast } = useToast();
   const { copyContractLink } = useCopyLink();
   const { configuracoes } = useEmpresa();
+  const navigate = useNavigate();
   
   const handleViewSite = () => {
-    let contractUrl;
-    
-    if (contract.id_amigavel && contract.nome_cliente) {
-      // Usar novo formato com dados completos
-      contractUrl = generateContractUrl({
-        id_contrato: contractId,
-        id_amigavel: contract.id_amigavel,
-        nome_cliente: contract.nome_cliente
-      });
-    } else {
-      // Fallback para formato antigo
-      contractUrl = generateContractUrl(contractId, contract.tipo_evento);
-    }
-    
-    const link = `${window.location.origin}${contractUrl}`;
-    window.open(link, '_blank');
+    navigate('/agenda/cliente-contratos');
   };
   
   const handleDownload = async () => {

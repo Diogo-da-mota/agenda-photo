@@ -499,6 +499,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
           nome_cliente: data.clientName, // Agora incluindo o nome do cliente
           email_cliente: data.clientEmail || '',
           telefone_cliente: data.phoneNumber,
+          cpf_cliente: data.cpfCliente || '', // Adicionando CPF do cliente
+          endereco_cliente: data.enderecoCliente || '', // Adicionando endereço do cliente
           tipo_evento: data.eventType,
           data_evento: data.eventDate.toISOString(),
           hora_evento: data.eventTime,
@@ -506,7 +508,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
           valor_total: data.price,
           valor_sinal: data.downPayment || 0,
           conteudo: data.termsAndConditions,
-          observacoes: `Evento ID: ${initialData?.eventoId || ''}`,
+          observacoes: '',
           evento_id: initialData?.eventoId || null,
         };
 

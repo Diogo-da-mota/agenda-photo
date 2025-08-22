@@ -6,11 +6,13 @@ import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Check, X } from 'lucide-react';
 import { formatarTelefoneExibicao } from '@/utils/formatters';
+import { formatCPF } from '@/utils/receiptGeneratorNative';
 
 interface ContractClientInfoProps {
   clientName: string;
   clientEmail: string;
   phoneNumber: string;
+  cpf_cliente?: string;
   eventType: string;
   eventDate: Date;
   eventLocation: string;
@@ -21,6 +23,7 @@ const ContractClientInfo = ({
   clientName,
   clientEmail,
   phoneNumber,
+  cpf_cliente,
   eventType,
   eventDate,
   eventLocation,
@@ -54,10 +57,17 @@ const ContractClientInfo = ({
         <div>
           <h3 className="font-medium mb-2">Informações de Contato</h3>
           <div className="space-y-1 text-sm">
-            {clientEmail && clientEmail !== 'N/A' && (
+            {clientEmail && clientEmail.trim() !== '' && clientEmail !== 'N/A' && (
               <p><strong>Email:</strong> {clientEmail}</p>
             )}
-            <p><strong>Telefone:</strong> {formatarTelefoneExibicao(phoneNumber)}</p>
+            {phoneNumber && (
+              <p><strong>Telefone:</strong> {formatarTelefoneExibicao(phoneNumber)}</p>
+            )}
+            
+            {cpf_cliente && (
+              <p><strong>CPF:</strong> {formatCPF(cpf_cliente)}</p>
+            )}
+
           </div>
         </div>
         

@@ -18,6 +18,10 @@ import LGPD from "./pages/LGPD";
 import Carreiras from "./pages/Carreiras";
 import ReferralPage from "./pages/r/[code]";
 
+
+// Import direto para componente de teste (temporário)
+import { TesteBugCorrecao } from "./components/debug/TesteBugCorrecao";
+
 // Lazy loading para componentes principais (otimização de performance)
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Portfolio = lazy(() => import("./pages/Dashboard/Portfolio"));
@@ -42,15 +46,25 @@ const PortfolioGaleriaTrabalho = lazy(() => import("./pages/Dashboard/PortfolioG
 
 // Lazy loading para componentes administrativos
 const EntregaFotos = lazy(() => import("./pages/Dashboard/EntregaFotos"));
-const EntregaFotosAdmin = lazy(() => import("./components/dashboard/EntregaFotosAdmin"));
+const EntregaFotosAdmin = lazy(() => import("./components/Dashboard/EntregaFotosAdmin"));
 const EntregaFotosVisualizacao = lazy(() => import("./pages/EntregaFotosVisualizacao"));
 const EscolherAlbum = lazy(() => import("./pages/Dashboard/EscolherAlbum"));
+const DiagnosticoSupabase = lazy(() => import("./pages/Dashboard/DiagnosticoSupabase"));
 
 // Lazy loading para área do cliente
+const ClientDashboard = lazy(() => import("./pages/Client/ClientDashboard"));
 const ClientAgenda = lazy(() => import("./pages/Client/ClientAgenda"));
+const ClientWelcome = lazy(() => import("./pages/Client/ClientWelcome"));
+const ClientPayments = lazy(() => import("./pages/Client/ClientPayments"));
 const ClientQuote = lazy(() => import("./pages/Client/ClientQuote"));
 const ClientContract = lazy(() => import("./pages/Client/ClientContract"));
+const ClientContracts = lazy(() => import("./pages/Client/ClientContracts"));
 const ClientNotifications = lazy(() => import("./pages/Client/ClientNotifications"));
+const AgendaClienteContratos = lazy(() => import("./pages/Client/AgendaClienteContratos"));
+
+// Lazy loading para autenticação de cliente
+const ClienteLogin = lazy(() => import("./pages/Client/ClienteLogin"));
+const ClienteContratos = lazy(() => import("./pages/Client/ClienteContratos"));
 
 // Imports diretos apenas para componentes pequenos e críticos
 import Indicacoes from "./pages/Dashboard/Indicacoes";
@@ -58,10 +72,13 @@ import Roadmap from "./pages/Dashboard/Roadmap";
 import SimpleClientes from "./pages/Dashboard/SimpleClientes";
 import Testes from "./pages/Dashboard/Testes";
 import Info from "./pages/Dashboard/Info";
+import SupabaseUploadTest from "./components/testing/SupabaseUploadTest";
 import DashboardLayout from "./layouts/DashboardLayout";
 import ClientLayout from "./layouts/ClientLayout";
 import AgendaLayout from "./layouts/AgendaLayout";
 import ClientTabLayout from "./layouts/ClientTabLayout";
+import ProtectedClientRoute from "./components/client/ProtectedClientRoute";
+import { ClienteAuthProvider } from "./contexts/ClienteAuthContext";
 
 // Componente de Loading seguro e otimizado
 const PageLoader = ({ message = "Carregando página..." }: { message?: string }) => (
@@ -170,12 +187,19 @@ const AppRoutes = () => {
         {/* Carreiras - Rota pública */}
         <Route path="/carreiras" element={<Carreiras />} />
         
+        {/* ROTA TEMPORÁRIA - Teste de Correção do Bug */}
+        <Route path="/teste-bug-templates" element={<TesteBugCorrecao />} />
+        
+        {/* ROTA TEMPORÁRIA - Teste F5 */}
+        
+        
         {/* Vitrine Pública do Portfólio */}
         <Route path="/portfolio/galeria" element={<PortfolioGaleria />} />
         <Route path="/portfolio/galeria/:id" element={<PortfolioGaleriaTrabalho />} />
         
         {/* Visualização Pública de Galeria de Fotos */}
         <Route path="/entrega-fotos/:slug" element={<EntregaFotosVisualizacao />} />
+        <Route path="/galeria/:slug" element={<EntregaFotosVisualizacao />} />
         
         {/* Visualização Pública de Contrato - SEM layout do site */}
         {/* Rota unificada que suporta tanto slug quanto ID direto */}
@@ -189,8 +213,59 @@ const AppRoutes = () => {
             </AgendaLayout>
           </ProtectedRoute>
         } />
-                {/* Nova rota para agenda do cliente - Acesso direto sem autenticação */}
-        <Route path="/agenda/cliente" element={<ClientAgenda />} />
+        {/* Nova rota para agenda do cliente - Com autenticação consistente */}
+        <Route path="/agenda/cliente" element={
+          <ClienteAuthProvider>
+            <ProtectedClientRoute>
+              <ClientTabLayout>
+                <ClientWelcome />
+              </ClientTabLayout>
+            </ProtectedClientRoute>
+          </ClienteAuthProvider>
+        } />
+        
+        {/* Rotas de autenticação de cliente */}
+        <Route path="/agenda/cliente-login" element={
+          <ClienteAuthProvider>
+            <ClienteLogin />
+          </ClienteAuthProvider>
+        } />
+        
+        {/* Rota protegida para minha agenda do cliente */}
+        <Route path="/agenda/cliente-minha-agenda" element={
+          <ClienteAuthProvider>
+            <ProtectedClientRoute>
+              <ClientTabLayout>
+                <ClientAgenda />
+              </ClientTabLayout>
+            </ProtectedClientRoute>
+          </ClienteAuthProvider>
+        } />
+        
+        {/* Rota protegida para contratos do cliente */}
+        <Route path="/agenda/cliente-contratos" element={
+          <ClienteAuthProvider>
+            <ProtectedClientRoute>
+              <ClientTabLayout>
+                <ClienteContratos />
+              </ClientTabLayout>
+            </ProtectedClientRoute>
+          </ClienteAuthProvider>
+        } />
+        
+        {/* Nova rota para contratos na agenda do cliente (mantida para compatibilidade) */}
+        <Route path="/agenda/cliente-contratos-old" element={
+          <ClientTabLayout>
+            <AgendaClienteContratos />
+          </ClientTabLayout>
+        } />
+        
+        {/* Nova rota para visualização individual de contrato na agenda do cliente */}
+        <Route path="/agenda/cliente-contratos/:slug" element={
+          <ClientTabLayout>
+            <AgendaClienteContratos />
+          </ClientTabLayout>
+        } />
         
         {/* Dashboard Routes - PROTEGIDAS */}
         <Route element={
@@ -236,6 +311,7 @@ const AppRoutes = () => {
           <Route path="/atividades-filtros" element={<HistoricoAtividades />} />
           <Route path="/relatorios" element={<Reports />} />
           <Route path="/dashboard/testes" element={<Testes />} />
+          <Route path="/dashboard/teste-supabase" element={<SupabaseUploadTest />} />
           <Route path="/info" element={<Info />} />
           
           {/* Novas rotas para Portfólio - PROTEGIDAS */}
@@ -244,8 +320,12 @@ const AppRoutes = () => {
           <Route path="/portfolio/integracoes" element={<PortfolioIntegracoes />} />
           <Route path="/portfolio/dominio" element={<PortfolioDominio />} />
           
-          {/* Rota Entrega de Fotos - Acessível para todos */}
-          <Route path="/entrega-fotos" element={<EntregaFotos />} />
+          {/* Rota ADMIN ONLY - Entrega de Fotos */}
+          <Route path="/entrega-fotos" element={
+            <AdminRoute>
+              <EntregaFotos />
+            </AdminRoute>
+          } />
           
           {/* Rota ADMIN ONLY - Administração Entrega de Fotos */}
           <Route path="/entrega-fotos/admin" element={
@@ -264,11 +344,28 @@ const AppRoutes = () => {
           <Route path="/portfolio/novo" element={<PortfolioNovo />} />
           <Route path="/portfolio/:id" element={<PortfolioDetalhes />} />
           
+          {/* Diagnóstico Supabase - PROTEGIDA */}
+          <Route path="/diagnostico-supabase" element={<DiagnosticoSupabase />} />
+          
           {/* Client Portal Routes - ADMIN ONLY - Com navegação por abas */}
+          <Route path="/cliente" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientDashboard />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
           <Route path="/cliente/agenda" element={
             <AdminRoute>
               <ClientTabLayout>
                 <ClientAgenda />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/pagamentos" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientPayments />
               </ClientTabLayout>
             </AdminRoute>
           } />
@@ -284,6 +381,13 @@ const AppRoutes = () => {
             <AdminRoute>
               <ClientTabLayout>
                 <ClientContract />
+              </ClientTabLayout>
+            </AdminRoute>
+          } />
+          <Route path="/cliente/contratos" element={
+            <AdminRoute>
+              <ClientTabLayout>
+                <ClientContracts />
               </ClientTabLayout>
             </AdminRoute>
           } />

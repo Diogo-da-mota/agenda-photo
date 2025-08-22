@@ -35,16 +35,13 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
     if (session) {
       console.log("[LOGIN] Sessão detectada, redirecionando para o dashboard");
       
-      // Verificar se há uma rota de redirecionamento específica
-      const redirectTo = new URLSearchParams(location.search).get('redirectTo') || '/dashboard';
-      
       toast({
         title: "Login realizado com sucesso",
         description: "Redirecionando...",
       });
       
       setTimeout(() => {
-        navigate(redirectTo);
+        navigate('/dashboard');
         onSuccess();
       }, 500);
     }

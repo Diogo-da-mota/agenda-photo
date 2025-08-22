@@ -212,12 +212,18 @@ const ClientContract = () => {
   // Função para carregar anexos existentes do contrato
   const loadExistingAttachments = React.useCallback(async () => {
     if (!contractId) return;
-    
+
     try {
+      // Verificar se contract existe antes de acessar a propriedade id
+      if (!contract) return;
+      
+      const id_contrato = contract.id;
+      if (!id_contrato) return;
+
       const { data: anexos, error } = await supabase
         .from('anexos_contrato')
         .select('*')
-        .eq('id_contrato', contractId);
+        .eq('id_contrato', id_contrato);
       
       if (error) {
         console.error('Erro ao carregar anexos existentes:', error);
@@ -270,7 +276,7 @@ const ClientContract = () => {
     } catch (error) {
       console.error('Erro ao carregar anexos:', error);
     }
-  }, [contractId]);
+  }, [contractId, contract]);
 
   // Função para gerar URL do PDF do contrato - OTIMIZADA para evitar loop
   const generateContractPdfUrl = React.useCallback(async () => {
@@ -764,7 +770,7 @@ const ClientContract = () => {
                 </p>
                 
                 {/* Anexos Existentes */}
-                {existingAttachments.length > 0 && (
+                {/* {existingAttachments.length > 0 && (
                   <div className="mb-6">
                     <ContractAttachments 
                       attachments={existingAttachments}
@@ -773,10 +779,9 @@ const ClientContract = () => {
                         nome_cliente: contract.clientName,
                         pdfUrl: savedContractPdfUrl || contractPdfUrl || undefined
                       }}
-                      showRemoveButton={false}
                     />
                   </div>
-                )}
+                )} */}
                 
                 {/* Visualização do PDF do Contrato */}
                 {(savedContractPdfUrl || contractPdfUrl) && (

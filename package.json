@@ -22,11 +22,7 @@
     "security:audit": "node scripts/security-audit.js",
     "security:config": "node scripts/security-config-check.js",
     "security:fix": "node scripts/apply-security-fixes.js",
-    "security:full": "npm run security:audit && npm run security:config",
-    "fix:supabase": "node scripts/fix-supabase-env.js",
-    "fix:env": "npm run fix:supabase",
-    "dev:clean": "npm run fix:supabase && npm run dev",
-    "test:supabase": "node scripts/test-supabase-setup.js"
+    "security:full": "npm run security:audit && npm run security:config"
   },
   "dependencies": {
     "@21st-dev/magic": "^0.1.0",
@@ -158,6 +154,7 @@
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",

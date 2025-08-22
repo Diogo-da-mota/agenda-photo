@@ -72,8 +72,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       //   variant: "destructive",
       // });
       
-      const redirectUrl = `${fallback}?redirectTo=${encodeURIComponent(location.pathname)}`;
-      return <Navigate to={redirectUrl} replace />;
+      return <Navigate to={fallback} replace />;
     }
   }
 
@@ -88,4 +87,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

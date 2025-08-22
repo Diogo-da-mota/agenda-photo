@@ -6,35 +6,83 @@
 import { QueryClient } from '@tanstack/react-query';
 
 /**
- * Configuração padrão simplificada para evitar problemas de hidratação
+ * Função dinâmica para obter as opções padrão do React Query.
+ * Aplica um cache mais agressivo em dispositivos móveis.
  */
-const defaultQueryOptions = {
-  queries: {
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10, // 10 minutos
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-    retry: 2,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  },
-  mutations: {
-    retry: 1,
-    onError: (error: any) => {
-      console.error("Ocorreu um erro em uma mutação:", error.message);
+const getDefaultQueryOptions = (isMobile: boolean) => {
+  // Em dispositivos móveis, o cache é mais longo para melhorar a performance percebida
+  // e reduzir o consumo de dados, já que a conexão pode ser instável.
+  const staleTime = isMobile ? 1000 * 60 * 10 : 1000 * 60 * 5; // Mobile: 10 min, Desktop: 5 min
+  const gcTime = isMobile ? 1000 * 60 * 20 : 1000 * 60 * 10;   // Mobile: 20 min, Desktop: 10 min
+
+  return {
+    queries: {
+      staleTime,
+      gcTime,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+      retry: 2,
+      retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
-  },
+    mutations: {
+      retry: 1,
+      onError: (error: any) => {
+        console.error("Ocorreu um erro em uma mutação:", error.message);
+      },
+    },
+  };
 };
 
 /**
- * Função para criar QueryClient com configuração otimizada
+ * O QueryClient agora é uma função que usa o hook para aplicar
+ * as configurações corretas baseadas no dispositivo.
+ * 
+ * NOTA: Esta abordagem não funciona diretamente na inicialização do QueryClient,
+ * pois hooks só podem ser chamados dentro de componentes React.
+ * A lógica será aplicada em um wrapper ou diretamente nos hooks de query.
+ * 
+ * CORREÇÃO: A melhor abordagem é criar uma função que retorne a configuração,
+ * mas o QueryClient deve ser instanciado fora do escopo de um componente.
+ * Vamos ajustar a abordagem para usar essa função em um ponto central da aplicação.
+ * 
+ * A inicialização do QueryClient será ajustada para que as defaultOptions
+ * possam ser dinâmicas.
  */
-export const createQueryClient = () => new QueryClient({
-  defaultOptions: defaultQueryOptions,
+export const createQueryClient = (isMobile: boolean) => new QueryClient({
+  defaultOptions: getDefaultQueryOptions(isMobile),
 });
 
-// Instância global do queryClient
-export const queryClient = createQueryClient();
+
+// A instância global do queryClient será criada no App.tsx, onde o hook pode ser usado.
+// Por enquanto, exportamos um cliente padrão para ser usado em contextos não-React.
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache mais longo para reduzir consultas
+      staleTime: 1000 * 60 * 5, // 5 minutos - dados considerados frescos
+      gcTime: 1000 * 60 * 10, // 10 minutos - tempo em cache
+      
+      // ✅ CORREÇÃO: Configurações mais conservadoras para evitar refetch excessivo
+      refetchOnWindowFocus: false, // Não recarregar ao focar janela (evita conflitos)
+      refetchOnMount: true, // Recarregar ao montar componente apenas se dados estão stale
+      refetchOnReconnect: true, // Recarregar ao reconectar internet
+      
+      // Retry mais conservador
+      retry: 2, // Máximo 2 tentativas
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      // Retry apenas uma vez para mutations
+      retry: 1,
+      // ✅ 3. Handler de erro global para mutações
+      onError: (error: any) => {
+        // Futuramente, poderíamos usar um sistema de toasts aqui
+        console.error("Ocorreu um erro em uma mutação:", error.message);
+      }
+    },
+  },
+});
 
 /**
  * Configurações específicas por tipo de dados com invalidação automática

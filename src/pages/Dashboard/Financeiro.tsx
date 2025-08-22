@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useAutoSync } from '@/hooks/useAutoSync';
 import { useQueryClient } from '@tanstack/react-query';
 import './Financeiro.css';
 
@@ -38,6 +39,9 @@ const Financeiro = () => {
   const queryClient = useQueryClient();
   // Verifica se o usuário é admin
   const isAdmin = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
+  
+  // Inicializar sincronização automática
+  useAutoSync();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');

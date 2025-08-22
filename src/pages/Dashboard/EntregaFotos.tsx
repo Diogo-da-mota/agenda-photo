@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { apagarGaleria, apagarCardIndividual, carregarGalerias, criarGaleria } from '@/services/galeriaService';
+import { carregarGalerias, apagarGaleria, criarGaleria } from '@/services/galeriaService';
 import { processFiles, ImageFile } from '@/utils/galeriaUtils';
 import { EntregarFotosFormData, Galeria } from '@/types/entregar-fotos';
 import GaleriaForm from '@/components/EntregaFotos/GaleriaForm';
@@ -55,6 +55,17 @@ export default function EntregaFotos() {
       loadGalerias();
     }
   }, [activeTab]);
+
+  // Função para lidar com mudanças no formulário
+  const handleInputChange = (field: keyof EntregarFotosFormData, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Função para limpar imagens
+  const handleClearImages = () => {
+    selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+    setSelectedImages([]);
+  };
 
   // Função para lidar com seleção de arquivos
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,44 +159,6 @@ export default function EntregaFotos() {
     }
   };
 
-  // Função para visualizar galeria (abre em nova aba)
-  const handleVisualizar = (slug: string) => {
-    const galeriaUrl = `${window.location.origin}/entrega-fotos/${slug}`;
-    window.open(galeriaUrl, '_blank');
-  };
-
-  // Função para copiar link da galeria
-  const handleCopiarLink = async (slug: string) => {
-    try {
-      const galeriaUrl = `${window.location.origin}/entrega-fotos/${slug}`;
-      await navigator.clipboard.writeText(galeriaUrl);
-      toast.success('Link copiado para a área de transferência!');
-    } catch (error) {
-      console.error('Erro ao copiar link:', error);
-      toast.error('Erro ao copiar link. Tente novamente.');
-    }
-  };
-
-  // Função para recarregar galerias
-  const handleRecarregar = async () => {
-    setIsLoadingGalerias(true);
-    try {
-      const galeriasData = await carregarGalerias();
-      setGalerias(galeriasData);
-      toast.success('Galerias atualizadas!');
-    } catch (error) {
-      console.error('Erro ao recarregar galerias:', error);
-      toast.error('Erro ao recarregar galerias. Tente novamente.');
-    } finally {
-      setIsLoadingGalerias(false);
-    }
-  };
-
-  // Função para criar primeira galeria
-  const handleCriarPrimeira = () => {
-    setActiveTab('nova-galeria');
-  };
-
   // Função para apagar galeria com atualização otimista
   const handleApagarGaleria = async (slug: string, titulo: string) => {
     try {
@@ -193,11 +166,10 @@ export default function EntregaFotos() {
       const galeriaOriginal = galerias.find(g => g.slug === slug);
       setGalerias(prev => prev.filter(g => g.slug !== slug));
 
-      // Usar apagarCardIndividual para remover apenas o card específico
-      const success = await apagarCardIndividual(slug, titulo);
+      const success = await apagarGaleria(slug, titulo);
       
       if (success) {
-        toast.success(`Card da galeria "${titulo}" foi apagado com sucesso!`);
+        toast.success(`Galeria "${titulo}" foi apagada com sucesso!`);
       } else {
         // Reverter UI se cancelado
         if (galeriaOriginal) {
@@ -221,6 +193,61 @@ export default function EntregaFotos() {
     }
   };
 
+  // Função para visualizar galeria
+  const handleVisualizarGaleria = (slug: string) => {
+    const url = `/galeria/${slug}`;
+    window.open(url, '_blank');
+  };
+
+  // Função para copiar link da galeria
+  const handleCopiarLink = async (slug: string) => {
+    try {
+      const url = `${window.location.origin}/galeria/${slug}`;
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copiado para a área de transferência!');
+    } catch (error) {
+      console.error('Erro ao copiar link:', error);
+      toast.error('Erro ao copiar link. Tente novamente.');
+    }
+  };
+
+  // Função para recarregar galerias
+  const handleRecarregarGalerias = async () => {
+    setIsLoadingGalerias(true);
+    try {
+      const galeriasData = await carregarGalerias();
+      setGalerias(galeriasData);
+      toast.success('Galerias atualizadas!');
+    } catch (error) {
+      toast.error('Erro ao carregar galerias. Tente novamente.');
+    } finally {
+      setIsLoadingGalerias(false);
+    }
+  };
+
+  // Função para criar primeira galeria
+  const handleCriarPrimeira = () => {
+    setActiveTab('nova-galeria');
+  };
+
+  // Função para copiar link da galeria criada
+  const handleCopyGaleriaLink = async () => {
+    try {
+      const url = `${window.location.origin}${galeriaUrl}`;
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copiado para a área de transferência!');
+    } catch (error) {
+      console.error('Erro ao copiar link:', error);
+      toast.error('Erro ao copiar link. Tente novamente.');
+    }
+  };
+
+  // Função para criar nova galeria
+  const handleNovaGaleria = () => {
+    setGaleriaUrl('');
+    setSenhaGaleria('');
+  };
+
   return (
     <ResponsiveContainer>
       <div className="space-y-6">
@@ -242,10 +269,8 @@ export default function EntregaFotos() {
               <GaleriaSucesso 
                 galeriaUrl={galeriaUrl}
                 senha={senhaGaleria}
-                onNovaGaleria={() => {
-                  setGaleriaUrl('');
-                  setSenhaGaleria('');
-                }}
+                onCopyLink={handleCopyGaleriaLink}
+                onNovaGaleria={handleNovaGaleria}
               />
             ) : (
               <GaleriaForm
@@ -253,17 +278,14 @@ export default function EntregaFotos() {
                 selectedImages={selectedImages}
                 isUploading={isUploading}
                 uploadProgress={uploadProgress}
-                galeriaSlug={formData.titulo ? formData.titulo.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : ''}
-                galeriaSenha={formData.senha_acesso || ''}
-                onInputChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
+                galeriaSlug={''}
+                galeriaSenha={''}
+                onInputChange={handleInputChange}
                 onFileSelect={handleFileSelect}
                 onDrop={handleDrop}
                 onRemoveImage={removeImage}
                 onSubmit={handleSubmit}
-                onClearImages={() => {
-                  selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
-                  setSelectedImages([]);
-                }}
+                onClearImages={handleClearImages}
               />
             )}
           </TabsContent>
@@ -272,8 +294,8 @@ export default function EntregaFotos() {
             <GaleriasLista
               galerias={galerias}
               loadingGalerias={isLoadingGalerias}
-              onRecarregar={handleRecarregar}
-              onVisualizar={handleVisualizar}
+              onRecarregar={handleRecarregarGalerias}
+              onVisualizar={handleVisualizarGaleria}
               onCopiarLink={handleCopiarLink}
               onApagar={handleApagarGaleria}
               onCriarPrimeira={handleCriarPrimeira}
