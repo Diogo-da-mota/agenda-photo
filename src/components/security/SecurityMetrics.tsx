@@ -44,12 +44,12 @@ export const SecurityMetrics: React.FC = () => {
 
         // Buscar eventos de rate limiting
         const rateLimitEvents = securityEvents?.filter(
-          event => event.new_data?.event_type === 'RATE_LIMIT_EXCEEDED'
+          event => (event.new_data as any)?.event_type === 'RATE_LIMIT_EXCEEDED'
         ) || [];
 
         // Buscar uploads de arquivo
         const fileUploadEvents = securityEvents?.filter(
-          event => event.new_data?.event_type === 'FILE_UPLOAD_SUCCESS'
+          event => (event.new_data as any)?.event_type === 'FILE_UPLOAD_SUCCESS'
         ) || [];
 
         // Buscar última auditoria

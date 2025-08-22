@@ -133,7 +133,7 @@ export const useEnhancedSecurity = (): SecurityHookReturn => {
     try {
       await supabase.rpc('log_security_event', {
         event_type: eventType,
-        event_details: details
+        event_details: JSON.stringify(details)
       });
     } catch (error) {
       console.error('Security logging error:', error);

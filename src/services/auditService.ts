@@ -1,88 +1,115 @@
-
 import { supabase } from '@/lib/supabase';
 
 export interface AuditLog {
   id: string;
-  user_id: string;
-  action: string;
   table_name: string;
-  record_id: string;
+  operation: string;
   old_data?: any;
   new_data?: any;
+  user_id?: string;
   timestamp: string;
 }
 
 export const auditService = {
-  async createAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>) {
+  async logActivity(
+    tableName: string,
+    operation: string,
+    recordId?: string,
+    oldData?: any,
+    newData?: any
+  ) {
     try {
-      // Log apenas em desenvolvimento
-      if (import.meta.env.MODE === 'development') {
-        console.log('Criando log de auditoria:', log);
-      }
-      const { data, error } = await supabase.from('audit_logs').insert(log).select('id');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Use sistema_atividades table instead of audit_logs
+      const { error } = await supabase
+        .from('sistema_atividades')
+        .insert({
+          table_name: tableName,
+          operation,
+          record_id: recordId,
+          old_data: oldData,
+          new_data: newData,
+          user_id: user?.id
+        });
+
       if (error) {
-        // Log apenas em desenvolvimento
-        if (import.meta.env.MODE === 'development') {
-          console.error('Erro ao criar log de auditoria:', error);
-        }
-        throw error;
+        console.error('Erro ao registrar atividade de auditoria:', error);
       }
-      return { success: true, id: data && data[0] ? data[0].id : null };
     } catch (error) {
-      console.error('Erro ao criar log de auditoria:', error);
-      return { success: false, error };
+      console.error('Erro no auditService.logActivity:', error);
     }
   },
 
-  async getAuditLogs(userId: string, limit = 50) {
+  async getAuditLogs(limit = 100): Promise<AuditLog[]> {
     try {
-      // Log apenas em desenvolvimento
-      if (import.meta.env.MODE === 'development') {
-        // Log removido por segurança - não expor userId
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return [];
       }
+
+      // Use sistema_atividades table instead of audit_logs
       const { data, error } = await supabase
-        .from('audit_logs')
+        .from('sistema_atividades')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .order('timestamp', { ascending: false })
         .limit(limit);
 
       if (error) {
-        // Log apenas em desenvolvimento
-        if (import.meta.env.MODE === 'development') {
-          console.error('Erro ao buscar logs de auditoria:', error);
-        }
-        throw error;
+        console.error('Erro ao buscar logs de auditoria:', error);
+        return [];
       }
-      return data;
+
+      return (data || []).map(item => ({
+        id: item.id,
+        table_name: item.table_name,
+        operation: item.operation,
+        old_data: item.old_data,
+        new_data: item.new_data,
+        user_id: item.user_id,
+        timestamp: item.timestamp || new Date().toISOString()
+      }));
     } catch (error) {
       console.error('Erro ao buscar logs de auditoria:', error);
       return [];
     }
   },
 
-  async getTableAuditLogs(tableName: string, recordId: string) {
+  async getActivityForRecord(tableName: string, recordId: string): Promise<AuditLog[]> {
     try {
-      // Log apenas em desenvolvimento
-      if (import.meta.env.MODE === 'development') {
-        console.log('Buscando logs de auditoria para tabela:', tableName, 'registro:', recordId);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return [];
       }
+
+      // Use sistema_atividades table instead of audit_logs
       const { data, error } = await supabase
-        .from('audit_logs')
+        .from('sistema_atividades')
         .select('*')
         .eq('table_name', tableName)
-        .eq('record_id', recordId);
+        .eq('record_id', recordId)
+        .eq('user_id', user.id)
+        .order('timestamp', { ascending: false });
 
       if (error) {
-        // Log apenas em desenvolvimento
-        if (import.meta.env.MODE === 'development') {
-          console.error('Erro ao buscar logs de auditoria da tabela:', error);
-        }
-        throw error;
+        console.error('Erro ao buscar atividade do registro:', error);
+        return [];
       }
-      return data;
+
+      return (data || []).map(item => ({
+        id: item.id,
+        table_name: item.table_name,
+        operation: item.operation,
+        old_data: item.old_data,
+        new_data: item.new_data,
+        user_id: item.user_id,
+        timestamp: item.timestamp || new Date().toISOString()
+      }));
     } catch (error) {
-      console.error('Erro ao buscar logs de auditoria da tabela:', error);
+      console.error('Erro ao buscar atividade do registro:', error);
       return [];
     }
   }

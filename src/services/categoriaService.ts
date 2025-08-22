@@ -46,7 +46,10 @@ export const buscarCategorias = async (userId: string, tipo?: 'receita' | 'despe
     
     logger.debug(`${data?.length || 0} categorias encontradas`, null, 'categoriaService');
     
-    return data || [];
+    return (data || []).map(categoria => ({
+      ...categoria,
+      tipo: categoria.tipo as 'receita' | 'despesa'
+    }));
   } catch (error) {
     logger.error('Exceção ao buscar categorias', error, 'categoriaService');
     throw error;
@@ -114,7 +117,10 @@ export const criarCategoria = async (nome: string, tipo: 'receita' | 'despesa', 
       }
       
       logger.info('Categoria criada com sucesso', { id: data.id }, 'categoriaService');
-      return data;
+    return {
+      ...data,
+      tipo: data.tipo as 'receita' | 'despesa'
+    };
     } catch (error) {
       logger.error('Exceção ao criar categoria', error, 'categoriaService');
       throw error;
@@ -191,7 +197,10 @@ export const editarCategoria = async (id: string, nome: string, userId: string):
       }
       
       logger.info('Categoria atualizada com sucesso', { id: data.id }, 'categoriaService');
-      return data;
+    return {
+      ...data,
+      tipo: data.tipo as 'receita' | 'despesa'
+    };
     } catch (error) {
       logger.error('Exceção ao editar categoria', error, 'categoriaService');
       throw error;

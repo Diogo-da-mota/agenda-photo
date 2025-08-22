@@ -51,11 +51,15 @@ export const imageService = {
       
       // Save metadata to database
       const { data, error } = await supabase
-        .from('imagens')
+        .from('entregar_imagens')
         .insert({
-          url: imageUrl,
+          url_imagem: imageUrl,
           user_id: userId,
-          nome: file.name,
+          nome_arquivo: file.name,
+          titulo: file.name,
+          slug: file.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          tamanho_arquivo: file.size,
+          formato: file.type,
           criado_em: new Date().toISOString()
         })
         .select('id')
@@ -65,7 +69,7 @@ export const imageService = {
         console.error('Erro ao salvar metadados:', error);
         // Continue anyway since we have the Supabase Storage URL
       } else {
-        imageData.id = data.id;
+        imageData.id = String(data.id);
       }
       
       return imageData;
@@ -131,11 +135,11 @@ export const imageService = {
   async getImages(userId: string): Promise<ImageData[]> {
     try {
       // Buscar imagens da tabela 'imagens' consolidada
-      const { data, error } = await supabase
-        .from('imagens')
-        .select('*')
-        .eq('user_id', userId)
-        .order('criado_em', { ascending: false });
+  const { data, error } = await supabase
+    .from('entregar_imagens')
+    .select('*')
+    .eq('user_id', userId)
+    .order('criado_em', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar imagens:', error);
@@ -143,12 +147,12 @@ export const imageService = {
       }
 
       return (data || []).map(item => ({
-        id: item.id,
-        url: item.url,
+        id: String(item.id),
+        url: item.url_imagem,
         user_id: item.user_id,
-        filename: item.nome || undefined,
-        filesize: undefined, // tabela imagens não tem este campo
-        mimetype: undefined, // tabela imagens não tem este campo
+        filename: item.nome_arquivo || undefined,
+        filesize: undefined, // tabela entregar_imagens não tem este campo
+        mimetype: undefined, // tabela entregar_imagens não tem este campo
         created_at: item.criado_em || new Date().toISOString()
       }));
     } catch (error) {
@@ -165,9 +169,9 @@ export const imageService = {
         throw new Error('Usuário não autenticado');
       }
 
-      // Simula deletar imagem da tabela 'imagens'
+      // Simula deletar imagem da tabela 'entregar_imagens'
       const { error } = await supabase
-        .from('imagens')
+        .from('entregar_imagens')
         .delete()
         .eq('id', imageId)
         .eq('user_id', user.id);
@@ -240,7 +244,7 @@ export const getPortfolioImages = async (): Promise<ImageData[]> => {
     }
     
     const { data, error } = await supabase
-      .from('imagens')
+      .from('entregar_imagens')
       .select('*')
       .eq('user_id', user.id)
       .order('criado_em', { ascending: false });
@@ -251,10 +255,10 @@ export const getPortfolioImages = async (): Promise<ImageData[]> => {
     }
     
     return (data || []).map(item => ({
-      id: item.id,
-      url: item.url,
+      id: String(item.id),
+      url: item.url_imagem,
       user_id: item.user_id || '',
-      filename: item.nome || undefined,
+      filename: item.nome_arquivo || undefined,
       filesize: undefined,
       mimetype: undefined,
       created_at: item.criado_em || new Date().toISOString()
@@ -275,9 +279,9 @@ export const deletePortfolioImage = async (imageUrl: string): Promise<boolean> =
     
     // Primeiro verificamos se a imagem pertence ao usuário
     const { data: imagem, error: errorConsulta } = await supabase
-      .from('imagens')
+      .from('entregar_imagens')
       .select('id')
-      .eq('url', imageUrl)
+      .eq('url_imagem', imageUrl)
       .eq('user_id', user.id)
       .single();
       
@@ -288,7 +292,7 @@ export const deletePortfolioImage = async (imageUrl: string): Promise<boolean> =
     
     // Depois deletamos a imagem
     const { error: errorDelete } = await supabase
-      .from('imagens')
+      .from('entregar_imagens')
       .delete()
       .eq('id', imagem.id);
       

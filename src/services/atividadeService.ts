@@ -104,7 +104,17 @@ export const buscarAtividades = async (userId: string, limite: number = 10): Pro
     logger.debug(`${data?.length || 0} atividades encontradas`, null, 'atividadeService');
     
     // Converter para formato do componente
-    return (data || []).map(formatarAtividadeParaComponente);
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      tipo: item.operation || 'acao',
+      descricao: `${item.operation} na tabela ${item.table_name}`,
+      criado_em: item.timestamp || new Date().toISOString(),
+      link_relacionado: item.record_id ? `/${item.table_name}/${item.record_id}` : undefined,
+      metadata: {
+        table_name: item.table_name,
+        record_id: item.record_id
+      }
+    }));
   } catch (error) {
     logger.error('Exceção ao buscar atividades', error, 'atividadeService');
     return [];
