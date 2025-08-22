@@ -18,7 +18,7 @@ const securityHeaders = {
     "style-src 'self' 'nonce-' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.io wss://*.supabase.io",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
     "media-src 'self' data: blob:",
     "object-src 'none'",
     "base-uri 'self'",
@@ -30,7 +30,7 @@ const securityHeaders = {
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8081,
+    port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
     // Configuração para SPA - evita redirecionamento no F5
     historyApiFallback: {
