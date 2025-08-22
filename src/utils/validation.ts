@@ -128,7 +128,7 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
   if (!input) return '';
   
   return input
-    .replace(/[<>\"'&]/g, '') // Remove caracteres perigosos para XSS
+    .replace(/[<>"'&]/g, '') // Remove caracteres perigosos para XSS
     .replace(/\s+/g, ' ') // Normaliza espaços
     .trim()
     .substring(0, maxLength);
