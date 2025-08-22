@@ -1,36 +1,42 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// Validação rigorosa de variáveis de ambiente
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Função para obter variáveis de ambiente com validação
+function getEnvVar(key: string): string | undefined {
+  return import.meta.env[key]
+}
 
-// Função para validar credenciais de forma segura
-const validateCredentials = () => {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    const error = new Error('ERRO CRÍTICO: Credenciais Supabase não configuradas');
-    console.error('❌', error.message);
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL')
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY')
+
+// Validação robusta das credenciais do Supabase
+function validateAndCreateSupabaseClient(): SupabaseClient {
+  // Verificar se as variáveis existem e não são strings vazias
+  const isUrlValid = supabaseUrl && supabaseUrl.trim() !== '' && supabaseUrl !== 'undefined'
+  const isKeyValid = supabaseAnonKey && supabaseAnonKey.trim() !== '' && supabaseAnonKey !== 'undefined'
+  
+  if (!isUrlValid || !isKeyValid) {
+    const errorMsg = `Supabase credentials missing or invalid:\n` +
+      `- URL: ${isUrlValid ? '✅' : '❌'} (${supabaseUrl ? 'present' : 'missing'})\n` +
+      `- Key: ${isKeyValid ? '✅' : '❌'} (${supabaseAnonKey ? 'present' : 'missing'})\n` +
+      `- Mode: ${import.meta.env.MODE}\n` +
+      `- Environment variables may not be loaded correctly.`
     
-    if (import.meta.env.PROD) {
-      // Em produção, mostrar interface de erro amigável
-      throw error;
-    } else {
-      console.warn('⚠️ Executando em modo desenvolvimento sem credenciais');
-      return false;
-    }
+    throw new Error(errorMsg)
   }
-  return true;
-};
+  
+  try {
+    const client = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    })
+    
+    return client
+  } catch (error) {
+    throw new Error(`Failed to create Supabase client: ${error}`)
+  }
+}
 
-// Validar credenciais antes de criar cliente
-validateCredentials();
-
-// SEGURANÇA: Usar apenas variáveis de ambiente - NUNCA hardcode credenciais
-const finalUrl = supabaseUrl;
-const finalKey = supabaseAnonKey;
-
-export const supabase = createClient(finalUrl, finalKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+// Criar cliente com validação robusta
+export const supabase = validateAndCreateSupabaseClient()
