@@ -21,11 +21,12 @@ export const buscarEventos = async (userId: string): Promise<Event[]> => {
 };
 
 export const criarEvento = async (evento: Omit<Event, 'id'>, userId: string): Promise<Event> => {
-  const eventData: EventInsert = {
+  const eventData = {
     user_id: userId,
     titulo: evento.clientName,
     tipo: evento.eventType,
     data_inicio: evento.date.toISOString(),
+    data_fim: new Date(evento.date.getTime() + 2 * 60 * 60 * 1000).toISOString(), // +2 horas por padrão
     local: evento.location,
     observacoes: evento.notes || '',
     status: evento.status,
