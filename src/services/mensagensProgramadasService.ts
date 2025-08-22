@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 
 // Tipos para mensagens programadas
 export type MensagemProgramada = Database['public']['Tables']['mensagens_programadas']['Row'];

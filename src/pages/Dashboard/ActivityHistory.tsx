@@ -49,7 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/supabase';
 
 // Activity status types
 type ActivityStatus = 'completed' | 'pending' | 'warning';
