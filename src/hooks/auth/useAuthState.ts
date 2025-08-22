@@ -7,7 +7,6 @@ export const useAuthState = () => {
   const [loading, setLoading] = useState(true);
   const [initialSessionChecked, setInitialSessionChecked] = useState(false);
   
-  // Controle para evitar múltiplas inicializações
   const initializingRef = useRef(false);
   const initializedRef = useRef(false);
 
@@ -21,6 +20,6 @@ export const useAuthState = () => {
     initialSessionChecked,
     setInitialSessionChecked,
     initializingRef,
-    initializedRef
+    initializedRef,
   };
 };
