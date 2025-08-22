@@ -34,7 +34,7 @@ const MonitorImagens: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="batch" className="space-y-6">
-          <ImageUploadBatch />
+          <ImageUploadBatch onImagesSelected={(images) => console.log('Images selected:', images)} />
         </TabsContent>
         
         <TabsContent value="docs" className="space-y-6">

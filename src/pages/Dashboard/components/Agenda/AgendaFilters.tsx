@@ -3,26 +3,32 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AgendaFiltersProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  dateFilter?: Date | null;
+  onClearDateFilter?: () => void;
 }
 
 const AgendaFilters: React.FC<AgendaFiltersProps> = ({
   searchQuery,
   onSearchChange,
   statusFilter,
-  onStatusFilterChange
+  onStatusFilterChange,
+  dateFilter,
+  onClearDateFilter
 }) => {
   return (
     <div className="flex gap-4">
-      <Input
-        placeholder="Buscar eventos..."
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="max-w-sm"
-      />
+      {onSearchChange && (
+        <Input
+          placeholder="Buscar eventos..."
+          value={searchQuery || ''}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="max-w-sm"
+        />
+      )}
       <Select value={statusFilter} onValueChange={onStatusFilterChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Status" />

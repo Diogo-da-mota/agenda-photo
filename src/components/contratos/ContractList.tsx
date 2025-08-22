@@ -19,4 +19,5 @@ const ContractList: React.FC = () => {
   );
 };
 
+export { ContractList };
 export default ContractList;

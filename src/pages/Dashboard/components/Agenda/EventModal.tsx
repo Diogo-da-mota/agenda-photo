@@ -8,11 +8,12 @@ import { ptBR } from 'date-fns/locale';
 import { Calendar, Clock, MapPin, Phone, Mail, DollarSign } from 'lucide-react';
 
 interface EventModalProps {
-  event: Event | null;
+  event?: Event | null;
   isOpen: boolean;
   onClose: () => void;
-  onEdit: (event: Event) => void;
-  onDelete: (eventId: string) => void;
+  onEdit?: (event: Event) => void;
+  onDelete?: (eventId: string) => void;
+  onEventCreated?: (newEvent: Event) => void;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -63,7 +64,7 @@ const EventModal: React.FC<EventModalProps> = ({
             
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>{event.startTime}{event.endTime && ` - ${event.endTime}`}</span>
+              <span>{event.startTime || event.time}{event.endTime && ` - ${event.endTime}`}</span>
             </div>
             
             <div className="flex items-center gap-2">
@@ -71,10 +72,10 @@ const EventModal: React.FC<EventModalProps> = ({
               <span>{event.location}</span>
             </div>
             
-            {event.clientPhone && (
+            {(event.clientPhone || event.phone) && (
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{event.clientPhone}</span>
+                <span>{event.clientPhone || event.phone}</span>
               </div>
             )}
             
@@ -101,12 +102,16 @@ const EventModal: React.FC<EventModalProps> = ({
           )}
           
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => onEdit(event)}>
-              Editar
-            </Button>
-            <Button variant="destructive" onClick={() => onDelete(event.id)}>
-              Excluir
-            </Button>
+            {onEdit && (
+              <Button variant="outline" onClick={() => onEdit(event)}>
+                Editar
+              </Button>
+            )}
+            {onDelete && (
+              <Button variant="destructive" onClick={() => onDelete(event.id)}>
+                Excluir
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

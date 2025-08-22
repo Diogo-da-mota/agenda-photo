@@ -3,10 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 interface AgendaHeaderProps {
-  onNewEvent: () => void;
+  searchQuery?: string;
+  localSearchQuery?: string;
+  onSearchChange: (query: string) => void;
+  onNewEventClick: () => void;
+  onNewEvent?: () => void;
 }
 
-const AgendaHeader: React.FC<AgendaHeaderProps> = ({ onNewEvent }) => {
+const AgendaHeader: React.FC<AgendaHeaderProps> = ({ onNewEvent, onNewEventClick, localSearchQuery, onSearchChange }) => {
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -15,7 +19,7 @@ const AgendaHeader: React.FC<AgendaHeaderProps> = ({ onNewEvent }) => {
           Gerencie seus eventos e compromissos
         </p>
       </div>
-      <Button onClick={onNewEvent}>
+      <Button onClick={onNewEventClick || onNewEvent}>
         <Plus className="mr-2 h-4 w-4" />
         Novo Evento
       </Button>

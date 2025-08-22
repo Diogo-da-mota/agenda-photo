@@ -6,11 +6,29 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface EventsListProps {
-  events: Event[];
-  onEventClick: (event: Event) => void;
+  events?: Event[];
+  filteredEvents?: Event[];
+  isLoading: boolean;
+  error?: string | null;
+  dateFilter?: Date | null;
+  onClearDateFilter?: () => void;
+  onStatusChange?: (eventId: string, newStatus: any, financials?: any) => Promise<void>;
+  onReschedule?: (eventId: string, newDate: Date) => Promise<void>;
+  onSendReminder?: (eventId: string) => Promise<void>;
+  onGenerateReceipt?: (eventId: string) => void;
+  onDeleteEvent?: (eventId: string) => Promise<void>;
+  onEventUpdate?: (updatedEvent: Event) => void;
+  onEventClick?: (event: Event) => void;
 }
 
-const EventsList: React.FC<EventsListProps> = ({ events, onEventClick }) => {
+const EventsList: React.FC<EventsListProps> = ({ 
+  events, 
+  filteredEvents, 
+  isLoading, 
+  error,
+  onEventClick 
+}) => {
+  const eventList = filteredEvents || events || [];
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'confirmado':
@@ -26,7 +44,31 @@ const EventsList: React.FC<EventsListProps> = ({ events, onEventClick }) => {
     }
   };
 
-  if (events.length === 0) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-center text-muted-foreground">
+            Carregando eventos...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-center text-destructive">
+            Erro: {error}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (eventList.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -40,7 +82,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, onEventClick }) => {
 
   return (
     <div className="space-y-4">
-      {events.map((event) => (
+      {eventList.map((event) => (
         <Card key={event.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onEventClick(event)}>
           <CardHeader>
             <div className="flex justify-between items-start">
@@ -56,7 +98,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, onEventClick }) => {
           <CardContent>
             <div className="space-y-2 text-sm">
               <p><strong>Data:</strong> {format(event.date, 'dd/MM/yyyy', { locale: ptBR })}</p>
-              <p><strong>Horário:</strong> {event.startTime}{event.endTime && ` - ${event.endTime}`}</p>
+              <p><strong>Horário:</strong> {event.startTime || event.time}{event.endTime && ` - ${event.endTime}`}</p>
               <p><strong>Local:</strong> {event.location}</p>
               {event.totalValue && (
                 <p><strong>Valor:</strong> R$ {event.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>

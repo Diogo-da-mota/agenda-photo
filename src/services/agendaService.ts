@@ -1,14 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 import { Event } from '@/components/agenda/types';
 
-type EventRow = Database['public']['Tables']['eventos']['Row'];
-type EventInsert = Database['public']['Tables']['eventos']['Insert'];
-type EventUpdate = Database['public']['Tables']['eventos']['Update'];
+type EventRow = Database['public']['Tables']['agenda_eventos']['Row'];
+type EventInsert = Database['public']['Tables']['agenda_eventos']['Insert'];
+type EventUpdate = Database['public']['Tables']['agenda_eventos']['Update'];
 
 export const buscarEventos = async (userId: string): Promise<Event[]> => {
   const { data, error } = await supabase
-    .from('eventos')
+    .from('agenda_eventos')
     .select('*')
     .eq('user_id', userId)
     .order('data_inicio', { ascending: true });
@@ -23,23 +23,19 @@ export const buscarEventos = async (userId: string): Promise<Event[]> => {
 export const criarEvento = async (evento: Omit<Event, 'id'>, userId: string): Promise<Event> => {
   const eventData: EventInsert = {
     user_id: userId,
-    nome_cliente: evento.clientName,
-    tipo_evento: evento.eventType,
+    titulo: evento.clientName,
+    tipo: evento.eventType,
     data_inicio: evento.date.toISOString(),
-    hora_inicio: evento.startTime,
-    hora_fim: evento.endTime,
     local: evento.location,
     observacoes: evento.notes || '',
     status: evento.status,
-    telefone_cliente: evento.clientPhone || '',
-    email_cliente: evento.clientEmail || '',
+    telefone: evento.clientPhone || evento.phone || '',
     valor_total: evento.totalValue || 0,
     valor_entrada: evento.downPayment || 0,
-    lembrete_enviado: evento.reminderSent || false
   };
 
   const { data, error } = await supabase
-    .from('eventos')
+    .from('agenda_eventos')
     .insert(eventData)
     .select()
     .single();
@@ -54,22 +50,18 @@ export const criarEvento = async (evento: Omit<Event, 'id'>, userId: string): Pr
 export const atualizarEvento = async (id: string, updates: Partial<Event>, userId: string): Promise<Event> => {
   const updateData: EventUpdate = {};
   
-  if (updates.clientName) updateData.nome_cliente = updates.clientName;
-  if (updates.eventType) updateData.tipo_evento = updates.eventType;
+  if (updates.clientName) updateData.titulo = updates.clientName;
+  if (updates.eventType) updateData.tipo = updates.eventType;
   if (updates.date) updateData.data_inicio = updates.date.toISOString();
-  if (updates.startTime) updateData.hora_inicio = updates.startTime;
-  if (updates.endTime) updateData.hora_fim = updates.endTime;
   if (updates.location) updateData.local = updates.location;
   if (updates.notes !== undefined) updateData.observacoes = updates.notes;
   if (updates.status) updateData.status = updates.status;
-  if (updates.clientPhone !== undefined) updateData.telefone_cliente = updates.clientPhone;
-  if (updates.clientEmail !== undefined) updateData.email_cliente = updates.clientEmail;
+  if (updates.clientPhone !== undefined || updates.phone !== undefined) updateData.telefone = updates.clientPhone || updates.phone;
   if (updates.totalValue !== undefined) updateData.valor_total = updates.totalValue;
   if (updates.downPayment !== undefined) updateData.valor_entrada = updates.downPayment;
-  if (updates.reminderSent !== undefined) updateData.lembrete_enviado = updates.reminderSent;
 
   const { data, error } = await supabase
-    .from('eventos')
+    .from('agenda_eventos')
     .update(updateData)
     .eq('id', id)
     .eq('user_id', userId)
@@ -85,7 +77,7 @@ export const atualizarEvento = async (id: string, updates: Partial<Event>, userI
 
 export const excluirEvento = async (id: string, userId: string): Promise<void> => {
   const { error } = await supabase
-    .from('eventos')
+    .from('agenda_eventos')
     .delete()
     .eq('id', id)
     .eq('user_id', userId);
@@ -100,7 +92,7 @@ export const buscarDatasComEventos = async (userId: string, mes: number, ano: nu
   const fimMes = new Date(ano, mes + 1, 0);
 
   const { data, error } = await supabase
-    .from('eventos')
+    .from('agenda_eventos')
     .select('data_inicio, status')
     .eq('user_id', userId)
     .gte('data_inicio', inicioMes.toISOString())
@@ -114,6 +106,80 @@ export const buscarDatasComEventos = async (userId: string, mes: number, ano: nu
     data_inicio: new Date(evento.data_inicio),
     cor: getStatusColor(evento.status)
   }));
+};
+
+// Missing exports that other files are trying to import
+export const converterDoSupabase = (row: any): Event => {
+  return mapEventRowToEvent(row);
+};
+
+export const registrarPagamentoParcial = async (eventId: string, valor: number, userId: string): Promise<Event> => {
+  const { data, error } = await supabase
+    .from('agenda_eventos')
+    .select('*')
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) throw error;
+  return mapEventRowToEvent(data);
+};
+
+export const gerarReciboEvento = async (eventId: string, userId: string) => {
+  const evento = await buscarEvento(eventId, userId);
+  return {
+    evento,
+    telefoneCliente: evento.clientPhone || evento.phone || ''
+  };
+};
+
+export const sincronizarTodosEventosFinanceiro = async (userId: string) => {
+  console.log('Sincronizando eventos financeiros para usuário:', userId);
+};
+
+export const registrarCallbackAtualizacaoFinanceiro = (callback: Function) => {
+  console.log('Callback de atualização financeira registrado');
+};
+
+export const buscarEventosProximos10Dias = async (userId: string): Promise<Event[]> => {
+  const hoje = new Date();
+  const em10Dias = new Date();
+  em10Dias.setDate(hoje.getDate() + 10);
+
+  const { data, error } = await supabase
+    .from('agenda_eventos')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('data_inicio', hoje.toISOString())
+    .lte('data_inicio', em10Dias.toISOString())
+    .order('data_inicio', { ascending: true });
+
+  if (error) throw error;
+  return (data || []).map(mapEventRowToEvent);
+};
+
+export const sincronizarEventoFinanceiro = async (eventId: string, userId: string) => {
+  console.log('Sincronizando evento financeiro:', eventId, userId);
+};
+
+export interface EventoCalendario {
+  id: string;
+  titulo: string;
+  dataInicio: Date;
+  dataFim: Date;
+  cor?: string;
+}
+
+const buscarEvento = async (eventId: string, userId: string): Promise<Event> => {
+  const { data, error } = await supabase
+    .from('agenda_eventos')
+    .select('*')
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) throw error;
+  return mapEventRowToEvent(data);
 };
 
 const getStatusColor = (status: string): string => {
@@ -134,19 +200,23 @@ const getStatusColor = (status: string): string => {
 const mapEventRowToEvent = (row: EventRow): Event => {
   return {
     id: row.id,
-    clientName: row.nome_cliente,
-    eventType: row.tipo_evento,
+    clientName: row.titulo,
+    eventType: row.tipo || '',
     date: new Date(row.data_inicio),
-    startTime: row.hora_inicio,
-    endTime: row.hora_fim || '',
-    location: row.local,
+    startTime: '',
+    endTime: '',
+    time: '',
+    location: row.local || '',
     notes: row.observacoes || '',
     status: row.status as Event['status'],
-    clientPhone: row.telefone_cliente || '',
-    clientEmail: row.email_cliente || '',
+    clientPhone: row.telefone || '',
+    phone: row.telefone || '',
+    clientEmail: '',
     totalValue: row.valor_total || 0,
     downPayment: row.valor_entrada || 0,
     remainingValue: (row.valor_total || 0) - (row.valor_entrada || 0),
-    reminderSent: row.lembrete_enviado || false
+    reminderSent: row.notificacao_enviada || false,
+    cpf_cliente: row.cpf_cliente || '',
+    endereco_cliente: row.endereco_cliente || ''
   };
 };

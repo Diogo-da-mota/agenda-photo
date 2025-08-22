@@ -27,20 +27,24 @@ export interface PartialEventFinancials {
 export interface Event {
   id: string;
   clientName: string;
-  phone: string;
-  birthday: Date | null;
+  phone?: string;
+  birthday?: Date | null;
   eventType: string;
   date: Date;
-  time: string;
+  time?: string;
+  startTime?: string;
+  endTime?: string;
   location: string;
-  totalValue: number;
-  downPayment: number;
-  remainingValue: number;
-  notes: string;
+  totalValue?: number;
+  downPayment?: number;
+  remainingValue?: number;
+  notes?: string;
   status: EventStatus;
-  reminderSent: boolean;
+  reminderSent?: boolean;
   cpf_cliente?: string;
   endereco_cliente?: string;
+  clientPhone?: string;
+  clientEmail?: string;
 }
 
 // Props for EventForm component

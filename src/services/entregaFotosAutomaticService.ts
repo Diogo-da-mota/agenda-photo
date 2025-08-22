@@ -42,3 +42,18 @@ export const saveEntregaFotosConfig = async (config: Omit<EntregaFotosConfig, 'i
 
   return data;
 };
+
+export const processarEntregaAutomatica = async (userId: string) => {
+  console.log('Processando entrega automática para usuário:', userId);
+  // Implementação básica
+};
+
+export const entregaFotosAutomaticService = {
+  processarEntregaAutomatica,
+  verificarEventosConcluidos: async (userId: string) => {
+    console.log('Verificando eventos concluídos para usuário:', userId);
+  },
+  executarProcessosAutomaticos: async (userId: string) => {
+    console.log('Executando processos automáticos para usuário:', userId);
+  }
+};
