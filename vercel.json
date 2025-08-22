@@ -50,7 +50,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|html|json|xml|txt))$",
+      "source": "/(.*)\\.(js|css|html|json|xml|txt)",
       "headers": [
         {
           "key": "Content-Encoding",
@@ -58,15 +58,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_SUPABASE_URL": "@vite_supabase_url",
-    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
-    "VITE_AUTH_API_URL": "@vite_auth_api_url"
-  },
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }

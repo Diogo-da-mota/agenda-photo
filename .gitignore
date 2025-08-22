@@ -49,3 +49,5 @@ security-config-*.json
 *.key
 *.crt
 .env.staging
+
+.vercel
