@@ -57,19 +57,10 @@ export class MensagensProgramadasService {
         throw new Error('Telefone é obrigatório');
       }
 
-      // Preparar dados para inserção
       const dadosInsercao: MensagemProgramadaInsert = {
         user_id: userId,
-        titulo: dados.titulo.trim(),
-        conteudo: dados.conteudo.trim(),
-        telefone: dados.telefone.trim(),
-        data_programada: dados.data_programada,
-        cliente_id: dados.cliente_id || null,
-        template_id: dados.template_id || null,
-        metadata: dados.metadata || {},
-        status: 'pendente',
-        tentativas: 0,
-        max_tentativas: 3
+        message: `${dados.titulo.trim()}\n\n${dados.conteudo.trim()}`,
+        status: 'pendente'
       };
 
       const { data, error } = await supabase
@@ -249,9 +240,7 @@ export class MensagensProgramadasService {
       logger.info('Cancelando mensagem programada', { id, userId });
 
       const dados: MensagemProgramadaUpdate = {
-        status: 'cancelado',
-        cancelado_em: new Date().toISOString(),
-        cancelado_por: userId
+        status: 'cancelado'
       };
 
       return await this.atualizar(id, userId, dados);
@@ -313,7 +302,6 @@ export class MensagensProgramadasService {
         .select('*')
         .eq('status', 'pendente')
         .lte('data_programada', agora)
-        .lt('tentativas', supabase.raw('max_tentativas'))
         .order('data_programada', { ascending: true })
         .limit(limite);
 
@@ -341,8 +329,7 @@ export class MensagensProgramadasService {
       const { error } = await supabase
         .from('mensagens_programadas')
         .update({
-          status: 'enviado',
-          enviado_em: new Date().toISOString()
+          status: 'enviado'
         })
         .eq('id', id);
 
@@ -369,7 +356,7 @@ export class MensagensProgramadasService {
       // Buscar mensagem atual para incrementar tentativas
       const { data: mensagem, error: errorBusca } = await supabase
         .from('mensagens_programadas')
-        .select('tentativas, max_tentativas')
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -378,18 +365,10 @@ export class MensagensProgramadasService {
         throw new Error(`Erro ao buscar mensagem: ${errorBusca.message}`);
       }
 
-      const novasTentativas = (mensagem.tentativas || 0) + 1;
-      const maxTentativas = mensagem.max_tentativas || 3;
-
-      // Determinar status baseado no número de tentativas
-      const novoStatus = novasTentativas >= maxTentativas ? 'erro' : 'pendente';
-
       const { error } = await supabase
         .from('mensagens_programadas')
         .update({
-          status: novoStatus,
-          tentativas: novasTentativas,
-          erro_ultimo: erro
+          status: 'erro'
         })
         .eq('id', id);
 
@@ -398,7 +377,7 @@ export class MensagensProgramadasService {
         throw new Error(`Erro ao marcar mensagem com erro: ${error.message}`);
       }
 
-      logger.info('Mensagem marcada com erro', { id, novoStatus, tentativas: novasTentativas });
+      logger.info('Mensagem marcada com erro', { id });
 
     } catch (error) {
       logger.error('Erro no serviço de marcação com erro', { error, id });
