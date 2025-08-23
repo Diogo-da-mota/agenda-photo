@@ -53,6 +53,137 @@ const logger = {
   warn: (...args: any[]) => console.warn('[agendaService]', ...args)
 };
 
+// Sistema de cache e debounce para otimização de requisições
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
+
+interface PendingRequest<T> {
+  promise: Promise<T>;
+  timestamp: number;
+}
+
+class RequestOptimizer {
+  private cache = new Map<string, CacheEntry<any>>();
+  private pendingRequests = new Map<string, PendingRequest<any>>();
+  private readonly DEFAULT_TTL = 30000; // 30 segundos
+
+  // Limpar cache expirado
+  private cleanExpiredCache(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > entry.ttl) {
+        this.cache.delete(key);
+        logger.info(`[RequestOptimizer] Cache expirado removido: ${key}`);
+      }
+    }
+  }
+
+  // Limpar requisições pendentes antigas
+  private cleanExpiredPendingRequests(): void {
+    const now = Date.now();
+    for (const [key, request] of this.pendingRequests.entries()) {
+      if (now - request.timestamp > 60000) { // 1 minuto
+        this.pendingRequests.delete(key);
+        logger.warn(`[RequestOptimizer] Requisição pendente expirada removida: ${key}`);
+      }
+    }
+  }
+
+  // Obter dados do cache ou executar função
+  async getOrExecute<T>(
+    key: string,
+    executeFn: () => Promise<T>,
+    ttl: number = this.DEFAULT_TTL
+  ): Promise<T> {
+    this.cleanExpiredCache();
+    this.cleanExpiredPendingRequests();
+
+    // Verificar cache
+    const cached = this.cache.get(key);
+    if (cached && (Date.now() - cached.timestamp) < cached.ttl) {
+      logger.info(`[RequestOptimizer] Dados obtidos do cache: ${key}`);
+      return cached.data;
+    }
+
+    // Verificar se já existe uma requisição pendente
+    const pending = this.pendingRequests.get(key);
+    if (pending) {
+      logger.info(`[RequestOptimizer] Aguardando requisição pendente: ${key}`);
+      return pending.promise;
+    }
+
+    // Executar nova requisição
+    logger.info(`[RequestOptimizer] Executando nova requisição: ${key}`);
+    const promise = executeFn();
+    
+    // Armazenar como pendente
+    this.pendingRequests.set(key, {
+      promise,
+      timestamp: Date.now()
+    });
+
+    try {
+      const result = await promise;
+      
+      // Armazenar no cache
+      this.cache.set(key, {
+        data: result,
+        timestamp: Date.now(),
+        ttl
+      });
+      
+      logger.info(`[RequestOptimizer] Resultado armazenado no cache: ${key}`);
+      return result;
+    } catch (error) {
+      logger.error(`[RequestOptimizer] Erro na requisição: ${key}`, error);
+      throw error;
+    } finally {
+      // Remover da lista de pendentes
+      this.pendingRequests.delete(key);
+    }
+  }
+
+  // Invalidar cache específico
+  invalidateCache(key: string): void {
+    this.cache.delete(key);
+    logger.info(`[RequestOptimizer] Cache invalidado: ${key}`);
+  }
+
+  // Limpar todo o cache
+  clearCache(): void {
+    this.cache.clear();
+    this.pendingRequests.clear();
+    logger.info(`[RequestOptimizer] Todo o cache foi limpo`);
+  }
+
+  // Obter estatísticas do cache
+  getCacheStats(): { cacheSize: number; pendingRequests: number } {
+    return {
+      cacheSize: this.cache.size,
+      pendingRequests: this.pendingRequests.size
+    };
+  }
+}
+
+// Instância global do otimizador de requisições
+const requestOptimizer = new RequestOptimizer();
+
+// Função para invalidar cache específico (útil após atualizações)
+export const invalidarCacheEventos = (userId: string) => {
+  const cacheKeys = [
+    `eventos_valores_entradas_${userId}`,
+    `eventos_valores_restantes_${userId}`
+  ];
+  
+  cacheKeys.forEach(key => {
+    requestOptimizer.invalidateCache(key);
+    logger.info(`[Cache] Cache invalidado para chave: ${key}`);
+  });
+};
+
 // Função auxiliar para extrair data de nascimento da descrição
 const extrairDataNascimento = (descricao?: string | null): string | null => {
   if (!descricao || !descricao.includes('Aniversário:')) {
@@ -932,89 +1063,108 @@ interface EventoFormatadoComoTransacao {
 }
 
 // Buscar eventos com valores restantes
+// Função interna sem cache para buscarEventosComValoresRestantes
+const _buscarEventosComValoresRestantesInternal = async (userId: string): Promise<EventoFormatadoComoTransacao[]> => {
+  logger.info(`[buscarEventosComValoresRestantes] Buscando eventos com valores restantes para usuário ${userId}`);
+  
+  const query = supabase
+    .from('agenda_eventos')
+    .select('*')
+    .eq('user_id', userId)
+    .gt('valor_restante', 0)
+    .not('status', 'eq', 'cancelado');
+  
+  const { data, error } = await query.order('data_inicio', { ascending: true });
+  
+  if (error) {
+    logger.error('[buscarEventosComValoresRestantes] Erro ao buscar eventos:', error);
+    throw error;
+  }
+  
+  // Converter para formato adequado para exibição
+  const eventosFormatados = (data || []).map(evento => ({
+    id: evento.id,
+    descricao: `${evento.titulo} - Valor Restante`,
+    clienteName: evento.titulo,
+    valor: (evento as any).valor_restante || 0, // Cast para acessar campo financeiro
+    tipo: 'receita',
+    status: 'restante',
+    data_transacao: evento.data_inicio,
+    data_evento: evento.data_inicio,
+    categoria: 'Valor Restante',
+    forma_pagamento: '',
+    observacoes: `Valor restante do evento ${evento.titulo}`,
+    user_id: userId,
+    cliente_id: evento.cliente_id,
+    evento_id: evento.id
+  }));
+  
+  logger.info(`[buscarEventosComValoresRestantes] ${eventosFormatados.length} eventos com valores restantes encontrados`);
+  return eventosFormatados;
+};
+
+// Função pública com cache e debounce
 export const buscarEventosComValoresRestantes = async (userId: string): Promise<EventoFormatadoComoTransacao[]> => {
   try {
-    logger.info(`[buscarEventosComValoresRestantes] Buscando eventos com valores restantes para usuário ${userId}`);
-    
-    const query = supabase
-      .from('agenda_eventos')
-      .select('*')
-      .eq('user_id', userId)
-      .gt('valor_restante', 0)
-      .not('status', 'eq', 'cancelado');
-    
-    const { data, error } = await query.order('data_inicio', { ascending: true });
-    
-    if (error) {
-      logger.error('[buscarEventosComValoresRestantes] Erro ao buscar eventos:', error);
-      throw error;
-    }
-    
-    // Converter para formato adequado para exibição
-    const eventosFormatados = (data || []).map(evento => ({
-      id: evento.id,
-      descricao: `${evento.titulo} - Valor Restante`,
-      clienteName: evento.titulo,
-      valor: (evento as any).valor_restante || 0, // Cast para acessar campo financeiro
-      tipo: 'receita',
-      status: 'restante',
-      data_transacao: evento.data_inicio,
-      data_evento: evento.data_inicio,
-      categoria: 'Valor Restante',
-      forma_pagamento: '',
-      observacoes: `Valor restante do evento ${evento.titulo}`,
-      user_id: userId,
-      cliente_id: evento.cliente_id,
-      evento_id: evento.id
-    }));
-    
-    logger.info(`[buscarEventosComValoresRestantes] ${eventosFormatados.length} eventos com valores restantes encontrados`);
-    return eventosFormatados;
+    const cacheKey = `eventos_valores_restantes_${userId}`;
+    return await requestOptimizer.getOrExecute(
+      cacheKey,
+      () => _buscarEventosComValoresRestantesInternal(userId)
+    );
   } catch (error) {
     logger.error('[buscarEventosComValoresRestantes] Erro:', error);
     throw error;
   }
 };
 
-// Buscar eventos com valores de entrada
+// Função interna sem cache para buscarEventosComValoresEntradas
+const _buscarEventosComValoresEntradasInternal = async (userId: string): Promise<EventoFormatadoComoTransacao[]> => {
+  logger.info(`[buscarEventosComValoresEntradas] Buscando eventos com valores de entrada para usuário ${userId}`);
+  
+  const query = supabase
+    .from('agenda_eventos')
+    .select('*')
+    .eq('user_id', userId)
+    .gt('valor_entrada', 0)
+    .not('status', 'eq', 'cancelado');
+  
+  const { data, error } = await query.order('data_inicio', { ascending: true });
+  
+  if (error) {
+    logger.error('[buscarEventosComValoresEntradas] Erro ao buscar eventos:', error);
+    throw error;
+  }
+  
+  // Converter para formato adequado para exibição
+  const eventosFormatados = (data || []).map(evento => ({
+    id: evento.id,
+    descricao: `${evento.titulo} - Valor de Entrada`,
+    clienteName: evento.titulo,
+    valor: (evento as any).valor_entrada || 0, // Cast para acessar campo financeiro
+    tipo: 'receita',
+    status: 'entrada',
+    data_transacao: evento.criado_em,
+    data_evento: evento.data_inicio,
+    categoria: 'Valor de Entrada',
+    forma_pagamento: '',
+    observacoes: `Valor de entrada do evento ${evento.titulo}`,
+    user_id: userId,
+    cliente_id: evento.cliente_id,
+    evento_id: evento.id
+  }));
+  
+  logger.info(`[buscarEventosComValoresEntradas] ${eventosFormatados.length} eventos com valores de entrada encontrados`);
+  return eventosFormatados;
+};
+
+// Função pública com cache e debounce
 export const buscarEventosComValoresEntradas = async (userId: string): Promise<EventoFormatadoComoTransacao[]> => {
   try {
-    logger.info(`[buscarEventosComValoresEntradas] Buscando eventos com valores de entrada para usuário ${userId}`);
-    
-    const query = supabase
-      .from('agenda_eventos')
-      .select('*')
-      .eq('user_id', userId)
-      .gt('valor_entrada', 0)
-      .not('status', 'eq', 'cancelado');
-    
-    const { data, error } = await query.order('data_inicio', { ascending: true });
-    
-    if (error) {
-      logger.error('[buscarEventosComValoresEntradas] Erro ao buscar eventos:', error);
-      throw error;
-    }
-    
-    // Converter para formato adequado para exibição
-    const eventosFormatados = (data || []).map(evento => ({
-      id: evento.id,
-      descricao: `${evento.titulo} - Valor de Entrada`,
-      clienteName: evento.titulo,
-      valor: (evento as any).valor_entrada || 0, // Cast para acessar campo financeiro
-      tipo: 'receita',
-      status: 'entrada',
-      data_transacao: evento.criado_em,
-      data_evento: evento.data_inicio,
-      categoria: 'Valor de Entrada',
-      forma_pagamento: '',
-      observacoes: `Valor de entrada do evento ${evento.titulo}`,
-      user_id: userId,
-      cliente_id: evento.cliente_id,
-      evento_id: evento.id
-    }));
-    
-    logger.info(`[buscarEventosComValoresEntradas] ${eventosFormatados.length} eventos com valores de entrada encontrados`);
-    return eventosFormatados;
+    const cacheKey = `eventos_valores_entradas_${userId}`;
+    return await requestOptimizer.getOrExecute(
+      cacheKey,
+      () => _buscarEventosComValoresEntradasInternal(userId)
+    );
   } catch (error) {
     logger.error('[buscarEventosComValoresEntradas] Erro:', error);
     throw error;
