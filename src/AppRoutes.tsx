@@ -327,12 +327,8 @@ const AppRoutes = () => {
           <Route path="/portfolio/integracoes" element={<PortfolioIntegracoes />} />
           <Route path="/portfolio/dominio" element={<PortfolioDominio />} />
           
-          {/* Rota ADMIN ONLY - Entrega de Fotos */}
-          <Route path="/entrega-fotos" element={
-            <AdminRoute>
-              <EntregaFotos />
-            </AdminRoute>
-          } />
+          {/* Rota PROTEGIDA - Entrega de Fotos */}
+          <Route path="/entrega-fotos" element={<EntregaFotos />} />
           
           {/* Rota ADMIN ONLY - Administração Entrega de Fotos */}
           <Route path="/entrega-fotos/admin" element={

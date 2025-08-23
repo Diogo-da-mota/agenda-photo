@@ -82,10 +82,8 @@ export const createMenuItems = (unreadMessages: number = 0, pendingContracts: nu
     name: "Entrega de Fotos",
     icon: Camera,
     path: "/entrega-fotos",
-    iconColor: "#FF6B35", // Laranja para fotografia (mantém cor original)
-    category: "SITE",
-    roles: ["admin"], // Visível apenas para admin
-    isAdminOnly: true // Para aplicar background vermelho
+    iconColor: "#FFFFFF", // Cor branca para o ícone da câmera
+    category: "SITE"
   },
   {
     name: "Escolher Álbum",

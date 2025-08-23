@@ -10,6 +10,7 @@ import { normalizeEmail, isValidEmailFormat } from '@/utils/authUtils';
 import { isBlocked as checkIfBlocked, recordFailedLogin, recordSuccessfulLogin, detectSuspiciousActivity } from '@/utils/authSecurity';
 import { useCSRF } from '@/components/security/CSRFProtection';
 import { securityLogger } from '@/utils/securityLogger';
+import { saveCredentials, loadCredentials, clearCredentials } from '@/utils/rememberMe';
 import { Mail, Shield } from "lucide-react";
 
 interface LoginFormProps {
@@ -26,6 +27,8 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isBlocked, setIsBlocked] = useState(false);
   const [remainingAttempts, setRemainingAttempts] = useState(5);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
   const { toast } = useToast();
   const { signIn, signInWithGoogle, session } = useAuth();
   const { validateToken } = useCSRF();
@@ -34,9 +37,52 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
 
 
+  // Carregar credenciais salvas e tentar auto-login
+  useEffect(() => {
+    const attemptAutoLogin = async () => {
+      if (autoLoginAttempted || session) return;
+      
+      const savedCredentials = loadCredentials();
+      if (savedCredentials) {
+        console.log('[REMEMBER_ME] Credenciais encontradas, tentando auto-login...');
+        setEmail(savedCredentials.email);
+        setPassword(savedCredentials.password);
+        setRememberMe(true);
+        setAutoLoginAttempted(true);
+        
+        // Tentar login automático
+        try {
+          setIsLoading(true);
+          const result = await signIn(savedCredentials.email, savedCredentials.password);
+          
+          if (result.success) {
+            console.log('[REMEMBER_ME] Auto-login bem-sucedido');
+            toast({
+              title: "Login automático realizado",
+              description: "Bem-vindo de volta!",
+            });
+          } else {
+            console.log('[REMEMBER_ME] Auto-login falhou, limpando credenciais salvas');
+            clearCredentials();
+            setPassword(''); // Limpar senha do formulário por segurança
+          }
+        } catch (error) {
+          console.error('[REMEMBER_ME] Erro no auto-login:', error);
+          clearCredentials();
+          setPassword('');
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setAutoLoginAttempted(true);
+      }
+    };
+    
+    attemptAutoLogin();
+  }, [signIn, session, autoLoginAttempted, toast]);
+
   // Monitorar mudanças na sessão para redirecionar após login bem-sucedido
   useEffect(() => {
-    
     if (session) {
       console.log("[LOGIN] Sessão detectada, redirecionando para o dashboard");
       
@@ -130,6 +176,15 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       // Registrar login bem-sucedido
       recordSuccessfulLogin(normalizedEmail);
       
+      // Salvar credenciais se "Lembrar de mim" estiver marcado
+      if (rememberMe) {
+        console.log('[REMEMBER_ME] Salvando credenciais para próximo login');
+        saveCredentials(normalizedEmail, password);
+      } else {
+        // Limpar credenciais salvas se "Lembrar de mim" não estiver marcado
+        clearCredentials();
+      }
+      
       console.log("[LOGIN] Login bem-sucedido, aguardando sessão...");
       // O redirecionamento será tratado pelo useEffect que monitora a sessão
       
@@ -194,7 +249,19 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           required
         />
         
-        <div className="text-right">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="rememberMe" className="text-xs text-gray-600 cursor-pointer">
+              Lembrar de mim
+            </label>
+          </div>
           <Link to="/reset-password" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
             Esqueci minha senha
           </Link>

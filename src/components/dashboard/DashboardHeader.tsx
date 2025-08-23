@@ -100,15 +100,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
   
   const handleLogout = async () => {
     try {
+      console.log('[DEBUG] Iniciando processo de logout...');
       await signOut();
-      // toast({
-      //   title: "Sessão encerrada",
-      //   description: "Você saiu do sistema com sucesso."
-      // });
+      console.log('[DEBUG] Logout executado com sucesso');
+      toast({
+        title: "Sessão encerrada",
+        description: "Você saiu do sistema com sucesso."
+      });
     } catch (error) {
-      if (import.meta.env.MODE === 'development') {
-        console.error('Erro ao fazer logout:', error);
-      }
+      console.error('[ERROR] Erro ao fazer logout:', error);
       toast({
         title: "Erro ao sair",
         description: "Não foi possível encerrar sua sessão. Tente novamente.",

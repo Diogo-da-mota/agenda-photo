@@ -151,9 +151,15 @@ export const useAuthActions = () => {
       
       if (error) {
         SecureLogger.error('[AUTH] Erro no logout:', error);
+        throw error;
       }
+      
+      // Redirecionar para a página inicial após logout bem-sucedido
+      window.location.href = '/';
+      
     } catch (error: unknown) {
       SecureLogger.error('[AUTH] Exceção no logout:', error);
+      throw error;
     }
   };
 
