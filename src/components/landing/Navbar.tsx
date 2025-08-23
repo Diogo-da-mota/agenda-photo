@@ -11,6 +11,17 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
   const [scrolled, setScrolled] = useState(false);
+  
+  // Debug logs temporários
+  const handleLoginClick = () => {
+    console.log('[DEBUG] Botão Login clicado');
+    onLoginClick();
+  };
+  
+  const handleRegisterClick = () => {
+    console.log('[DEBUG] Botão Criar Conta clicado');
+    onRegisterClick();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,14 +67,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
           <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-4">
             <TubelightButton 
               className="text-[11px] xs:text-xs sm:text-sm py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
-              onClick={onLoginClick}
+              onClick={handleLoginClick}
             >
               Login
             </TubelightButton>
             
             <TubelightButton 
               className="text-[11px] xs:text-xs sm:text-sm py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
-              onClick={onRegisterClick}
+              onClick={handleRegisterClick}
             >
               Criar Conta
             </TubelightButton>

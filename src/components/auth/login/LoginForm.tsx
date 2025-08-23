@@ -17,6 +17,8 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onSuccess }: LoginFormProps) => {
+
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,8 +32,11 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+
+
   // Monitorar mudanças na sessão para redirecionar após login bem-sucedido
   useEffect(() => {
+    
     if (session) {
       console.log("[LOGIN] Sessão detectada, redirecionando para o dashboard");
       
@@ -152,6 +157,8 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       setError("Falha no login com Google. Tente novamente.");
     }
   };
+
+
 
   return (
     <>

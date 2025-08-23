@@ -12,6 +12,13 @@ interface LoginModalProps {
 
 const LoginModal = ({ isOpen, onOpenChange, onRegisterClick }: LoginModalProps) => {
   const isMobile = useIsMobile();
+  
+  // Debug logs temporários
+  console.log('[DEBUG] LoginModal renderizado:', { isOpen, isMobile });
+  
+  React.useEffect(() => {
+    console.log('[DEBUG] LoginModal isOpen mudou:', isOpen);
+  }, [isOpen]);
 
   const switchToRegister = () => {
     onOpenChange(false);

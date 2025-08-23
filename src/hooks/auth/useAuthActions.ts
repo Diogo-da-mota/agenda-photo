@@ -19,13 +19,31 @@ interface UserUpdateData {
 
 export const useAuthActions = () => {
   const signIn = async (email: string, password: string) => {
+    // DEBUG: Log de tentativa de login
+    console.log('[DEBUG] useAuthActions - signIn chamado:', {
+      email: email ? 'FORNECIDO' : 'VAZIO',
+      password: password ? 'FORNECIDO' : 'VAZIO',
+      supabaseUrl: supabase.supabaseUrl,
+      supabaseKey: supabase.supabaseKey ? 'DEFINIDA' : 'NÃO DEFINIDA'
+    });
+    
     try {
+      console.log('[DEBUG] useAuthActions - Chamando supabase.auth.signInWithPassword');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
+      
+      console.log('[DEBUG] useAuthActions - Resposta do Supabase:', {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        hasError: !!error,
+        errorMessage: error?.message
+      });
 
       if (error) {
+        console.log('[DEBUG] useAuthActions - Erro no login:', error);
         let errorMessage = 'Erro no login. Verifique suas credenciais.';
         
         if (error.message.includes('Invalid login credentials')) {
@@ -35,16 +53,23 @@ export const useAuthActions = () => {
         }
         
         securityLogger.logLoginAttempt(email, false, errorMessage);
+        console.log('[DEBUG] useAuthActions - Retornando erro:', errorMessage);
         return { success: false, error: errorMessage };
       }
 
       if (data.user) {
+        console.log('[DEBUG] useAuthActions - Login bem-sucedido:', {
+          userId: data.user.id,
+          userEmail: data.user.email
+        });
         securityLogger.logLoginAttempt(email, true);
         return { success: true };
       }
 
+      console.log('[DEBUG] useAuthActions - Falha na autenticação - sem usuário');
       return { success: false, error: 'Falha na autenticação' };
     } catch (error: unknown) {
+      console.log('[DEBUG] useAuthActions - Exceção durante login:', error);
       securityLogger.logSuspiciousActivity('login_exception', { error: error instanceof Error ? error.message : 'Unknown error' }, email);
       return { success: false, error: 'Erro de conexão. Tente novamente.' };
     }

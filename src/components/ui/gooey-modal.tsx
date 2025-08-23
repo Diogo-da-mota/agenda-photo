@@ -18,6 +18,9 @@ export const GooeyModal: React.FC<GooeyModalProps> = ({
   footerContent
 }) => {
   const [isMounted, setIsMounted] = useState(false);
+  
+  // Debug logs temporários
+  console.log('[DEBUG] GooeyModal renderizado:', { isOpen, isMounted, title });
 
   useEffect(() => {
     setIsMounted(true);
