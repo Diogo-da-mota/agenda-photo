@@ -16,7 +16,10 @@ export const useDashboardLayout = () => {
   }, [isMobile]);
   
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    // Só permite recolher a sidebar em dispositivos móveis
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+    }
   };
 
   return {

@@ -21,16 +21,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ isOpen, toggleSidebar, is
       {/* Espaçador em mobile para manter altura consistente */}
       {isMobile && <div className="flex-1"></div>}
       
-      {!isMobile && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleSidebar}
-          className="absolute right-2 h-8 w-8 rounded-full text-gray-300 hover:bg-[#1A1F2E] hover:text-white"
-        >
-          {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </Button>
-      )}
+      {/* Botão de toggle removido do desktop - sidebar agora é fixa */}
     </div>
   );
 };
