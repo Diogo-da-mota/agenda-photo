@@ -236,7 +236,7 @@ export const criarGaleria = async (
     .select('id');
 
   if (insertError) {
-    // Log de erro removido para produção - erro detalhado no insert da galeria
+    console.error('Erro ao inserir galeria:', {
       error: insertError,
       message: insertError.message,
       details: insertError.details,
