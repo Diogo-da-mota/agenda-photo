@@ -18,4 +18,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-console.log('[DEBUG] Supabase cliente configurado com sucesso');
+// console.log('[DEBUG] Supabase cliente configurado com sucesso'); // Removido para produção

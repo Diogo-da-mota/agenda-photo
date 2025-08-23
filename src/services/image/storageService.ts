@@ -116,12 +116,12 @@ export const getUserImages = async (options?: {
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
-      console.error('❌ Erro ao obter usuário autenticado:', userError);
+      // Log de erro removido para produção
       throw new Error(`Erro de autenticação: ${userError.message}`);
     }
     
     if (!userData.user || !userData.user.id) {
-      console.error('❌ Usuário não autenticado ou ID ausente');
+      // Log de erro removido para produção
       throw new Error('Você precisa estar autenticado para ver suas imagens');
     }
     
@@ -156,7 +156,7 @@ export const getUserImages = async (options?: {
     const duration = Math.round(performance.now() - startTime);
     
     if (error) {
-      console.error('❌ Erro ao buscar imagens do usuário:', error);
+      // Log de erro removido para produção
       
       // Registrar falha na operação de seleção
       await logStorageOperation('select', false, error.message, duration);
@@ -167,10 +167,10 @@ export const getUserImages = async (options?: {
     // Registrar sucesso da operação
     await logStorageOperation('select', true, null, duration);
     
-    console.log(`✅ ${data?.length || 0} imagens encontradas para o usuário em ${duration}ms`);
+    // Log removido para produção
     return data || [];
   } catch (error) {
-    console.error('❌ Erro geral ao buscar imagens do usuário:', error);
+    // Log de erro removido para produção
     throw error;
   }
 };
@@ -182,13 +182,13 @@ export const deleteImage = async (imageId: string): Promise<boolean> => {
   const startTime = performance.now();
   
   try {
-    console.log('🗑️ Excluindo imagem com ID:', imageId);
+    // Log removido para produção
     
     // Verificar autenticação
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError || !userData.user) {
-      console.error('❌ Erro ao verificar autenticação:', userError);
+      // Log de erro removido para produção
       throw new Error('Você precisa estar autenticado para excluir imagens');
     }
     
@@ -200,12 +200,12 @@ export const deleteImage = async (imageId: string): Promise<boolean> => {
       .single();
       
     if (imageError) {
-      console.error('❌ Erro ao verificar propriedade da imagem:', imageError);
+      // Log de erro removido para produção
       throw new Error('Imagem não encontrada ou você não tem permissão para excluí-la');
     }
     
     if (imageData.user_id !== userData.user.id) {
-      console.error('⚠️ Tentativa de excluir imagem de outro usuário');
+      // Log de erro removido para produção
       throw new Error('Você não tem permissão para excluir esta imagem');
     }
     
@@ -218,7 +218,7 @@ export const deleteImage = async (imageId: string): Promise<boolean> => {
     const duration = Math.round(performance.now() - startTime);
     
     if (error) {
-      console.error('❌ Erro ao excluir imagem:', error);
+      // Log de erro removido para produção
       
       // Registrar falha na operação de exclusão
       await logStorageOperation('delete', false, error.message, duration);
@@ -229,10 +229,10 @@ export const deleteImage = async (imageId: string): Promise<boolean> => {
     // Registrar sucesso da operação
     await logStorageOperation('delete', true, null, duration);
     
-    console.log(`✅ Imagem excluída com sucesso em ${duration}ms`);
+    // Log removido para produção
     return true;
   } catch (error) {
-    console.error('❌ Erro geral ao excluir imagem:', error);
+    // Log de erro removido para produção
     throw error;
   }
 };
@@ -248,7 +248,7 @@ export const getUserImageStats = async () => {
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError || !userData.user) {
-      console.error('❌ Erro ao verificar autenticação:', userError);
+      // Log de erro removido para produção
       throw new Error('Você precisa estar autenticado para ver estatísticas');
     }
     
@@ -259,7 +259,7 @@ export const getUserImageStats = async () => {
       .eq('user_id', userData.user.id);
     
     if (error) {
-      console.error('❌ Erro ao obter estatísticas:', error);
+      // Log de erro removido para produção
       throw new Error(`Erro ao obter estatísticas: ${error.message}`);
     }
     
@@ -271,10 +271,10 @@ export const getUserImageStats = async () => {
       byType: {} as Record<string, number>
     };
     
-    console.log('✅ Estatísticas calculadas:', stats);
+    // Log removido para produção
     return stats;
   } catch (error) {
-    console.error('❌ Erro ao obter estatísticas:', error);
+    // Log de erro removido para produção
     throw error;
   }
 };

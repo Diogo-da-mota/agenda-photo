@@ -20,13 +20,12 @@ export const extractFileUrl = (result: UploadResult): string | null => {
   
   for (const field of possibleUrlFields) {
     if (result[field]) {
-      console.log(`🔍 [DIAGNÓSTICO PARTE 4] ✅ URL encontrada no campo '${field}':`, result[field]);
+      // Log de diagnóstico removido para produção
       return result[field];
     }
   }
   
-  console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ Nenhuma URL encontrada nos campos esperados');
-  console.error('🔍 [DIAGNÓSTICO PARTE 4] Campos disponíveis no resultado:', Object.keys(result));
+  // Logs de diagnóstico removidos para produção
   return null;
 };
 
@@ -63,14 +62,7 @@ export const createFormData = (file: File, formFields: FormFields): FormData => 
  * Log detalhado dos dados enviados para diagnóstico
  */
 export const logDiagnosticInfo = (file: File, formFields: FormFields, formData: FormData) => {
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] === INICIO enviarImagemParaN8N ===');
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Arquivo recebido:', {
-    name: file.name,
-    size: file.size,
-    type: file.type,
-    lastModified: file.lastModified
-  });
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] FormFields recebidos:', formFields);
+  // Logs de diagnóstico removidos para produção
 
   // Listar campos do FormData
   const formDataEntries: Record<string, unknown> = {};
@@ -86,23 +78,12 @@ export const logDiagnosticInfo = (file: File, formFields: FormFields, formData: 
       formDataEntries[key] = value;
     }
   }
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] FormData campos (formato N8N):', formDataEntries);
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] ✅ Usando file_0, fileName_0, totalFiles para compatibilidade N8N');
+  // Logs de diagnóstico removidos para produção
 };
 
 /**
  * Log detalhado da resposta do N8N
  */
 export const logResponseInfo = (response: Response, responseText: string) => {
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] === RESPOSTA N8N RECEBIDA ===');
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Status:', response.status, response.statusText);
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] OK:', response.ok);
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Headers:');
-  for (const [key, value] of response.headers.entries()) {
-    console.log(`🔍 [DIAGNÓSTICO PARTE 4]   ${key}: ${value}`);
-  }
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Raw Response Text:');
-  console.log('🔍 [DIAGNÓSTICO PARTE 4]', responseText);
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Response length:', responseText.length);
-  console.log('🔍 [DIAGNÓSTICO PARTE 4] Response type:', typeof responseText);
+  // Logs de diagnóstico removidos para produção
 };

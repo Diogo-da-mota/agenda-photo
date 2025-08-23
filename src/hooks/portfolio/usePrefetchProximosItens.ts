@@ -47,9 +47,9 @@ export const usePrefetchProximosItens = (
         gcTime: 1000 * 60 * 10, // 10 minutos em memória
       });
 
-      console.log(`[PrefetchNext] ✅ Página ${nextPage} pré-carregada`);
+      // Log removido para produção - página pré-carregada
     } catch (error) {
-      console.warn(`[PrefetchNext] Erro ao pré-carregar página ${nextPage}:`, error);
+      // Log de erro removido para produção - erro ao pré-carregar página
     }
   }, [queryClient, user?.id, currentPage, pageSize, searchTerm, hasNextPage]);
 

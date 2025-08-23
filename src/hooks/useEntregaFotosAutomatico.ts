@@ -23,11 +23,11 @@ export const useEntregaFotosAutomatico = (options: UseEntregaFotosAutomaticoOpti
     executandoRef.current = true;
     
     try {
-      console.log('[EntregaFotos] Iniciando processos automáticos...');
+      // Log removido para produção - iniciando processos automáticos
       const resultado = await entregaFotosAutomaticService.executarProcessosAutomaticos();
-      console.log('[EntregaFotos] Processos automáticos concluídos:', resultado);
+      // Log removido para produção - processos automáticos concluídos
     } catch (error) {
-      console.error('[EntregaFotos] Erro nos processos automáticos:', error);
+      // Log removido para produção - erro nos processos automáticos
     } finally {
       executandoRef.current = false;
     }

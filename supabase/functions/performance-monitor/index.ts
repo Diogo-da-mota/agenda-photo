@@ -83,7 +83,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erro na função:', error);
+    // Erro na função - logs removidos para produção
     return new Response(
       JSON.stringify({ error: 'Erro interno do servidor' }),
       { 
@@ -98,7 +98,7 @@ serve(async (req) => {
 async function handleMetrics(req: Request, supabase: any) {
   const metrics = await req.json();
   
-  console.log('[PERFORMANCE_MONITOR] Métricas recebidas:', metrics);
+  // Métricas recebidas - logs removidos para produção
   
   // Analisar métricas e gerar alertas se necessário
   const alerts = analyzeMetrics(metrics);
@@ -113,7 +113,7 @@ async function handleMetrics(req: Request, supabase: any) {
       })));
     
     if (error) {
-      console.error('[PERFORMANCE_MONITOR] Erro ao salvar métricas:', error);
+      // Erro ao salvar métricas - logs removidos para produção
     }
   }
   
@@ -209,7 +209,7 @@ function analyzeMetrics(metrics: (PerformanceMetric | APIMetric)[]): any[] {
 
 // Enviar alerta
 async function sendAlert(alert: any, supabase: any) {
-  console.log(`[ALERT] ${alert.severity}: ${alert.message}`);
+  // Alerta de performance - logs removidos para produção
   
   // Salvar alerta no banco
   const { error } = await supabase
@@ -220,7 +220,7 @@ async function sendAlert(alert: any, supabase: any) {
     });
   
   if (error) {
-    console.error('[PERFORMANCE_MONITOR] Erro ao salvar alerta:', error);
+    // Erro ao salvar alerta - logs removidos para produção
   }
   
   // Em produção, aqui você poderia enviar notificações via:
@@ -360,4 +360,4 @@ async function handleAlert(req: Request, supabase: any) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     }
   );
-} 
+}

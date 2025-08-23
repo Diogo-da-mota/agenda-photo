@@ -38,9 +38,9 @@ const App = () => {
   const [queryClient] = useState(() => createQueryClient(isMobile));
 
   // Log apenas em desenvolvimento
-  if (import.meta.env.MODE === 'development') {
-    console.log('App inicializando...', { isMobile });
-  }
+  // if (import.meta.env.MODE === 'development') {
+  //   console.log('App inicializando...', { isMobile }); // Removido para produção
+  // }
 
   return (
     <ErrorBoundary>

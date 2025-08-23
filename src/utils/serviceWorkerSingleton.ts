@@ -94,7 +94,7 @@ class ServiceWorkerSingleton {
 
     // Se já está registrado, retornar o registro existente
     if (this.registration) {
-      console.log('[SW Singleton] Service Worker já registrado');
+      // console.log('[SW Singleton] Service Worker já registrado'); // Removido para produção
       return this.registration;
     }
 
@@ -104,7 +104,7 @@ class ServiceWorkerSingleton {
       try {
         const existingRegistration = await navigator.serviceWorker.getRegistration();
         if (existingRegistration) {
-          console.log('[SW Singleton] Usando registro existente do navegador');
+          // console.log('[SW Singleton] Usando registro existente do navegador'); // Removido para produção
           this.registration = existingRegistration;
           this.setupEventListeners(existingRegistration);
           this.notifyListeners();
@@ -133,7 +133,7 @@ class ServiceWorkerSingleton {
    */
   private async _performRegistration(): Promise<ServiceWorkerRegistration | null> {
     try {
-      console.log('[SW Singleton] Iniciando registro do Service Worker');
+      // console.log('[SW Singleton] Iniciando registro do Service Worker'); // Removido para produção
       
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
@@ -142,7 +142,7 @@ class ServiceWorkerSingleton {
       this.registration = registration;
       this.setupEventListeners(registration);
       
-      console.log('[SW Singleton] Service Worker registrado com sucesso:', registration.scope);
+      // console.log('[SW Singleton] Service Worker registrado com sucesso:', registration.scope); // Removido para produção
       
       if (this.config.onSuccess) {
         this.config.onSuccess(registration);

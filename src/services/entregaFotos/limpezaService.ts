@@ -20,7 +20,7 @@ export class LimpezaService {
     };
 
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Iniciando limpeza de arquivos antigos`);
+      // Log removido para produção - iniciando limpeza de arquivos antigos
 
       const dataLimite = this.calcularDataLimite();
       const galeriasAntigas = await this.buscarGaleriasAntigas(dataLimite);

@@ -20,7 +20,7 @@ export class ExpiracaoService {
     };
 
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Iniciando verificação de expiração`);
+      // Log removido para produção - iniciando verificação de expiração
 
       const agora = new Date().toISOString();
 

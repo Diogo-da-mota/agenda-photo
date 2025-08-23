@@ -83,7 +83,7 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       toast.success('Login realizado com sucesso!');
       return true;
     } catch (error) {
-      console.error('Erro no login:', error);
+      // Erro no login - logs removidos para produção
       toast.error('Erro interno. Tente novamente.');
       return false;
     } finally {

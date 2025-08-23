@@ -38,7 +38,7 @@ export const useLazyLoading = () => {
     const connectionSpeed = getConnectionSpeed();
     
     if (!shouldPreloadComponent(componentName, connectionSpeed, config)) {
-      console.log(`⏭️ Preload pulado para ${componentName} (configuração/conexão)`);
+      // Log removido para produção - preload pulado
       return;
     }
     
@@ -52,12 +52,12 @@ export const useLazyLoading = () => {
         const loadTime = performance.now() - startTime;
         
         if (config.monitoring.logPerformance) {
-          console.log(`✅ ${componentName} precarregado em ${loadTime.toFixed(2)}ms (tentativa ${attempt})`);
+          // Log removido para produção - componente precarregado
         }
         return;
       } catch (error) {
         if (config.monitoring.trackErrors) {
-          console.warn(`⚠️ Erro ao precarregar ${componentName} (tentativa ${attempt}/${maxRetries}):`, error);
+          // Log de erro removido para produção - erro ao precarregar
         }
         
         if (attempt < maxRetries) {

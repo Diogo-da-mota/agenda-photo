@@ -21,9 +21,9 @@ export const preloadComponent = async (importFn: () => Promise<any>, key: string
     preloadCache.set(key, preloadPromise);
     
     await preloadPromise;
-    console.log(`✅ Componente ${key} precarregado com sucesso`);
+    // Log removido para produção - componente precarregado com sucesso
   } catch (error) {
-    console.warn(`⚠️ Falha ao precarregar componente ${key}:`, error);
+    // Log removido para produção - falha ao precarregar componente
     // Remove do cache em caso de erro
     preloadCache.delete(key);
   }

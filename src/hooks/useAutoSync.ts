@@ -15,7 +15,7 @@ export const useAutoSync = () => {
   useEffect(() => {
     if (!user) return;
 
-    logger.info('[useAutoSync] Inicializando sincronização automática para usuário:', user.id);
+    // logger.info('[useAutoSync] Inicializando sincronização automática para usuário:', user.id);
     
     // Obter instância do serviço
     // const autoSyncService = AutoSyncService.getInstance();
@@ -23,7 +23,7 @@ export const useAutoSync = () => {
     // Registrar callback para atualização da UI financeira
     const atualizarUIFinanceira = (userId: string) => {
       if (userId === user.id) {
-        logger.info('[useAutoSync] Atualizando dados financeiros na UI');
+        // logger.info('[useAutoSync] Atualizando dados financeiros na UI');
         
         // Invalidar queries relacionadas ao financeiro
         queryClient.invalidateQueries({ queryKey: ['financeiro-resumo', userId] });
@@ -44,7 +44,7 @@ export const useAutoSync = () => {
     // Cleanup function
     return () => {
       // autoSyncService.unregisterCallback(`ui-financeira-${user.id}`);
-      logger.info('[useAutoSync] Callback de sincronização automática removido');
+      // logger.info('[useAutoSync] Callback de sincronização automática removido');
     };
   }, [user, queryClient]);
 

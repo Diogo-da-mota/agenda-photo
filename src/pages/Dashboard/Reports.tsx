@@ -175,7 +175,7 @@ const Reports: React.FC = () => {
       await carregarRelatorios();
 
     } catch (error) {
-      console.error('Erro ao salvar relatório:', error);
+      // console.error('Erro ao salvar relatório:', error); // Removido para produção
       toast({
         title: 'Erro ao salvar',
         description: 'Não foi possível salvar o relatório.',
@@ -194,7 +194,7 @@ const Reports: React.FC = () => {
       const data = await buscarRelatorios(user.id);
       setRelatorios(data);
     } catch (error) {
-      console.error('Erro ao carregar relatórios:', error);
+      // console.error('Erro ao carregar relatórios:', error); // Removido para produção
       toast({
         title: 'Erro ao carregar',
         description: 'Não foi possível carregar os relatórios.',
@@ -213,7 +213,7 @@ const Reports: React.FC = () => {
       const duplicados = await reportsService.buscarClientesDuplicados(user.id);
       setClientesDuplicados(duplicados);
     } catch (error) {
-      console.error('Erro ao buscar clientes duplicados:', error);
+      // console.error('Erro ao buscar clientes duplicados:', error); // Removido para produção
     } finally {
       setLoadingStates(prev => ({ ...prev, clientesDuplicados: false }));
     }
@@ -238,7 +238,7 @@ const Reports: React.FC = () => {
       setReceitaTotal(dados.receitaTotal);
       setDespesasTotal(dados.despesasTotal);
     } catch (error) {
-      console.error('Erro ao carregar dados financeiros:', error);
+      // console.error('Erro ao carregar dados financeiros:', error); // Removido para produção
     } finally {
       setLoadingStates(prev => ({ ...prev, dadosFinanceiros: false }));
     }
@@ -326,7 +326,7 @@ const Reports: React.FC = () => {
       setCachedData(cacheKey, dadosMensais);
       setDadosMensaisReais(dadosMensais);
     } catch (error) {
-      console.error('Erro ao carregar dados mensais:', error);
+      // console.error('Erro ao carregar dados mensais:', error); // Removido para produção
     } finally {
       setLoadingStates(prev => ({ ...prev, dadosMensais: false }));
     }
@@ -369,7 +369,7 @@ const Reports: React.FC = () => {
       setPagamentosPendentes(totalPendente);
       setFaturasPendentes(totalFaturas);
     } catch (error) {
-      console.error('Erro ao carregar pagamentos pendentes:', error);
+      // console.error('Erro ao carregar pagamentos pendentes:', error); // Removido para produção
       setPagamentosPendentes(0);
       setFaturasPendentes(0);
     } finally {
@@ -441,7 +441,7 @@ const Reports: React.FC = () => {
       
       setDadosCategoriaReais(dadosCategoria);
     } catch (error) {
-      console.error('Erro ao carregar dados de categoria:', error);
+      // console.error('Erro ao carregar dados de categoria:', error); // Removido para produção
     } finally {
       setLoadingStates(prev => ({ ...prev, dadosCategoria: false }));
     }
@@ -481,12 +481,12 @@ const Reports: React.FC = () => {
             ];
             
             if (resultado.status === 'rejected') {
-              console.error(`Erro em ${funcoes[index]}:`, resultado.reason);
+              // console.error(`Erro em ${funcoes[index]}:`, resultado.reason); // Removido para produção
             }
           });
         }
       } catch (error) {
-        console.error('Erro ao carregar dados iniciais:', error);
+        // console.error('Erro ao carregar dados iniciais:', error); // Removido para produção
       } finally {
         if (isMounted) {
           setIsLoading(false);

@@ -18,13 +18,13 @@ export function SupabaseUploadTest() {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
-    console.log('🚀 Iniciando upload...');
+    // Upload iniciado - logs removidos para produção
     const result = await uploadFiles(files);
     
     if (result?.success) {
-      console.log('✅ Todos os arquivos foram enviados com sucesso:', result.urls);
+      // Upload bem-sucedido - logs removidos para produção
     } else {
-      console.error('❌ Falha no upload:', result?.errors);
+      // Falha no upload - logs removidos para produção
     }
   };
 
@@ -114,4 +114,4 @@ export function SupabaseUploadTest() {
   );
 }
 
-export default SupabaseUploadTest; 
+export default SupabaseUploadTest;

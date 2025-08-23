@@ -46,11 +46,11 @@ export interface EventoCalendario {
   cor?: string;
 }
 
-// Logger simples
+// Logger simples - removido para produção
 const logger = {
-  info: (...args: any[]) => console.log('[agendaService]', ...args),
-  error: (...args: any[]) => console.error('[agendaService]', ...args),
-  warn: (...args: any[]) => console.warn('[agendaService]', ...args)
+  info: (...args: any[]) => {}, // console.log('[agendaService]', ...args), // Removido para produção
+  error: (...args: any[]) => {}, // console.error('[agendaService]', ...args), // Removido para produção
+  warn: (...args: any[]) => {} // console.warn('[agendaService]', ...args) // Removido para produção
 };
 
 // Sistema de cache e debounce para otimização de requisições

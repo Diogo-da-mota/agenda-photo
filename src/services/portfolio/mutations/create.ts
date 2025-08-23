@@ -13,7 +13,7 @@ export const criarTrabalhoPortfolio = async (trabalho: CriarTrabalhoPortfolio, u
       throw new Error('ID de usuário não fornecido. Impossível criar trabalho.');
     }
 
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] === INICIO criarTrabalhoPortfolio ===');
+    // Log de diagnóstico removido para produção
     logger.info('[criarTrabalhoPortfolio] Iniciando criação de trabalho:', { 
       titulo: trabalho.titulo, 
       categoria: trabalho.categoria,
@@ -22,7 +22,7 @@ export const criarTrabalhoPortfolio = async (trabalho: CriarTrabalhoPortfolio, u
 
     const trabalhoParaSalvar = converterParaSupabase(trabalho, userId);
     
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] Dados preparados para Supabase INSERT:', trabalhoParaSalvar);
+    // Log de diagnóstico removido para produção
     logger.info('[criarTrabalhoPortfolio] Dados preparados para o Supabase:', trabalhoParaSalvar);
 
     const { data, error } = await supabase
@@ -32,12 +32,12 @@ export const criarTrabalhoPortfolio = async (trabalho: CriarTrabalhoPortfolio, u
       .single();
       
     if (error) {
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ ERRO SUPABASE INSERT:', error);
+      // Log de diagnóstico removido para produção
       logger.error('[criarTrabalhoPortfolio] Erro ao salvar trabalho no Supabase:', error);
       throw new Error(`Erro ao salvar trabalho: ${error.message}`);
     }
 
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] ✅ SUCESSO SUPABASE INSERT:', data);
+    // Log de diagnóstico removido para produção
     logger.info('[criarTrabalhoPortfolio] Trabalho salvo com sucesso:', data);
     
     const trabalhoConvertido = converterDoSupabase(data);
@@ -46,7 +46,7 @@ export const criarTrabalhoPortfolio = async (trabalho: CriarTrabalhoPortfolio, u
     
     return trabalhoConvertido;
   } catch (error) {
-    console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ ERRO GERAL criarTrabalhoPortfolio:', error);
+    // Log de diagnóstico removido para produção
     logger.error('[criarTrabalhoPortfolio] Erro geral ao criar trabalho:', error);
     throw error;
   }

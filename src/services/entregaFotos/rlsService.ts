@@ -20,16 +20,16 @@ export class RLSService {
     };
 
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Verificando políticas RLS`);
+      // Log removido para produção - verificando políticas RLS
 
       await this.verificarRLSEntregarImagens(result);
 
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Verificação de políticas RLS concluída`);
+      // Log removido para produção - verificação de políticas RLS concluída
 
     } catch (error) {
       result.success = false;
       result.errors.push(`Erro geral na verificação de políticas: ${error}`);
-      logger.error(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Erro na verificação de políticas:`, error);
+      // Log removido para produção - erro na verificação de políticas
     }
 
     return result;

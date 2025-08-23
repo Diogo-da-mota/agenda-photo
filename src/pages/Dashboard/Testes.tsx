@@ -66,9 +66,9 @@ const Testes: React.FC = () => {
       setDbError(null);
       setStorageError(null);
       // Registro no console
-      console.log("user_id:", id);
-      console.log("Upload result (URL):", resultUrl);
-      console.log("storeImageMetadata: OK (handled internamente no handleImageUpload)");
+      // console.log("user_id:", id); // Removido para produção
+        // console.log("Upload result (URL):", resultUrl); // Removido para produção
+        // console.log("storeImageMetadata: OK (handled internamente no handleImageUpload)"); // Removido para produção
     } catch (err: Error) {
       // Erro pode vir do Storage OU do banco
       // handleImageUpload lança o erro correspondente!
@@ -80,13 +80,13 @@ const Testes: React.FC = () => {
       if (errorMsg.toLowerCase().includes("storage")) {
         setStorageError(errorMsg);
         setDbError(null);
-        console.log("user_id:", id);
-        console.log("Upload Storage ERROR:", errorMsg);
+        // console.log("user_id:", id); // Removido para produção
+        // console.log("Upload Storage ERROR:", errorMsg); // Removido para produção
       } else {
         setStorageError(null);
         setDbError(errorMsg);
-        console.log("user_id:", id);
-        console.log("DB insert ERROR:", errorMsg);
+        // console.log("user_id:", id); // Removido para produção
+        // console.log("DB insert ERROR:", errorMsg); // Removido para produção
       }
     }
   };

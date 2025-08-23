@@ -6,7 +6,7 @@ export function register() {
       try {
         const registration = await serviceWorkerSingleton.register({
           onSuccess: (registration) => {
-            console.log('[SW Registration] Service Worker registered with scope:', registration.scope);
+            // console.log('[SW Registration] Service Worker registered with scope:', registration.scope); // Removido para produção
           },
           onError: (error) => {
             console.error('[SW Registration] Service Worker registration failed:', error);
@@ -17,7 +17,7 @@ export function register() {
         });
         
         if (registration) {
-          console.log('[SW Registration] Registration successful');
+          // console.log('[SW Registration] Registration successful'); // Removido para produção
         }
       } catch (error) {
         console.error('[SW Registration] Registration error:', error);

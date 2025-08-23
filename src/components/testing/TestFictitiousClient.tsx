@@ -18,7 +18,7 @@ const TestFictitiousClient = () => {
   const [clientEmail, setClientEmail] = useState(`teste${Date.now()}@cliente.com`);
 
   const addDiagnostic = (message: string) => {
-    console.log(message);
+    // Log removido para produção
     setDiagnostics(prev => [...prev, message]);
   };
 

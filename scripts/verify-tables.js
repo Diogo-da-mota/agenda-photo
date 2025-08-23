@@ -8,7 +8,7 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function verificarTabelas() {
-  console.log('==== VERIFICAÇÃO DAS TABELAS ====');
+  // console.log('==== VERIFICAÇÃO DAS TABELAS ===='); // Removido para produção
   
   try {
     // 1. Verificar a tabela fotos_drive
@@ -17,17 +17,17 @@ async function verificarTabelas() {
     // 2. Verificar a tabela portfolio_trabalhos
     await verificarTabelaPortfolioTrabalhos();
     
-    console.log('\n==== RESUMO ====');
-    console.log('✅ Verificação concluída. Para aplicar as migrações, execute:');
-    console.log('npx supabase migration up');
+    // console.log('\n==== RESUMO ===='); // Removido para produção
+    // console.log('✅ Verificação concluída. Para aplicar as migrações, execute:'); // Removido para produção
+    // console.log('npx supabase migration up'); // Removido para produção
     
   } catch (error) {
-    console.error('❌ Erro na verificação:', error);
+    // console.error('❌ Erro na verificação:', error); // Removido para produção
   }
 }
 
 async function verificarTabelaFotosDrive() {
-  console.log('\n1. Verificando tabela fotos_drive...');
+  // console.log('\n1. Verificando tabela fotos_drive...'); // Removido para produção
   
   try {
     // Verificar se a tabela existe
@@ -37,11 +37,11 @@ async function verificarTabelaFotosDrive() {
       .limit(1);
     
     if (error) {
-      console.error('❌ Erro ao acessar a tabela fotos_drive:', error);
+      // console.error('❌ Erro ao acessar a tabela fotos_drive:', error); // Removido para produção
       return;
     }
     
-    console.log('✓ Tabela fotos_drive existe');
+    // console.log('✓ Tabela fotos_drive existe'); // Removido para produção
     
     // Verificar estrutura
     const { data: tableData, error: tableError } = await supabase
@@ -63,7 +63,7 @@ async function verificarTabelaFotosDrive() {
       });
     
     if (tableError) {
-      console.error('❌ Erro ao consultar estrutura da tabela fotos_drive:', tableError);
+      // console.error('❌ Erro ao consultar estrutura da tabela fotos_drive:', tableError); // Removido para produção
       return;
     }
     
@@ -81,7 +81,7 @@ async function verificarTabelaFotosDrive() {
       return acc;
     }, {});
     
-    console.log('\nCampos da tabela fotos_drive:');
+    // console.log('\nCampos da tabela fotos_drive:'); // Removido para produção
     
     let todosCamposCorretos = true;
     
@@ -91,7 +91,7 @@ async function verificarTabelaFotosDrive() {
         (camposExistentes[nome] === tipo || 
          (tipo === 'ARRAY' && camposExistentes[nome].includes('ARRAY')));
       
-      console.log(`- ${nome}: ${existe ? (tipoCorreto ? '✅' : '❌ (tipo incorreto)') : '❌ (ausente)'}`);
+      // console.log(`- ${nome}: ${existe ? (tipoCorreto ? '✅' : '❌ (tipo incorreto)') : '❌ (ausente)'}`);
       
       if (!existe || !tipoCorreto) {
         todosCamposCorretos = false;
@@ -99,18 +99,18 @@ async function verificarTabelaFotosDrive() {
     });
     
     if (todosCamposCorretos) {
-      console.log('\n✅ Tabela fotos_drive está configurada corretamente');
+      // console.log('\n✅ Tabela fotos_drive está configurada corretamente'); // Removido para produção
     } else {
-      console.log('\n❌ Tabela fotos_drive NÃO está configurada corretamente');
+      // console.log('\n❌ Tabela fotos_drive NÃO está configurada corretamente'); // Removido para produção
     }
     
   } catch (error) {
-    console.error('❌ Erro ao verificar tabela fotos_drive:', error);
+    // console.error('❌ Erro ao verificar tabela fotos_drive:', error); // Removido para produção
   }
 }
 
 async function verificarTabelaPortfolioTrabalhos() {
-  console.log('\n2. Verificando tabela portfolio_trabalhos...');
+  // console.log('\n2. Verificando tabela portfolio_trabalhos...'); // Removido para produção
   
   try {
     // Verificar se a tabela existe
@@ -120,11 +120,11 @@ async function verificarTabelaPortfolioTrabalhos() {
       .limit(1);
     
     if (error) {
-      console.error('❌ Erro ao acessar a tabela portfolio_trabalhos:', error);
+      // console.error('❌ Erro ao acessar a tabela portfolio_trabalhos:', error); // Removido para produção
       return;
     }
     
-    console.log('✓ Tabela portfolio_trabalhos existe');
+    // console.log('✓ Tabela portfolio_trabalhos existe'); // Removido para produção
     
     // Verificar se existem registros
     const { count, error: countError } = await supabase
@@ -132,9 +132,9 @@ async function verificarTabelaPortfolioTrabalhos() {
       .select('*', { count: 'exact', head: true });
     
     if (countError) {
-      console.error('❌ Erro ao contar registros:', countError);
+      // console.error('❌ Erro ao contar registros:', countError); // Removido para produção
     } else {
-      console.log(`✓ A tabela portfolio_trabalhos contém ${count} registros`);
+      // console.log(`✓ A tabela portfolio_trabalhos contém ${count} registros`); // Removido para produção
     }
     
     // Verificar campos específicos
@@ -153,25 +153,25 @@ async function verificarTabelaPortfolioTrabalhos() {
       });
     
     if (tableError) {
-      console.error('❌ Erro ao consultar estrutura da tabela portfolio_trabalhos:', tableError);
+      // console.error('❌ Erro ao consultar estrutura da tabela portfolio_trabalhos:', tableError); // Removido para produção
       return;
     }
     
     const camposExistentes = tableData.map(col => col.column_name);
     
-    console.log('\nVerificando campos necessários:');
-          console.log(`- imagens: ${camposExistentes.includes('imagens') ? '✅' : '❌ (ausente)'}`);
-      console.log(`- imagem_capa: ${camposExistentes.includes('imagem_capa') ? '✅' : '❌ (ausente)'}`);
+    // console.log('\nVerificando campos necessários:'); // Removido para produção
+          // console.log(`- imagens: ${camposExistentes.includes('imagens') ? '✅' : '❌ (ausente)'}`);
+      // console.log(`- imagem_capa: ${camposExistentes.includes('imagem_capa') ? '✅' : '❌ (ausente)'}`);
       
       if (camposExistentes.includes('imagens') && camposExistentes.includes('imagem_capa')) {
-      console.log('\n✅ Tabela portfolio_trabalhos contém os campos necessários');
+      // console.log('\n✅ Tabela portfolio_trabalhos contém os campos necessários'); // Removido para produção
     } else {
-      console.log('\n❌ Tabela portfolio_trabalhos NÃO contém todos os campos necessários');
+      // console.log('\n❌ Tabela portfolio_trabalhos NÃO contém todos os campos necessários'); // Removido para produção
     }
     
   } catch (error) {
-    console.error('❌ Erro ao verificar tabela portfolio_trabalhos:', error);
+    // console.error('❌ Erro ao verificar tabela portfolio_trabalhos:', error); // Removido para produção
   }
 }
 
-verificarTabelas(); 
+verificarTabelas();

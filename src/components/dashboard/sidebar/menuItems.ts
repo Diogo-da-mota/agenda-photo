@@ -82,7 +82,7 @@ export const createMenuItems = (unreadMessages: number = 0, pendingContracts: nu
     name: "Entrega de Fotos",
     icon: Camera,
     path: "/entrega-fotos",
-    iconColor: "#FFFFFF", // Cor branca para o ícone da câmera
+    iconColor: "#FF6B35", // Cor branca para o ícone da câmera
     category: "SITE"
   },
   {

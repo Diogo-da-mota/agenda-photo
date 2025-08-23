@@ -40,8 +40,7 @@ export const PortfolioTimeoutTest: React.FC = () => {
     try {
       const novosResultados: TestResult[] = [];
 
-      // Teste 1: UPDATE simples
-      console.log('🧪 Teste 1: UPDATE simples...');
+      // Teste 1: UPDATE simples - logs removidos para produção
       const startTime1 = performance.now();
       
       try {
@@ -69,8 +68,7 @@ export const PortfolioTimeoutTest: React.FC = () => {
         });
       }
 
-      // Teste 2: UPDATE com dados grandes
-      console.log('🧪 Teste 2: UPDATE com dados grandes...');
+      // Teste 2: UPDATE com dados grandes - logs removidos para produção
       const startTime2 = performance.now();
       
       try {
@@ -105,8 +103,7 @@ export const PortfolioTimeoutTest: React.FC = () => {
         });
       }
 
-      // Teste 3: Múltiplos UPDATEs sequenciais
-      console.log('🧪 Teste 3: Múltiplos UPDATEs...');
+      // Teste 3: Múltiplos UPDATEs sequenciais - logs removidos para produção
       const startTime3 = performance.now();
       
       try {
@@ -156,7 +153,7 @@ export const PortfolioTimeoutTest: React.FC = () => {
       }
 
     } catch (error) {
-      console.error('Erro nos testes:', error);
+      // Erro nos testes - logs removidos para produção
       toast.error('Erro geral nos testes');
     } finally {
       setTestando(false);
@@ -305,4 +302,4 @@ export const PortfolioTimeoutTest: React.FC = () => {
       </Card>
     </div>
   );
-}; 
+};

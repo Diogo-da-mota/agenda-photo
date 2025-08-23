@@ -66,7 +66,7 @@ function getClientInfo(request: Request): { ip: string; userId: string | null } 
       const payload = JSON.parse(atob(token.split('.')[1]));
       userId = payload.sub || payload.user_id || null;
     } catch (error) {
-      console.warn('Erro ao extrair user_id do token:', error);
+      // Erro ao extrair user_id do token - logs removidos para produção
     }
   }
   
@@ -100,7 +100,7 @@ async function checkRateLimit(
     });
     
     if (error) {
-      console.error('Erro ao verificar rate limit:', error);
+      // Erro ao verificar rate limit - logs removidos para produção
       // Em caso de erro, permitir a requisição por precaução
       return { allowed: true, retryAfter: 0 };
     }
@@ -111,7 +111,7 @@ async function checkRateLimit(
       retryAfter: config.windowMinutes * 60 // Segundos até reset
     };
   } catch (error) {
-    console.error('Erro inesperado no rate limit:', error);
+    // Erro inesperado no rate limit - logs removidos para produção
     // Em caso de erro, permitir a requisição por precaução
     return { allowed: true, retryAfter: 0 };
   }
@@ -125,12 +125,12 @@ async function cleanupOldRateLimits() {
     });
     
     if (error) {
-      console.error('Erro ao limpar rate limits antigos:', error);
+      // Erro ao limpar rate limits antigos - logs removidos para produção
     } else {
-      console.log(`Registros de rate limit antigos removidos: ${data}`);
+      // Registros de rate limit antigos removidos - logs removidos para produção
     }
   } catch (error) {
-    console.error('Erro inesperado na limpeza:', error);
+    // Erro inesperado na limpeza - logs removidos para produção
   }
 }
 
@@ -175,8 +175,7 @@ Deno.serve(async (req: Request) => {
     };
     
     if (!allowed) {
-      // Log da requisição bloqueada (sem dados sensíveis)
-      console.warn(`Rate limit excedido para ${rateLimitType}: ${ip}, path: ${pathname}`);
+      // Log da requisição bloqueada - logs removidos para produção
       
       return new Response(
         JSON.stringify({
@@ -198,7 +197,7 @@ Deno.serve(async (req: Request) => {
     // A cada 100 requisições bem sucedidas, limpar registros antigos
     // (uma forma simples de manutenção periódica)
     if (Math.random() < 0.01) { // ~1% das requisições
-      cleanupOldRateLimits().catch(console.error);
+      cleanupOldRateLimits().catch(() => {}); // Logs removidos para produção
     }
     
     // Requisição permitida - retornar headers informativos
@@ -214,7 +213,7 @@ Deno.serve(async (req: Request) => {
     );
     
   } catch (error) {
-    console.error('Erro no rate limiter:', error);
+    // Erro no rate limiter - logs removidos para produção
     
     return new Response(
       JSON.stringify({
@@ -230,4 +229,4 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
-}); 
+});

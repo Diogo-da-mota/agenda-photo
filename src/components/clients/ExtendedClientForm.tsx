@@ -22,7 +22,7 @@ const ExtendedClientForm = () => {
   const salvarClienteCompleto = async () => {
     if (!user) {
       const errorMsg = "Usuário não autenticado.";
-      console.error(errorMsg);
+      // console.error(errorMsg); // Removido para produção
       setLog(`❌ Falha: ${errorMsg}`);
       toast({
         title: "Erro",
@@ -32,12 +32,12 @@ const ExtendedClientForm = () => {
       return;
     }
 
-    console.log("Usuário autenticado:", user.id);
+    // console.log("Usuário autenticado:", user.id); // Removido para produção
     setLog(`🔍 Usuário autenticado: ${user.id}`);
 
     if (!nome || !email) {
       const errorMsg = "Preencha nome e email.";
-      console.error(errorMsg);
+      // console.error(errorMsg); // Removido para produção
       setLog(`❌ Falha: ${errorMsg}`);
       toast({
         title: "Erro",
@@ -58,7 +58,7 @@ const ExtendedClientForm = () => {
       user_id: user.id
     };
     
-    console.log("Tentando salvar cliente:", clienteData);
+    // console.log("Tentando salvar cliente:", clienteData); // Removido para produção
     setLog(`🔄 Enviando dados: ${JSON.stringify(clienteData, null, 2)}`);
     
     try {
@@ -122,7 +122,7 @@ const ExtendedClientForm = () => {
       setLog(prev => `${prev}\n📊 Status da resposta: ${status} ${statusText || ''}`);
 
       if (error) {
-        console.error("Erro ao salvar no Supabase:", error);
+        // console.error("Erro ao salvar no Supabase:", error); // Removido para produção
         setLog(prev => `${prev}\n❌ Erro na inserção: ${error.message} (${error.code})`);
         throw error;
       }
@@ -143,7 +143,7 @@ const ExtendedClientForm = () => {
       setTelefone('');
       setEmpresa('');
     } catch (error) {
-      console.error("Erro detalhado:", error);
+      // console.error("Erro detalhado:", error); // Removido para produção
       
       toast({
         title: "Erro",

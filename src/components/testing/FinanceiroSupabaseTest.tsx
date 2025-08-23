@@ -109,7 +109,7 @@ const FinanceiroSupabaseTest: React.FC = () => {
         throw new Error("Falha na verificação dos dados salvos.");
       }
     } catch (error) {
-      console.error("Erro no teste:", error);
+      // Erro no teste - log removido para produção
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -238,4 +238,4 @@ const FinanceiroSupabaseTest: React.FC = () => {
   );
 };
 
-export default FinanceiroSupabaseTest; 
+export default FinanceiroSupabaseTest;

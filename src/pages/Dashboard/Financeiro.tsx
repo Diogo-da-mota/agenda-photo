@@ -79,7 +79,7 @@ const Financeiro = () => {
     try {
       return groupTransactionsByMonth(transactions || [], despesas || [], transacoesRestantes, transacoesEntradas);
     } catch (error) {
-      console.error('[Financeiro] Erro ao agrupar transações:', error);
+      // console.error('[Financeiro] Erro ao agrupar transações:', error); // Removido para produção
       return [];
     }
   }, [transactions, despesas, transacoesRestantes, transacoesEntradas]);
@@ -88,7 +88,7 @@ const Financeiro = () => {
     try {
       return applyAllFilters(allGroupedTransactions, { dateRange, typeFilter, categoryFilter });
     } catch (error) {
-      console.error('[Financeiro] Erro ao aplicar filtros:', error);
+      // console.error('[Financeiro] Erro ao aplicar filtros:', error); // Removido para produção
       return [];
     }
   }, [allGroupedTransactions, dateRange, typeFilter, categoryFilter]);
@@ -130,7 +130,7 @@ const Financeiro = () => {
         { typeFilter, dateRange, categoryFilter }
       );
     } catch (error) {
-      console.error('[Financeiro] Erro ao calcular totais:', error);
+      // console.error('[Financeiro] Erro ao calcular totais:', error); // Removido para produção
       return {
         totalReceitas: 0,
         totalDespesas: 0,

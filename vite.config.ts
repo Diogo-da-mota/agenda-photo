@@ -58,16 +58,11 @@ export default defineConfig(({ mode }) => ({
         rewrite: (path) => path.replace(/^\/api\/n8n/, ''),
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('🔧 Proxy N8N:', req.method, req.url);
             proxyReq.removeHeader('origin');
           });
           proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log('📊 N8N Response:', proxyRes.statusCode);
             proxyRes.headers['access-control-allow-origin'] = 'http://localhost:8080';
             proxyRes.headers['access-control-allow-credentials'] = 'true';
-          });
-          proxy.on('error', (err, req, res) => {
-            console.error('❌ Proxy Error:', err.message);
           });
         }
       }

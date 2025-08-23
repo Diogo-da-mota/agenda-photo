@@ -33,9 +33,9 @@ export const usePrefetchTrabalho = () => {
         gcTime: 1000 * 60 * 10, // 10 minutos em memória
       });
 
-      console.log(`[Prefetch] ✅ Trabalho ${trabalhoId} pré-carregado com sucesso`);
+      // Log removido para produção - trabalho pré-carregado
     } catch (error) {
-      console.warn(`[Prefetch] Erro ao pré-carregar trabalho ${trabalhoId}:`, error);
+      // Log de erro removido para produção - erro ao pré-carregar trabalho
       // Não bloquear a interface por erros de prefetch
     }
   }, [queryClient, user?.id]);

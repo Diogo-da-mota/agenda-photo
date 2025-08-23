@@ -20,7 +20,7 @@ export class BackupService {
     };
 
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Backup desabilitado temporariamente`);
+      // Log removido para produção - backup desabilitado temporariamente
       result.details.push('Backup desabilitado temporariamente para evitar erros de tabelas não existentes');
       return result;
 
@@ -133,7 +133,7 @@ export class EstatisticasService {
    */
   static async obterEstatisticas(): Promise<GaleriaStats[]> {
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Obtendo estatísticas das galerias`);
+      // Log removido para produção - obtendo estatísticas das galerias
 
       const { data: estatisticas, error } = await supabase
         .from('galeria')
@@ -152,14 +152,14 @@ export class EstatisticasService {
         .limit(100);
 
       if (error) {
-        logger.error(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Erro ao obter estatísticas:`, error);
+        // Log de erro removido para produção
         return [];
       }
 
       return estatisticas || [];
 
     } catch (error) {
-      logger.error(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Erro ao obter estatísticas:`, error);
+      // Log de erro removido para produção
       return [];
     }
   }

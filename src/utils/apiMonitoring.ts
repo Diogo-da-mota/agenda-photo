@@ -193,7 +193,7 @@ export const exportAPIMetrics = () => {
 };
 
 // Inicializar monitoramento
-console.log('[API_MONITORING] Sistema de monitoramento de API inicializado');
+// console.log('[API_MONITORING] Sistema de monitoramento de API inicializado'); // Removido para produção
 
 // Expor funções globalmente para debug
 if (process.env.NODE_ENV === 'development') {
@@ -203,4 +203,4 @@ if (process.env.NODE_ENV === 'development') {
     clearMetrics: clearAPIMetrics,
     exportMetrics: exportAPIMetrics
   };
-} 
+}

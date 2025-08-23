@@ -80,7 +80,7 @@ export const useFinanceiroData = ({
     queryKey: ['financeiro-transacoes', user?.id, typeFilter, dateRange, categoryFilter, debouncedSearchQuery],
     queryFn: async () => {
       if (!user) return [];
-      console.log('[Financeiro] Buscando transações com filtros atuais');
+      // Log removido para produção
       return await buscarTransacoes(user.id, getFiltros());
     },
     enabled: !!user,
@@ -96,7 +96,7 @@ export const useFinanceiroData = ({
     queryKey: ['financeiro-resumo', user?.id],
     queryFn: async () => {
       if (!user) return { totalReceitas: 0, totalDespesas: 0, saldo: 0 };
-      console.log('[Financeiro] Buscando resumo financeiro das transações regulares');
+      // Log removido para produção
       // Usar o resumo financeiro sem filtros para mostrar todos os totais
       return await buscarResumoFinanceiro(user.id, {});
     },
@@ -135,4 +135,4 @@ export const useFinanceiroData = ({
     isLoadingResumo,
     isLoadingDespesas
   };
-}; 
+};

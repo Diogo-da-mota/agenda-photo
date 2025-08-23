@@ -95,7 +95,7 @@ export class EntregaFotosAutomaticService {
     this.isProcessing = true;
 
     try {
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Iniciando execução de processos automáticos`);
+      // Log removido para produção - iniciando execução de processos automáticos
 
       const verificacaoExpiracao = await this.verificarExpiracao();
       const limpezaArquivos = await this.limpezaArquivosAntigos();
@@ -116,7 +116,7 @@ export class EntregaFotosAutomaticService {
 
       const sucesso = totalErros === 0;
 
-      logger.info(`${ENTREGA_FOTOS_CONFIG.LOG_PREFIX} Processos automáticos concluídos: ${totalProcessado} processados, ${totalErros} erros`);
+      // Log removido para produção - processos automáticos concluídos
 
       return {
         verificacaoExpiracao,

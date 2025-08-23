@@ -151,7 +151,7 @@ export default function EntregaFotos() {
       toast.success('Galeria criada com sucesso!');
 
     } catch (error) {
-      console.error('Erro ao criar galeria:', error);
+      // console.error('Erro ao criar galeria:', error); // Removido para produção
       toast.error(error instanceof Error ? error.message : 'Erro ao criar galeria');
     } finally {
       setIsUploading(false);
@@ -180,7 +180,7 @@ export default function EntregaFotos() {
       }
       
     } catch (error) {
-      console.error('Erro ao apagar galeria:', error);
+      // console.error('Erro ao apagar galeria:', error); // Removido para produção
       toast.error('Erro inesperado ao apagar galeria. Tente novamente.');
       
       // Reverter UI em caso de erro
@@ -206,7 +206,7 @@ export default function EntregaFotos() {
       await navigator.clipboard.writeText(url);
       toast.success('Link copiado para a área de transferência!');
     } catch (error) {
-      console.error('Erro ao copiar link:', error);
+      // console.error('Erro ao copiar link:', error); // Removido para produção
       toast.error('Erro ao copiar link. Tente novamente.');
     }
   };
@@ -237,7 +237,7 @@ export default function EntregaFotos() {
       await navigator.clipboard.writeText(url);
       toast.success('Link copiado para a área de transferência!');
     } catch (error) {
-      console.error('Erro ao copiar link:', error);
+      // console.error('Erro ao copiar link:', error); // Removido para produção
       toast.error('Erro ao copiar link. Tente novamente.');
     }
   };

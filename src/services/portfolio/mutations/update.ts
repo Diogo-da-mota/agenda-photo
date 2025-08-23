@@ -70,7 +70,7 @@ export const atualizarTrabalhoPortfolio = async (
       logger.info('✅ Trabalho atualizado com sucesso:', { id: trabalhoId });
 
       // Sistema agora usa Amazon S3 - atualização automática
-      console.log('✅ [atualizarTrabalhoPortfolio] Trabalho atualizado - usando Amazon S3');
+      // Log removido para produção - trabalho atualizado
       
       /* CÓDIGO ORIGINAL N8N COMENTADO
       
@@ -147,7 +147,7 @@ export const updatePortfolioMutation = async (
       }
 
       // Sistema usa Amazon S3 - integração automática
-      console.log('✅ [updatePortfolioMutation] Portfolio atualizado - usando Amazon S3');
+      // Log removido para produção - portfolio atualizado
       
       /* CÓDIGO ORIGINAL N8N COMENTADO
       

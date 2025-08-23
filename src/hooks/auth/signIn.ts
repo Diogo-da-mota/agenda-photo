@@ -15,7 +15,7 @@ export async function signIn(email: string, password: string) {
 
     return { data, error: null };
   } catch (error) {
-    console.error("Erro no login:", error);
+    // Erro no login - logs removidos para produção
     return { data: null, error };
   }
 }

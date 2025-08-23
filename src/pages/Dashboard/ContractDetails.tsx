@@ -142,7 +142,7 @@ const ContractDetails = () => {
         return pdfUrl;
       });
     } catch (error) {
-      console.error('Erro ao gerar PDF para preview:', error);
+      // console.error('Erro ao gerar PDF para preview:', error); // Removido para produção
     }
   }, [contract, configuracoes, eventLocation, attachments]);
   
@@ -158,7 +158,7 @@ const ContractDetails = () => {
       .single();
 
     if (contratoError) {
-      console.error('Erro ao buscar contrato:', contratoError);
+      // console.error('Erro ao buscar contrato:', contratoError); // Removido para produção
       throw new Error(`Erro ao buscar contrato com id_contrato ${id_contrato}`);
     }
 
@@ -171,7 +171,7 @@ const ContractDetails = () => {
         .eq('id_contrato', id_contrato_db);
       
       if (error) {
-        console.error('Erro ao carregar anexos:', error);
+        // console.error('Erro ao carregar anexos:', error); // Removido para produção
         return;
       }
       
@@ -219,7 +219,7 @@ const ContractDetails = () => {
         );
       }
     } catch (error) {
-      console.error('Erro ao buscar anexos:', error);
+      // console.error('Erro ao buscar anexos:', error); // Removido para produção
     }
   }, [contractId]);
   
@@ -280,7 +280,7 @@ const ContractDetails = () => {
           .single();
 
         if (contratoError) {
-          console.error('Erro ao buscar contrato:', contratoError);
+          // console.error('Erro ao buscar contrato:', contratoError); // Removido para produção
           throw new Error(`Erro ao buscar contrato com id_contrato ${id_contrato}`);
         }
 
@@ -298,7 +298,7 @@ const ContractDetails = () => {
           });
 
         if (dbError) {
-          console.error('Erro ao salvar no banco:', dbError);
+          // console.error('Erro ao salvar no banco:', dbError); // Removido para produção
           throw new Error(`Erro ao salvar informações do arquivo ${attachment.name}`);
         }
       }
@@ -312,7 +312,7 @@ const ContractDetails = () => {
       });
       
     } catch (error) {
-      console.error('Erro ao salvar anexos:', error);
+      // console.error('Erro ao salvar anexos:', error); // Removido para produção
       toast({
         title: "Erro ao salvar",
         description: error instanceof Error ? error.message : "Ocorreu um erro ao salvar os anexos. Tente novamente.",
@@ -367,7 +367,7 @@ const ContractDetails = () => {
             setEventLocation(eventData.local);
           }
         } catch (error) {
-          console.error('Erro ao buscar local do evento:', error);
+          // console.error('Erro ao buscar local do evento:', error); // Removido para produção
         }
       }
     };
@@ -530,7 +530,7 @@ const ContractDetails = () => {
     }
 
     // Log attachment being removed
-    console.log("Removendo anexo:", attachmentToRemove);
+    // console.log("Removendo anexo:", attachmentToRemove); // Removido para produção
 
     // Update attachments state
     setAttachments(prev => {

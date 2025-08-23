@@ -8,7 +8,7 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function verificarUserIds() {
-  console.log('Verificando user_ids na tabela portfolio_trabalhos...');
+  // console.log('Verificando user_ids na tabela portfolio_trabalhos...'); // Removido para produção
   
   try {
     // Obter todos os registros na tabela
@@ -18,11 +18,11 @@ async function verificarUserIds() {
       .order('criado_em', { ascending: false });
     
     if (error) {
-      console.error('❌ Erro ao buscar registros:', error);
+      // console.error('❌ Erro ao buscar registros:', error); // Removido para produção
       return;
     }
     
-    console.log(`✓ Total de registros: ${registros.length}`);
+    // console.log(`✓ Total de registros: ${registros.length}`); // Removido para produção
     
     if (registros && registros.length > 0) {
       // Criar um mapa de user_ids para contar ocorrências
@@ -44,21 +44,21 @@ async function verificarUserIds() {
       });
       
       // Exibir contagem por user_id
-      console.log('\nContagem por user_id:');
-      console.log('------------------');
+      // console.log('\nContagem por user_id:'); // Removido para produção
+      // console.log('------------------'); // Removido para produção
       
       userIdsMap.forEach((info, userId) => {
-        console.log(`User ID: ${userId}`);
-        console.log(`Total de registros: ${info.count}`);
-        console.log('Registros:');
+        // console.log(`User ID: ${userId}`); // Removido para produção
+        // console.log(`Total de registros: ${info.count}`); // Removido para produção
+        // console.log('Registros:'); // Removido para produção
         info.registros.forEach((registro, index) => {
-          console.log(`  ${index + 1}. ${registro.titulo} (ID: ${registro.id})`);
+          // console.log(`  ${index + 1}. ${registro.titulo} (ID: ${registro.id})`); // Removido para produção
         });
-        console.log('------------------');
+        // console.log('------------------'); // Removido para produção
       });
       
       // Agora tentar fazer login com usuário de teste para verificar o ID
-      console.log('\nVerificando login com usuário de teste...');
+      // console.log('\nVerificando login com usuário de teste...'); // Removido para produção
       
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: 'test@example.com',
@@ -66,27 +66,27 @@ async function verificarUserIds() {
       });
       
       if (authError) {
-        console.error('❌ Erro ao fazer login:', authError.message);
+        // console.error('❌ Erro ao fazer login:', authError.message); // Removido para produção
       } else {
         const loggedUserId = authData.user.id;
-        console.log(`✅ Login realizado com sucesso! User ID: ${loggedUserId}`);
+        // console.log(`✅ Login realizado com sucesso! User ID: ${loggedUserId}`); // Removido para produção
         
         // Verificar se esse usuário tem registros
         if (userIdsMap.has(loggedUserId)) {
           const userInfo = userIdsMap.get(loggedUserId);
-          console.log(`✓ Usuário tem ${userInfo.count} registros na tabela.`);
+          // console.log(`✓ Usuário tem ${userInfo.count} registros na tabela.`); // Removido para produção
         } else {
-          console.log(`❌ Usuário NÃO tem registros na tabela.`);
+          // console.log(`❌ Usuário NÃO tem registros na tabela.`); // Removido para produção
         }
       }
       
     } else {
-      console.log('\n❌ Nenhum registro encontrado na tabela.');
+      // console.log('\n❌ Nenhum registro encontrado na tabela.'); // Removido para produção
     }
     
   } catch (error) {
-    console.error('❌ Erro ao verificar registros:', error);
+    // console.error('❌ Erro ao verificar registros:', error); // Removido para produção
   }
 }
 
-verificarUserIds(); 
+verificarUserIds();

@@ -14,12 +14,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
   
   // Debug logs temporários
   const handleLoginClick = () => {
-    console.log('[DEBUG] Botão Login clicado');
+    // console.log('[DEBUG] Botão Login clicado'); // Removido para produção
     onLoginClick();
   };
   
   const handleRegisterClick = () => {
-    console.log('[DEBUG] Botão Criar Conta clicado');
+    // console.log('[DEBUG] Botão Criar Conta clicado'); // Removido para produção
     onRegisterClick();
   };
 

@@ -1,23 +1,9 @@
 import { supabase } from "@/lib/supabase";
-import { createClient, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import { registrarContratoCriado } from './atividadeService';
 
-// Cliente Supabase para consultas públicas (sem RLS)
-const publicSupabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-      }
-    }
-  }
-);
+// Reutilizando o cliente Supabase principal para evitar múltiplas instâncias
+// const publicSupabase = supabase; // Removido para evitar aviso de múltiplas instâncias
 
 // Interface para dados do contrato
 export interface Contract {
@@ -163,7 +149,7 @@ export const getContract = async (id: string, user: User) => {
 export const getPublicContract = async (id: string) => {
   try {
     // Usar o cliente público que não tem sessão de usuário
-    const { data, error } = await publicSupabase
+    const { data, error } = await supabase
       .from('contratos')
       .select('*, clientes(*)')
       .eq('id_contrato', id)

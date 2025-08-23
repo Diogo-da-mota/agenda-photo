@@ -31,7 +31,7 @@ export const excluirTrabalhoPortfolio = async (trabalhoId: string, userId: strin
     logger.info(`[excluirTrabalhoPortfolio] Trabalho ${trabalhoId} excluído com sucesso`);
 
     // Sistema agora usa Amazon S3 - exclusão automática via lifecycle
-    console.log('✅ [excluirTrabalhoPortfolio] Trabalho excluído - usando Amazon S3');
+    // Log removido para produção - trabalho excluído
     
     /* CÓDIGO ORIGINAL N8N COMENTADO
     

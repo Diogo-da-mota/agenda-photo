@@ -88,11 +88,7 @@ export const enviarImagemParaN8NOriginal = async (
     // Log diagnóstico detalhado
     logDiagnosticInfo(file, formFields, formData);
 
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] === DADOS ENVIADOS PARA N8N ===');
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] URL:', N8N_WEBHOOK_URL);
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] Method: POST');
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] Mode: cors');
-    console.log('🔍 [DIAGNÓSTICO PARTE 4] Enviando requisição para N8N...');
+    // Logs de diagnóstico removidos para produção
 
     // Enviar para N8N
     const response = await fetch(N8N_WEBHOOK_URL, {
@@ -103,7 +99,7 @@ export const enviarImagemParaN8NOriginal = async (
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ HTTP ERROR:', errorText);
+      // Log de diagnóstico removido para produção
       throw new Error(`HTTP ${response.status}: ${response.statusText}. Response: ${errorText}`);
     }
 
@@ -115,10 +111,9 @@ export const enviarImagemParaN8NOriginal = async (
     let result: N8NImageResponse;
     try {
       result = JSON.parse(responseText);
-      console.log('🔍 [DIAGNÓSTICO PARTE 4] ✅ JSON VÁLIDO:', result);
+      // Log de diagnóstico removido para produção
     } catch (parseError) {
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ ERRO PARSE JSON:', parseError);
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] Response text:', responseText.substring(0, 200));
+      // Logs de diagnóstico removidos para produção
       throw new Error('N8N retornou resposta não-JSON: ' + responseText.substring(0, 100));
     }
 
@@ -127,16 +122,16 @@ export const enviarImagemParaN8NOriginal = async (
       const fileUrl = extractFileUrl(result);
       
       if (!fileUrl) {
-        console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ URL DO DRIVE NÃO ENCONTRADA:', result);
+        // Log de diagnóstico removido para produção
         throw new Error('N8N não retornou URL do Drive em nenhum campo esperado');
       }
 
       if (!result.success) {
-        console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ N8N indicou falha:', result.message);
+        // Log de diagnóstico removido para produção
         throw new Error(result.message || 'N8N indicou falha no upload');
       }
 
-      console.log('🔍 [DIAGNÓSTICO PARTE 4] ✅ URL EXTRAÍDA:', fileUrl);
+      // Log de diagnóstico removido para produção
       
       logger.info('[enviarImagemParaN8N] ✅ Sucesso! URL recebida:', {
         fileName: file.name,
@@ -146,10 +141,7 @@ export const enviarImagemParaN8NOriginal = async (
 
       return fileUrl;
     } else {
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] ❌ ERRO em enviarImagemParaN8N:', error);
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] Arquivo:', file.name);
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] FormFields:', formFields);
-      console.error('🔍 [DIAGNÓSTICO PARTE 4] Stack:', error.stack);
+      // Logs de diagnóstico removidos para produção
     }
 
     logger.error('[enviarImagemParaN8N] ❌ Erro ao enviar para N8N:', error);

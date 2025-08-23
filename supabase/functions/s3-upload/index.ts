@@ -55,22 +55,14 @@ const s3Config = {
   region: Deno.env.get('AWS_REGION') || Deno.env.get('aws_region') || 'us-east-2',
 }
 
-// Log detalhado para depuração das variáveis de ambiente
-console.log('--- Início da Verificação de Variáveis de Ambiente ---');
-console.log('Variáveis disponíveis:', Object.keys(Deno.env.toObject()));
-console.log('Status das Credenciais Lidas:', {
-  hasAccessKey: !!s3Config.accessKeyId,
-  hasSecretKey: !!s3Config.secretAccessKey,
-  hasBucket: !!s3Config.bucketName,
-  hasRegion: !!s3Config.region,
-  regionLida: s3Config.region,
-  bucketLido: s3Config.bucketName
-});
-console.log('--- Fim da Verificação ---');
+// Log detalhado para depuração das variáveis de ambiente - logs removidos para produção
+// Verificação de variáveis de ambiente
+// Status das credenciais - dados sensíveis removidos
+// Fim da verificação
 
 // Validação robusta para garantir que todas as credenciais foram carregadas
 if (!s3Config.accessKeyId || !s3Config.secretAccessKey || !s3Config.bucketName || !s3Config.region) {
-  console.error('Erro fatal: Credenciais S3 incompletas ou não encontradas nas variáveis de ambiente.', s3Config);
+  // Erro fatal: Credenciais S3 incompletas - logs removidos para produção
   throw new Error('❌ Credenciais S3 incompletas nas variáveis de ambiente');
 }
 
@@ -172,7 +164,7 @@ const validateUserStorage = async (supabase: any, userId: string): Promise<Valid
       .eq('user_id', userId);
 
     if (error) {
-      console.warn('⚠️ Erro ao verificar storage do usuário:', error);
+      // Erro ao verificar storage do usuário - logs removidos para produção
       return { isValid: true }; // Falha aberta
     }
 
@@ -182,7 +174,7 @@ const validateUserStorage = async (supabase: any, userId: string): Promise<Valid
     }
     return { isValid: true };
   } catch (error) {
-    console.warn('⚠️ Validação de storage falhou:', error);
+    // Validação de storage falhou - logs removidos para produção
     return { isValid: true }; // Falha aberta
   }
 };
@@ -195,7 +187,7 @@ serve(async (req) => {
   const startTime = Date.now();
 
   if (req.method === 'OPTIONS') {
-    console.log('Recebida requisição OPTIONS (CORS preflight). Respondendo com status 200.');
+    // Recebida requisição OPTIONS (CORS preflight) - logs removidos para produção
     return handleCORS();
   }
   if (req.method !== 'POST') {
@@ -203,7 +195,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🚀 [S3] Processando requisição de upload...');
+    // Processando requisição de upload - logs removidos para produção
 
     const authHeader = req.headers.get('Authorization')!;
     const userId = req.headers.get('X-User-Id');
@@ -277,7 +269,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('❌ Erro no upload para S3:', error);
+    // Erro no upload para S3 - logs removidos para produção
     return new Response(
       JSON.stringify({
         success: false,
@@ -287,4 +279,4 @@ serve(async (req) => {
       { status: 500, headers: jsonHeaders }
     );
   }
-}); 
+});

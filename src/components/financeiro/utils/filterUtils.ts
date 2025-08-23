@@ -14,12 +14,7 @@ export const applyAllFilters = (
 ) => {
   const { dateRange, typeFilter, categoryFilter } = filters;
   
-  console.log('[Financeiro] Aplicando filtros:', { 
-    dateRange, 
-    typeFilter, 
-    categoryFilter,
-    hasDateFilter: !!(dateRange.start || dateRange.end)
-  });
+  // Log removido para produção
   
   return groups.map(group => {
     // Filtrar transações por data e tipo
@@ -134,4 +129,4 @@ export const calcularTotaisDosFiltros = (
       totalEntradas
     };
   }
-}; 
+};

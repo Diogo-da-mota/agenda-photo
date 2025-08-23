@@ -76,7 +76,7 @@ export const useFinanceiroActions = (
     }
 
     try {
-      console.log('[Financeiro] Buscando cards individuais de restantes e entradas');
+      // Log removido para produção
       
       const [transacoesRestantes, transacoesEntradas] = await Promise.all([
         asyncRetry(() => buscarEventosComValoresRestantes(user.id)),
@@ -87,21 +87,21 @@ export const useFinanceiroActions = (
         if (Array.isArray(transacoesRestantes)) {
           setTransacoesRestantes(transacoesRestantes);
         } else {
-          console.error('[FinanceiroActions] transacoesRestantes não é um array. Recebido:', transacoesRestantes);
+          // console.error('[FinanceiroActions] transacoesRestantes não é um array. Recebido:', transacoesRestantes);
           setTransacoesRestantes([]);
         }
 
         if (Array.isArray(transacoesEntradas)) {
           setTransacoesEntradas(transacoesEntradas);
         } else {
-          console.error('[FinanceiroActions] transacoesEntradas não é um array. Recebido:', transacoesEntradas);
+          // console.error('[FinanceiroActions] transacoesEntradas não é um array. Recebido:', transacoesEntradas);
           setTransacoesEntradas([]);
         }
       }
       
-      console.log(`[Financeiro] Cards carregados: ${transacoesRestantes.length} restantes, ${transacoesEntradas.length} entradas`);
+      // Log removido para produção
     } catch (error) {
-      console.error('Erro ao carregar cards individuais:', error);
+      // console.error('Erro ao carregar cards individuais:', error);
       if (isMounted.current) {
         setTransacoesRestantes([]);
         setTransacoesEntradas([]);
@@ -141,7 +141,7 @@ export const useFinanceiroActions = (
         description: resultado
       });
     } catch (error) {
-      console.error("Erro ao corrigir transações:", error);
+      // console.error("Erro ao corrigir transações:", error);
       setMensagemCorrecao(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
       toast({
         title: "Erro",
@@ -165,7 +165,7 @@ export const useFinanceiroActions = (
         variant: "default"
       });
     } catch (error) {
-      console.error("Erro inesperado:", error);
+      // console.error("Erro inesperado:", error);
       setMensagemCorrecao(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
       toast({
         title: "Erro",

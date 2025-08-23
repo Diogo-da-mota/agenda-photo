@@ -61,7 +61,7 @@ serve(async (req) => {
       .single();
     
     if (userError || !userExists) {
-      console.error("Usuário não encontrado:", userError);
+      // Usuário não encontrado - logs removidos para produção
       return new Response(
         JSON.stringify({ error: "Usuário não encontrado" }),
         { 
@@ -71,9 +71,9 @@ serve(async (req) => {
       );
     }
 
-    // Log the webhook event
-    console.log(`Webhook recebido para fotógrafo ${photographerId}`);
-    console.log("Payload:", JSON.stringify(payload));
+    // Log the webhook event - logs removidos para produção
+    // Webhook recebido para fotógrafo
+    // Payload: dados sensíveis removidos
 
     // Save webhook data to database
     const { data, error } = await supabase
@@ -87,7 +87,7 @@ serve(async (req) => {
       });
     
     if (error) {
-      console.error("Erro ao salvar evento de webhook:", error);
+      // Erro ao salvar evento de webhook - logs removidos para produção
       throw new Error(`Erro ao salvar dados: ${error.message}`);
     }
 
@@ -127,9 +127,9 @@ serve(async (req) => {
           .eq('event_type', payload.event || 'unknown')
           .eq('processed_at', new Date().toISOString());
           
-        console.log("Webhook encaminhado com sucesso:", forwardResponse);
+        // Webhook encaminhado com sucesso - logs removidos para produção
       } catch (forwardError) {
-        console.error("Erro ao encaminhar webhook:", forwardError);
+        // Erro ao encaminhar webhook - logs removidos para produção
         
         // Atualizar o status do evento para erro
         await supabase
@@ -160,7 +160,7 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error("Erro no webhook:", error);
+    // Erro no webhook - logs removidos para produção
     
     return new Response(
       JSON.stringify({ 

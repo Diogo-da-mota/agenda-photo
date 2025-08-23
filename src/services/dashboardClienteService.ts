@@ -55,9 +55,9 @@ export interface AtualizarDashboardCliente {
 
 // Logger para debugging (Critério 8: Tratamento de Erros)
 const logger = {
-  info: (...args: any[]) => console.log('[dashboardClienteService]', ...args),
-  error: (...args: any[]) => console.error('[dashboardClienteService]', ...args),
-  warn: (...args: any[]) => console.warn('[dashboardClienteService]', ...args)
+  info: (...args: any[]) => {}, // console.log('[dashboardClienteService]', ...args); // Removido para produção
+  error: (...args: any[]) => {}, // console.error('[dashboardClienteService]', ...args); // Removido para produção
+  warn: (...args: any[]) => {} // console.warn('[dashboardClienteService]', ...args); // Removido para produção
 };
 
 // Função para buscar todos os agendamentos de um usuário

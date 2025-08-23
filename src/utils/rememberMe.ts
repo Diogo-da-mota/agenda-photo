@@ -30,16 +30,27 @@ function decryptData(encryptedData: string): string {
  */
 export function saveCredentials(email: string, password: string): void {
   try {
+    console.log('[REMEMBER_ME] Iniciando salvamento de credenciais para:', email);
+    
     const data: RememberMeData = {
       email,
       password,
       timestamp: Date.now()
     };
     
+    console.log('[REMEMBER_ME] Dados preparados, criptografando...');
     const encryptedData = encryptData(JSON.stringify(data));
+    
+    console.log('[REMEMBER_ME] Dados criptografados, salvando no localStorage...');
     localStorage.setItem(STORAGE_KEY, encryptedData);
     
-    console.log('[REMEMBER_ME] Credenciais salvas com sucesso');
+    // Verificar se foi salvo corretamente
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      console.log('[REMEMBER_ME] Credenciais salvas com sucesso no localStorage');
+    } else {
+      console.error('[REMEMBER_ME] Falha ao salvar no localStorage');
+    }
   } catch (error) {
     console.error('[REMEMBER_ME] Erro ao salvar credenciais:', error);
   }
@@ -50,23 +61,31 @@ export function saveCredentials(email: string, password: string): void {
  */
 export function loadCredentials(): RememberMeData | null {
   try {
+    console.log('[REMEMBER_ME] Tentando carregar credenciais do localStorage...');
     const encryptedData = localStorage.getItem(STORAGE_KEY);
     
     if (!encryptedData) {
+      console.log('[REMEMBER_ME] Nenhum dado encontrado no localStorage');
       return null;
     }
     
+    console.log('[REMEMBER_ME] Dados encontrados, descriptografando...');
     const decryptedData = decryptData(encryptedData);
     const data: RememberMeData = JSON.parse(decryptedData);
     
+    console.log('[REMEMBER_ME] Dados descriptografados, verificando validade...');
     // Verificar se os dados não são muito antigos (30 dias)
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-    if (Date.now() - data.timestamp > thirtyDaysInMs) {
+    const age = Date.now() - data.timestamp;
+    console.log('[REMEMBER_ME] Idade dos dados:', Math.floor(age / (24 * 60 * 60 * 1000)), 'dias');
+    
+    if (age > thirtyDaysInMs) {
+      console.log('[REMEMBER_ME] Dados expirados (mais de 30 dias), limpando...');
       clearCredentials();
       return null;
     }
     
-    console.log('[REMEMBER_ME] Credenciais carregadas com sucesso');
+    console.log('[REMEMBER_ME] Credenciais carregadas com sucesso para:', data.email);
     return data;
   } catch (error) {
     console.error('[REMEMBER_ME] Erro ao carregar credenciais:', error);

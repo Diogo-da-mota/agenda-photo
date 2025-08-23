@@ -40,11 +40,18 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   // Carregar credenciais salvas e tentar auto-login
   useEffect(() => {
     const attemptAutoLogin = async () => {
+      // Só tentar auto-login se não há sessão ativa e ainda não foi tentado
       if (autoLoginAttempted || session) return;
+      
+      // Verificar se signIn está disponível
+      if (!signIn) {
+        console.log('[REMEMBER_ME] signIn não está disponível ainda, aguardando...');
+        return;
+      }
       
       const savedCredentials = loadCredentials();
       if (savedCredentials) {
-        console.log('[REMEMBER_ME] Credenciais encontradas, tentando auto-login...');
+        // Credenciais encontradas, tentando auto-login - logs removidos para produção
         setEmail(savedCredentials.email);
         setPassword(savedCredentials.password);
         setRememberMe(true);
@@ -56,24 +63,25 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           const result = await signIn(savedCredentials.email, savedCredentials.password);
           
           if (result.success) {
-            console.log('[REMEMBER_ME] Auto-login bem-sucedido');
+            // Auto-login bem-sucedido - logs removidos para produção
             toast({
               title: "Login automático realizado",
               description: "Bem-vindo de volta!",
             });
           } else {
-            console.log('[REMEMBER_ME] Auto-login falhou, limpando credenciais salvas');
+            // Auto-login falhou, limpando credenciais salvas - logs removidos para produção
             clearCredentials();
             setPassword(''); // Limpar senha do formulário por segurança
           }
         } catch (error) {
-          console.error('[REMEMBER_ME] Erro no auto-login:', error);
+          // Erro no auto-login - logs removidos para produção
           clearCredentials();
           setPassword('');
         } finally {
           setIsLoading(false);
         }
       } else {
+        console.log('[REMEMBER_ME] Nenhuma credencial salva encontrada');
         setAutoLoginAttempted(true);
       }
     };
@@ -84,7 +92,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   // Monitorar mudanças na sessão para redirecionar após login bem-sucedido
   useEffect(() => {
     if (session) {
-      console.log("[LOGIN] Sessão detectada, redirecionando para o dashboard");
+      // Sessão detectada, redirecionando para o dashboard - logs removidos para produção
       
       toast({
         title: "Login realizado com sucesso",
@@ -150,7 +158,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       securityLogger.logLoginAttempt(normalizedEmail, result.success, result.error);
       
       if (!result.success) {
-        console.error("[LOGIN] Login falhou:", result.error);
+        // Login falhou - logs removidos para produção
         
         // Registrar tentativa falhada
         recordFailedLogin(normalizedEmail);
@@ -178,18 +186,18 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       
       // Salvar credenciais se "Lembrar de mim" estiver marcado
       if (rememberMe) {
-        console.log('[REMEMBER_ME] Salvando credenciais para próximo login');
+        // Salvando credenciais para próximo login - logs removidos para produção
         saveCredentials(normalizedEmail, password);
       } else {
         // Limpar credenciais salvas se "Lembrar de mim" não estiver marcado
         clearCredentials();
       }
       
-      console.log("[LOGIN] Login bem-sucedido, aguardando sessão...");
+      // Login bem-sucedido, aguardando sessão - logs removidos para produção
       // O redirecionamento será tratado pelo useEffect que monitora a sessão
       
     } catch (error) {
-      console.error("[LOGIN] Exceção durante login:", error);
+      // Exceção durante login - logs removidos para produção
       if (error instanceof Error) {
         setError(error.message || "Falha na autenticação. Verifique suas credenciais.");
       } else {
@@ -201,14 +209,14 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
   const handleGoogleLogin = async () => {
     try {
-      console.log("[LOGIN] Iniciando login com Google");
+      // Iniciando login com Google - logs removidos para produção
       const result = await signInWithGoogle('login');
       
       if (!result.success) {
         setError(result.error || "Falha no login com Google. Tente novamente.");
       }
     } catch (error) {
-      console.error("[LOGIN] Erro no login com Google:", error);
+      // Erro no login com Google - logs removidos para produção
       setError("Falha no login com Google. Tente novamente.");
     }
   };

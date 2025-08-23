@@ -1,19 +1,57 @@
 // Logger simples para substituir SecureLogger temporariamente
-export const simpleLogger = {
-  log: console.log,
-  info: console.info,
-  error: console.error,
-  warn: console.warn,
-  debug: console.debug,
-  
-  security: (message: string, data?: any, context?: string) => console.warn(`[SECURITY] ${message}`, data, context),
+const isDevelopment = import.meta.env.MODE === 'development';
 
-  audit: {
-    log: (message: string, data?: any) => console.info(`[AUDIT] ${message}`, data),
-    warn: (message: string, data?: any) => console.warn(`[AUDIT WARNING] ${message}`, data),
-    error: (message: string, error?: any, data?: any) => console.error(`[AUDIT ERROR] ${message}`, error, data)
+export const simpleLogger = {
+  log: (...args: any[]) => {
+    if (isDevelopment) {
+      console.log(...args);
+    }
+  },
+  info: (...args: any[]) => {
+    if (isDevelopment) {
+      console.info(...args);
+    }
+  },
+  error: (...args: any[]) => {
+    if (isDevelopment) {
+      console.error(...args);
+    }
+  },
+  warn: (...args: any[]) => {
+    if (isDevelopment) {
+      console.warn(...args);
+    }
+  },
+  debug: (...args: any[]) => {
+    if (isDevelopment) {
+      console.debug(...args);
+    }
+  },
+  
+  security: (message: string, data?: any, context?: string) => {
+    if (isDevelopment) {
+      console.warn(`[SECURITY] ${message}`, data, context);
+    }
   },
 
-  emDesenvolvimento: import.meta.env.MODE === 'development',
-  emProducao: import.meta.env.MODE === 'production'
+  audit: {
+    log: (message: string, data?: any) => {
+      if (isDevelopment) {
+        console.info(`[AUDIT] ${message}`, data);
+      }
+    },
+    warn: (message: string, data?: any) => {
+      if (isDevelopment) {
+        console.warn(`[AUDIT WARNING] ${message}`, data);
+      }
+    },
+    error: (message: string, error?: any, data?: any) => {
+      if (isDevelopment) {
+        console.error(`[AUDIT ERROR] ${message}`, error, data);
+      }
+    }
+  },
+
+  emDesenvolvimento: isDevelopment,
+  emProducao: !isDevelopment
 };

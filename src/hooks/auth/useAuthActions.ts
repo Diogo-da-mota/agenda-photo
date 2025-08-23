@@ -19,31 +19,18 @@ interface UserUpdateData {
 
 export const useAuthActions = () => {
   const signIn = async (email: string, password: string) => {
-    // DEBUG: Log de tentativa de login
-    console.log('[DEBUG] useAuthActions - signIn chamado:', {
-      email: email ? 'FORNECIDO' : 'VAZIO',
-      password: password ? 'FORNECIDO' : 'VAZIO',
-      supabaseUrl: supabase.supabaseUrl,
-      supabaseKey: supabase.supabaseKey ? 'DEFINIDA' : 'NÃO DEFINIDA'
-    });
+    // DEBUG: Log de tentativa de login - logs removidos para produção
     
     try {
-      console.log('[DEBUG] useAuthActions - Chamando supabase.auth.signInWithPassword');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
       
-      console.log('[DEBUG] useAuthActions - Resposta do Supabase:', {
-        hasData: !!data,
-        hasUser: !!data?.user,
-        hasSession: !!data?.session,
-        hasError: !!error,
-        errorMessage: error?.message
-      });
+      // Resposta do Supabase - logs removidos para produção
 
       if (error) {
-        console.log('[DEBUG] useAuthActions - Erro no login:', error);
+        // Erro no login - logs removidos para produção
         let errorMessage = 'Erro no login. Verifique suas credenciais.';
         
         if (error.message.includes('Invalid login credentials')) {
@@ -53,23 +40,20 @@ export const useAuthActions = () => {
         }
         
         securityLogger.logLoginAttempt(email, false, errorMessage);
-        console.log('[DEBUG] useAuthActions - Retornando erro:', errorMessage);
+        // Retornando erro - logs removidos para produção
         return { success: false, error: errorMessage };
       }
 
       if (data.user) {
-        console.log('[DEBUG] useAuthActions - Login bem-sucedido:', {
-          userId: data.user.id,
-          userEmail: data.user.email
-        });
+        // Login bem-sucedido - logs removidos para produção
         securityLogger.logLoginAttempt(email, true);
         return { success: true };
       }
 
-      console.log('[DEBUG] useAuthActions - Falha na autenticação - sem usuário');
+      // Falha na autenticação - sem usuário - logs removidos para produção
       return { success: false, error: 'Falha na autenticação' };
     } catch (error: unknown) {
-      console.log('[DEBUG] useAuthActions - Exceção durante login:', error);
+      // Exceção durante login - logs removidos para produção
       securityLogger.logSuspiciousActivity('login_exception', { error: error instanceof Error ? error.message : 'Unknown error' }, email);
       return { success: false, error: 'Erro de conexão. Tente novamente.' };
     }

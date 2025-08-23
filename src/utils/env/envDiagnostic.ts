@@ -72,20 +72,20 @@ export function reportEnvironmentStatus(): void {
       ? `${value.substring(0, 10)}...` 
       : value || '❌ NÃO DEFINIDA';
     
-    console.log(`${key}: ${displayValue}`);
+    // Logs removidos para produção
   });
   
-  // Mostrar problemas
+  // Verificação silenciosa em produção
   if (check.missing.length > 0) {
-    console.error('❌ Variáveis obrigatórias faltando:', check.missing);
+    // Variáveis obrigatórias faltando - verificação silenciosa
   }
   
   if (check.warnings.length > 0) {
-    console.warn('⚠️ Avisos:', check.warnings);
+    // Avisos - verificação silenciosa
   }
   
   if (check.isValid) {
-    console.log('✅ Todas as variáveis obrigatórias estão definidas');
+    // Todas as variáveis obrigatórias estão definidas - verificação silenciosa
   }
   
   console.groupEnd();
@@ -134,19 +134,16 @@ export async function runEnvironmentDiagnostic(): Promise<void> {
   reportEnvironmentStatus();
   
   // 2. Testar conectividade
-  console.log('🌐 Testando conectividade com Supabase...');
+  // Testando conectividade com Supabase - verificação silenciosa
   const connectionTest = await testSupabaseConnection();
   
   if (connectionTest.success) {
-    console.log('✅ Conectividade com Supabase OK');
+    // Conectividade com Supabase OK - verificação silenciosa
   } else {
-    console.error('❌ Falha na conectividade:', connectionTest.error);
+    // Falha na conectividade - verificação silenciosa
   }
   
-  // 3. Verificar modo de desenvolvimento
-  console.log(`🏗️ Modo: ${requiredEnvVars.MODE}`);
-  console.log(`🔧 Desenvolvimento: ${requiredEnvVars.DEV}`);
-  console.log(`🚀 Produção: ${requiredEnvVars.PROD}`);
+  // 3. Verificar modo de desenvolvimento - verificação silenciosa
   
   console.groupEnd();
 }

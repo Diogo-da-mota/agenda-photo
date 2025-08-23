@@ -132,13 +132,13 @@ const PortfolioDetalhes: React.FC = () => {
     try {
       // O estado de loading é gerenciado pelo hook 'useTrabalhoPortfolio' como 'isAtualizando'
       // mas o upload é uma operação separada que acontece antes.
-      console.log('=== INÍCIO DO SAVE ===');
-      console.log('Arquivos selecionados:', arquivos?.length || 0);
+      // console.log('=== INÍCIO DO SAVE ==='); // Removido para produção
+    // console.log('Arquivos selecionados:', arquivos?.length || 0); // Removido para produção
       
       let updatedFormData: CriarTrabalhoPortfolio = { ...formData };
       
       if (arquivos && arquivos.length > 0) {
-        console.log('Iniciando upload de', arquivos.length, 'arquivos para o Supabase Storage...');
+        // console.log('Iniciando upload de', arquivos.length, 'arquivos para o Supabase Storage...'); // Removido para produção
         
         try {
           const pathPrefix = `Portfolio/${trabalho.user_id}/${slugify(formData.titulo)}`;
@@ -154,11 +154,11 @@ const PortfolioDetalhes: React.FC = () => {
             uploadedUrls = response.urls;
           } else {
              const errorMessages = response.errors.map(e => e.error).join(', ');
-             console.error('AVISO: Upload falhou!', errorMessages);
+             // console.error('AVISO: Upload falhou!', errorMessages); // Removido para produção
              // Não impede o salvamento dos metadados, mas loga o erro.
           }
           
-          console.log('URLs extraídas:', uploadedUrls);
+          // console.log('URLs extraídas:', uploadedUrls); // Removido para produção
           
           if (uploadedUrls && uploadedUrls.length > 0) {
             // Remove as imagens de preview (data: URL) antes de adicionar as novas
@@ -167,15 +167,15 @@ const PortfolioDetalhes: React.FC = () => {
             // Define a imagem de capa se ainda não houver uma
             if (!updatedFormData.imagem_capa && uploadedUrls[0]) {
               updatedFormData.imagem_capa = uploadedUrls[0];
-              console.log('Definindo nova imagem de capa:', uploadedUrls[0]);
+              // console.log('Definindo nova imagem de capa:', uploadedUrls[0]); // Removido para produção
             }
             
             updatedFormData.imagens = [...imagensReais, ...uploadedUrls];
-            console.log('Array de imagens atualizado:', updatedFormData.imagens);
+            // console.log('Array de imagens atualizado:', updatedFormData.imagens); // Removido para produção
           }
           
         } catch (uploadError) {
-          console.error('Erro CRÍTICO no upload:', uploadError);
+          // console.error('Erro CRÍTICO no upload:', uploadError); // Removido para produção
           toast({
             title: "Erro no Upload",
             description: "Não foi possível enviar os arquivos. A operação foi cancelada.",
@@ -188,12 +188,12 @@ const PortfolioDetalhes: React.FC = () => {
       // Remove quaisquer data URLs restantes antes de salvar
       updatedFormData.imagens = updatedFormData.imagens.filter(img => !img.startsWith('data:'));
 
-      console.log('=== DADOS PARA SALVAR ===');
-      console.log('FormData atualizado:', updatedFormData);
+      // console.log('=== DADOS PARA SALVAR ==='); // Removido para produção
+    // console.log('FormData atualizado:', updatedFormData); // Removido para produção
       
       await atualizarTrabalho(updatedFormData);
       
-      console.log('Salvamento concluído com sucesso.');
+      // console.log('Salvamento concluído com sucesso.'); // Removido para produção
       
       toast({
         title: "Sucesso!",
@@ -203,15 +203,15 @@ const PortfolioDetalhes: React.FC = () => {
       setArquivos([]); // Limpa a lista de arquivos a serem enviados
       
     } catch (error) {
-      console.error('=== ERRO GERAL NO SAVE ===');
-      console.error('Erro ao salvar:', error);
+      // console.error('=== ERRO GERAL NO SAVE ==='); // Removido para produção
+      // console.error('Erro ao salvar:', error); // Removido para produção
       toast({
         title: "Erro ao Salvar",
         description: "Ocorreu um erro inesperado ao salvar o portfolio.",
         variant: "destructive"
       });
     } finally {
-      console.log('=== FIM DO SAVE ===');
+      // console.log('=== FIM DO SAVE ==='); // Removido para produção
     }
   };
 
@@ -522,4 +522,4 @@ const PortfolioDetalhes: React.FC = () => {
   );
 };
 
-export default PortfolioDetalhes; 
+export default PortfolioDetalhes;

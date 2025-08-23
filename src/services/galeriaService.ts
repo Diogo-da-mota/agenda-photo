@@ -179,11 +179,11 @@ export const criarGaleria = async (
             url_imagem: imageUrl
           };
           
-          console.log(`✅ Upload concluído: ${task.image.file.name}`);
+          // Log removido para produção
           return imagemCompleta;
           
         } catch (error) {
-          console.error(`❌ Erro no upload: ${task.image.file.name}`, error);
+          // Log de erro removido para produção
           throw new Error(`Falha no upload de ${task.image.file.name}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
       });
@@ -236,7 +236,7 @@ export const criarGaleria = async (
     .select('id');
 
   if (insertError) {
-    console.error('❌ Erro detalhado no insert da galeria:', {
+    // Log de erro removido para produção - erro detalhado no insert da galeria
       error: insertError,
       message: insertError.message,
       details: insertError.details,
@@ -256,7 +256,7 @@ export const criarGaleria = async (
     throw new Error(errorMessage);
   }
 
-  console.log(`✅ Galeria inserida com sucesso: ${galeriasInseridas?.length} imagens`);
+  // Log removido para produção
 
   onProgress(100);
 
