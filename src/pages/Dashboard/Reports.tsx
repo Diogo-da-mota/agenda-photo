@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-// Removido import de Tabs - não será mais usado
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { Download, FileText, TrendingUp, TrendingDown, DollarSign, Users, Calendar, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
@@ -67,6 +75,53 @@ const Reports: React.FC = () => {
   const [dadosAnuaisReais, setDadosAnuaisReais] = useState<any[]>([]);
   const [dadosCategoriaReais, setDadosCategoriaReais] = useState<any[]>([]);
   const [clientesDuplicados, setClientesDuplicados] = useState<any[]>([]);
+  const [pagamentosPendentes, setPagamentosPendentes] = useState<number>(0);
+  const [faturasPendentes, setFaturasPendentes] = useState<number>(0);
+  
+  // Loading states granulares
+  const [loadingStates, setLoadingStates] = useState({
+    relatorios: false,
+    dadosFinanceiros: false,
+    dadosMensais: false,
+    dadosCategoria: false,
+    pagamentosPendentes: false,
+    clientesDuplicados: false
+  });
+  
+  // Sistema de cache simples
+  const cacheRef = useRef(new Map());
+  const lastFetchRef = useRef(new Map());
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+  
+  // Função de debounce
+  const debounceRef = useRef<NodeJS.Timeout>();
+  
+  const debounce = useCallback((func: Function, delay: number) => {
+    return (...args: any[]) => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      debounceRef.current = setTimeout(() => func(...args), delay);
+    };
+  }, []);
+  
+  // Função para verificar cache
+  const getCachedData = useCallback((key: string) => {
+    const cached = cacheRef.current.get(key);
+    const lastFetch = lastFetchRef.current.get(key);
+    
+    if (cached && lastFetch && (Date.now() - lastFetch) < CACHE_DURATION) {
+      return cached;
+    }
+    
+    return null;
+  }, []);
+  
+  // Função para salvar no cache
+  const setCachedData = useCallback((key: string, data: any) => {
+    cacheRef.current.set(key, data);
+    lastFetchRef.current.set(key, Date.now());
+  }, []);
 
   // Funções de manipulação
   const handleExport = (format: 'pdf' | 'excel') => {
@@ -134,8 +189,8 @@ const Reports: React.FC = () => {
   const carregarRelatorios = async () => {
     if (!user) return;
     
+    setLoadingStates(prev => ({ ...prev, relatorios: true }));
     try {
-      setIsLoading(true);
       const data = await buscarRelatorios(user.id);
       setRelatorios(data);
     } catch (error) {
@@ -146,141 +201,239 @@ const Reports: React.FC = () => {
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setLoadingStates(prev => ({ ...prev, relatorios: false }));
     }
   };
 
   const buscarClientesDuplicados = async () => {
     if (!user) return;
     
+    setLoadingStates(prev => ({ ...prev, clientesDuplicados: true }));
     try {
       const duplicados = await reportsService.buscarClientesDuplicados(user.id);
       setClientesDuplicados(duplicados);
     } catch (error) {
       console.error('Erro ao buscar clientes duplicados:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, clientesDuplicados: false }));
     }
   };
 
   const carregarDadosFinanceirosAnoAtual = async () => {
     if (!user) return;
     
+    const cacheKey = `dadosFinanceiros_${user.id}_${new Date().getFullYear()}`;
+    const cachedData = getCachedData(cacheKey);
+    
+    if (cachedData) {
+      setReceitaTotal(cachedData.receitaTotal);
+      setDespesasTotal(cachedData.despesasTotal);
+      return;
+    }
+    
+    setLoadingStates(prev => ({ ...prev, dadosFinanceiros: true }));
     try {
       const dados = await reportsService.carregarDadosAnoAtual(user.id);
+      setCachedData(cacheKey, dados);
       setReceitaTotal(dados.receitaTotal);
       setDespesasTotal(dados.despesasTotal);
     } catch (error) {
       console.error('Erro ao carregar dados financeiros:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, dadosFinanceiros: false }));
     }
   };
 
   const carregarDadosMensaisReais = async () => {
     if (!user) return;
     
+    const anoAtual = new Date().getFullYear();
+    const cacheKey = `dadosMensais_${user.id}_${anoAtual}`;
+    const cachedData = getCachedData(cacheKey);
+    
+    if (cachedData) {
+      setDadosMensaisReais(cachedData);
+      return;
+    }
+    
+    setLoadingStates(prev => ({ ...prev, dadosMensais: true }));
     try {
-      const anoAtual = new Date().getFullYear();
-      const dadosMensais = [];
+      const inicioAno = new Date(anoAtual, 0, 1);
+      const fimAno = new Date(anoAtual, 11, 31, 23, 59, 59, 999);
       
+      // Buscar todos os dados do ano de uma vez (otimização crítica)
+      const [resumoAnual, transacoesAno, eventosEntradas] = await Promise.all([
+        buscarResumoFinanceiro(user.id, {
+          dataInicio: inicioAno,
+          dataFim: fimAno
+        }),
+        buscarTransacoes(user.id, {
+          dataInicio: inicioAno,
+          dataFim: fimAno
+        }),
+        buscarEventosComValoresEntradas(user.id)
+      ]);
+      
+      // Filtrar eventos do ano atual
+      const eventosAnoAtual = eventosEntradas.filter(evento => {
+        const dataEvento = new Date(evento.data_transacao);
+        return dataEvento >= inicioAno && dataEvento <= fimAno;
+      });
+      
+      // Agrupar dados por mês usando processamento client-side otimizado
+      const dadosPorMes = new Map();
+      
+      // Inicializar todos os meses
       for (let mes = 0; mes < 12; mes++) {
         const inicioMes = new Date(anoAtual, mes, 1);
-        const fimMes = new Date(anoAtual, mes + 1, 0, 23, 59, 59, 999);
-        
-        const resumo = await buscarResumoFinanceiro(user.id, {
-          dataInicio: inicioMes,
-          dataFim: fimMes
-        });
-        
-        const transacoes = await buscarTransacoes(user.id, {
-          dataInicio: inicioMes,
-          dataFim: fimMes
-        });
-        
-        const eventosEntradas = await buscarEventosComValoresEntradas(user.id);
-        const eventosEntradasMes = eventosEntradas.filter(evento => {
-          const dataEvento = new Date(evento.data_transacao);
-          return dataEvento >= inicioMes && dataEvento <= fimMes;
-        });
-        
-        const totalTransacoes = transacoes
-          .filter(t => t.tipo === 'receita' && t.status === 'entrada')
-          .reduce((sum, t) => sum + t.valor, 0);
-        
-        const totalEventos = eventosEntradasMes.reduce((sum, e) => sum + e.valor, 0);
-        const receitaMes = totalTransacoes + totalEventos;
-        
-        dadosMensais.push({
-          name: format(inicioMes, 'MMM', { locale: ptBR }),
-          receita: receitaMes,
-          despesas: resumo.totalDespesas
+        const nomeMes = format(inicioMes, 'MMM', { locale: ptBR });
+        dadosPorMes.set(mes, {
+          name: nomeMes,
+          receita: 0,
+          despesas: 0
         });
       }
       
+      // Processar transações
+      transacoesAno.forEach(transacao => {
+        const dataTransacao = new Date(transacao.data_transacao || transacao.created_at);
+        const mes = dataTransacao.getMonth();
+        const dadosMes = dadosPorMes.get(mes);
+        
+        if (dadosMes) {
+          if (transacao.tipo === 'receita' && transacao.status === 'entrada') {
+            dadosMes.receita += transacao.valor;
+          } else if (transacao.tipo === 'despesa') {
+            dadosMes.despesas += transacao.valor;
+          }
+        }
+      });
+      
+      // Processar eventos
+      eventosAnoAtual.forEach(evento => {
+        const dataEvento = new Date(evento.data_transacao);
+        const mes = dataEvento.getMonth();
+        const dadosMes = dadosPorMes.get(mes);
+        
+        if (dadosMes) {
+          dadosMes.receita += evento.valor;
+        }
+      });
+      
+      // Converter Map para Array
+      const dadosMensais = Array.from(dadosPorMes.values());
+      
+      setCachedData(cacheKey, dadosMensais);
       setDadosMensaisReais(dadosMensais);
     } catch (error) {
       console.error('Erro ao carregar dados mensais:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, dadosMensais: false }));
+    }
+  };
+
+  const carregarPagamentosPendentes = async () => {
+    if (!user) return;
+    
+    setLoadingStates(prev => ({ ...prev, pagamentosPendentes: true }));
+    try {
+      // Buscar dados em paralelo para otimizar performance
+      const [transacoesPendentes, eventos] = await Promise.all([
+        buscarTransacoes(user.id, { status: 'pendente' }),
+        buscarEventos(user.id)
+      ]);
+      
+      // Processar transações pendentes (apenas receitas)
+      const totalTransacoesPendentes = transacoesPendentes
+        .filter(t => t.tipo === 'receita')
+        .reduce((sum, t) => sum + t.valor, 0);
+      
+      // Processar eventos com pagamentos pendentes de forma otimizada
+      let totalEventosPendentes = 0;
+      let contadorEventosPendentes = 0;
+      
+      eventos.forEach(evento => {
+        const valorTotal = (evento.totalValue || evento.valor_total || 0);
+        const valorPago = (evento.downPayment || evento.valor_entrada || 0);
+        const valorPendente = valorTotal - valorPago;
+        
+        if (valorPendente > 0) {
+          totalEventosPendentes += valorPendente;
+          contadorEventosPendentes++;
+        }
+      });
+      
+      const totalPendente = totalTransacoesPendentes + totalEventosPendentes;
+      const totalFaturas = transacoesPendentes.length + contadorEventosPendentes;
+      
+      setPagamentosPendentes(totalPendente);
+      setFaturasPendentes(totalFaturas);
+    } catch (error) {
+      console.error('Erro ao carregar pagamentos pendentes:', error);
+      setPagamentosPendentes(0);
+      setFaturasPendentes(0);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, pagamentosPendentes: false }));
     }
   };
 
   const carregarDadosCategoriaReais = async () => {
     if (!user) return;
     
+    setLoadingStates(prev => ({ ...prev, dadosCategoria: true }));
     try {
       const anoAtual = new Date().getFullYear();
       const inicioAno = new Date(anoAtual, 0, 1);
       const fimAno = new Date(anoAtual, 11, 31, 23, 59, 59, 999);
       
-      // Buscar transações financeiras
-      const transacoes = await buscarTransacoes(user.id, {
-        dataInicio: inicioAno,
-        dataFim: fimAno
-      });
+      // Buscar dados em paralelo para otimizar performance
+      const [transacoes, eventos] = await Promise.all([
+        buscarTransacoes(user.id, {
+          dataInicio: inicioAno,
+          dataFim: fimAno
+        }),
+        buscarEventos(user.id)
+      ]);
       
-      // Buscar eventos do ano atual
-      const eventos = await buscarEventos(user.id);
+      // Filtrar eventos do ano atual de forma otimizada
       const eventosAnoAtual = eventos.filter(evento => {
         const dataEvento = new Date(evento.date || evento.data_inicio);
         return dataEvento >= inicioAno && dataEvento <= fimAno;
       });
       
-      // Agrupar transações por categoria
-      const categoriasTransacoes = transacoes
-        .filter(t => t.tipo === 'receita')
-        .reduce((acc, transacao) => {
-          const categoria = transacao.categoria || 'Outros';
-          if (!acc[categoria]) {
-            acc[categoria] = { valor: 0, quantidade: 0 };
-          }
-          acc[categoria].valor += transacao.valor;
-          acc[categoria].quantidade += 1;
-          return acc;
-        }, {} as Record<string, { valor: number; quantidade: number }>);
+      // Usar Map para melhor performance no agrupamento
+      const categorias = new Map<string, { valor: number; quantidade: number }>();
       
-      // Agrupar eventos por tipo
-      const categoriasEventos = eventosAnoAtual.reduce((acc, evento) => {
+      // Processar transações de receita
+      transacoes
+        .filter(t => t.tipo === 'receita')
+        .forEach(transacao => {
+          const categoria = transacao.categoria || 'Outros';
+          const dadosExistentes = categorias.get(categoria) || { valor: 0, quantidade: 0 };
+          
+          categorias.set(categoria, {
+            valor: dadosExistentes.valor + transacao.valor,
+            quantidade: dadosExistentes.quantidade + 1
+          });
+        });
+      
+      // Processar eventos de forma otimizada
+      eventosAnoAtual.forEach(evento => {
         const categoria = evento.eventType || evento.tipo || evento.titulo || 'Outros';
         const valorEvento = (evento.totalValue || evento.valor_total || 0) + 
                            (evento.downPayment || evento.valor_entrada || 0) + 
                            (evento.remainingValue || evento.valor_restante || 0);
         
-        if (!acc[categoria]) {
-          acc[categoria] = { valor: 0, quantidade: 0 };
-        }
-        acc[categoria].valor += valorEvento;
-        acc[categoria].quantidade += 1;
-        return acc;
-      }, {} as Record<string, { valor: number; quantidade: number }>);
-      
-      // Combinar dados de transações e eventos
-      const todasCategorias = { ...categoriasTransacoes };
-      
-      Object.entries(categoriasEventos).forEach(([categoria, dados]) => {
-        if (!todasCategorias[categoria]) {
-          todasCategorias[categoria] = { valor: 0, quantidade: 0 };
-        }
-        todasCategorias[categoria].valor += dados.valor;
-        todasCategorias[categoria].quantidade += dados.quantidade;
+        const dadosExistentes = categorias.get(categoria) || { valor: 0, quantidade: 0 };
+        
+        categorias.set(categoria, {
+          valor: dadosExistentes.valor + valorEvento,
+          quantidade: dadosExistentes.quantidade + 1
+        });
       });
       
-      const dadosCategoria = Object.entries(todasCategorias).map(([nome, dados]) => ({
+      // Converter Map para Array de forma otimizada
+      const dadosCategoria = Array.from(categorias.entries()).map(([nome, dados]) => ({
         nome,
         valor: dados.valor,
         quantidade: dados.quantidade
@@ -289,18 +442,65 @@ const Reports: React.FC = () => {
       setDadosCategoriaReais(dadosCategoria);
     } catch (error) {
       console.error('Erro ao carregar dados de categoria:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, dadosCategoria: false }));
     }
   };
 
   // Efeitos
   useEffect(() => {
-    if (user) {
-      carregarRelatorios();
-      carregarDadosFinanceirosAnoAtual();
-      carregarDadosMensaisReais();
-      carregarDadosCategoriaReais();
-      buscarClientesDuplicados();
-    }
+    if (!user) return;
+
+    const abortController = new AbortController();
+    let isMounted = true;
+
+    const carregarDadosIniciais = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Executar todas as funções em paralelo com Promise.allSettled
+        const resultados = await Promise.allSettled([
+          carregarRelatorios(),
+          carregarDadosFinanceirosAnoAtual(),
+          carregarDadosMensaisReais(),
+          carregarDadosCategoriaReais(),
+          carregarPagamentosPendentes(),
+          buscarClientesDuplicados()
+        ]);
+
+        // Log de erros para debugging (apenas em desenvolvimento)
+        if (process.env.NODE_ENV === 'development') {
+          resultados.forEach((resultado, index) => {
+            const funcoes = [
+              'carregarRelatorios',
+              'carregarDadosFinanceirosAnoAtual', 
+              'carregarDadosMensaisReais',
+              'carregarDadosCategoriaReais',
+              'carregarPagamentosPendentes',
+              'buscarClientesDuplicados'
+            ];
+            
+            if (resultado.status === 'rejected') {
+              console.error(`Erro em ${funcoes[index]}:`, resultado.reason);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados iniciais:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    carregarDadosIniciais();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
   }, [user]);
 
   // Cálculos derivados
@@ -335,6 +535,8 @@ const Reports: React.FC = () => {
         isLoading={isLoading}
         formatarMoeda={formatCurrency}
         obterAnoAtual={() => anoAtual}
+        pagamentosPendentes={pagamentosPendentes}
+        faturasPendentes={faturasPendentes}
       />
 
       {/* Card grande: Receita vs. Despesas no topo */}

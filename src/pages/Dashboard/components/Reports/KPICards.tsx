@@ -9,6 +9,8 @@ interface KPICardsProps {
   isLoading: boolean;
   formatarMoeda: (valor: number) => string;
   obterAnoAtual: () => number;
+  pagamentosPendentes?: number;
+  faturasPendentes?: number;
 }
 
 export const KPICards: React.FC<KPICardsProps> = ({
@@ -17,7 +19,9 @@ export const KPICards: React.FC<KPICardsProps> = ({
   lucroLiquido,
   isLoading,
   formatarMoeda,
-  obterAnoAtual
+  obterAnoAtual,
+  pagamentosPendentes = 0,
+  faturasPendentes = 0
 }) => {
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -90,11 +94,17 @@ export const KPICards: React.FC<KPICardsProps> = ({
            <CreditCard className="w-4 h-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-xl md:text-2xl font-bold">R$ 12.350,00</div>
-          <p className="text-xs flex items-center text-amber-500 mt-1">
-            <Calendar className="h-3 w-3 mr-1" />
-            8 faturas pendentes
-          </p>
+          {isLoading ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <>
+              <div className="text-xl md:text-2xl font-bold">{formatarMoeda(pagamentosPendentes)}</div>
+              <p className="text-xs flex items-center text-amber-500 mt-1">
+                <Calendar className="h-3 w-3 mr-1" />
+                {faturasPendentes} faturas pendentes
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

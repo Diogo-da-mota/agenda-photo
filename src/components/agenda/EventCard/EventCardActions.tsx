@@ -1,43 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Bell, 
-  DollarSign, 
-  Receipt,
-  Share2
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EventCardActionsProps, EventStatus, Event } from './types';
-import { useUserRole } from '@/hooks/useUserRole'; // Importar o hook
+import { Bell, DollarSign, Receipt, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Event, EventStatus } from '@/components/agenda/types';
+import { formatarTelefoneExibicao } from '@/utils/formatters';
+import { useUserRole } from '@/hooks/useUserRole';
 
-/**
- * Formata um número de telefone brasileiro
- */
-const formatPhone = (phone: string): string => {
-  if (!phone) return '';
-  
-  // Remove tudo que não é número
-  const numbers = phone.replace(/\D/g, '');
-  
-  // Se não tem números, retorna vazio
-  if (!numbers) return '';
-  
-  // Aplica a máscara baseada no comprimento
-  if (numbers.length <= 2) {
-    return `(${numbers}`;
-  } else if (numbers.length <= 6) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-  } else if (numbers.length <= 10) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
-  } else {
-    // Para celular (11 dígitos): (00) 00000-0000
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  }
-};
+interface EventCardActionsProps {
+  event: Event;
+  hasPendingPayment: boolean;
+  onSendReminder: () => void;
+  onRegisterPayment: () => void;
+  onGenerateReceipt: () => void;
+  onStatusChange: (eventId: string, status: EventStatus) => void;
+}
 
-const generateGoogleCalendarUrl = (event: Event) => {
-  const G_CAL_URL = 'https://www.google.com/calendar/render?action=TEMPLATE';
+const G_CAL_URL = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
 
+const generateGoogleCalendarUrl = (event: Event): string => {
   const startTime = new Date(`${format(event.date, 'yyyy-MM-dd')}T${event.time}`);
   // Adiciona 2 horas como duração padrão
   const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
@@ -61,7 +41,7 @@ const generateGoogleCalendarUrl = (event: Event) => {
   ];
 
   // Dados do Cliente
-  if (event.phone) detailsParts.push(`📞 Telefone: ${formatPhone(event.phone)}`);
+  if (event.phone) detailsParts.push(`📞 Telefone: ${formatarTelefoneExibicao(event.phone)}`);
   if (event.birthday) detailsParts.push(`🎂 Aniversário: ${format(new Date(event.birthday), 'dd/MM/yyyy')}`);
   if (event.cpf_cliente) detailsParts.push(`📄 CPF: ${event.cpf_cliente}`);
   if (event.endereco_cliente) detailsParts.push(`🏠 Endereço: ${event.endereco_cliente}`);
@@ -90,7 +70,7 @@ const generateGoogleCalendarUrl = (event: Event) => {
 };
 
 
-const EventCardActions: React.FC<EventCardActionsProps> = ({
+const EventCardActions: React.FC<EventCardActionsProps> = React.memo(({
   event,
   hasPendingPayment,
   onSendReminder,
@@ -208,6 +188,33 @@ const EventCardActions: React.FC<EventCardActionsProps> = ({
       </div>
     </div>
   );
+});
+
+// Função de comparação customizada para EventCardActions
+const areActionsPropsEqual = (prevProps: EventCardActionsProps, nextProps: EventCardActionsProps): boolean => {
+  const prevEvent = prevProps.event;
+  const nextEvent = nextProps.event;
+  
+  return (
+    prevEvent.id === nextEvent.id &&
+    prevEvent.status === nextEvent.status &&
+    prevEvent.reminderSent === nextEvent.reminderSent &&
+    prevEvent.clientName === nextEvent.clientName &&
+    prevEvent.eventType === nextEvent.eventType &&
+    prevEvent.date === nextEvent.date &&
+    prevEvent.time === nextEvent.time &&
+    prevEvent.location === nextEvent.location &&
+    prevEvent.phone === nextEvent.phone &&
+    prevEvent.totalValue === nextEvent.totalValue &&
+    prevEvent.downPayment === nextEvent.downPayment &&
+    prevEvent.remainingValue === nextEvent.remainingValue &&
+    prevEvent.notes === nextEvent.notes &&
+    prevProps.hasPendingPayment === nextProps.hasPendingPayment &&
+    prevProps.onSendReminder === nextProps.onSendReminder &&
+    prevProps.onRegisterPayment === nextProps.onRegisterPayment &&
+    prevProps.onGenerateReceipt === nextProps.onGenerateReceipt &&
+    prevProps.onStatusChange === nextProps.onStatusChange
+  );
 };
 
-export default EventCardActions;
+export default React.memo(EventCardActions, areActionsPropsEqual);
