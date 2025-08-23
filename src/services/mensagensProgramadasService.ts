@@ -1,11 +1,21 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/logger';
-import { Database } from '@/integrations/supabase/types';
+// Removido import problemático: import { Database } from '@/integrations/supabase/types';
 
-// Tipos para mensagens programadas
-export type MensagemProgramada = Database['public']['Tables']['mensagens_programadas']['Row'];
-export type MensagemProgramadaInsert = Database['public']['Tables']['mensagens_programadas']['Insert'];
-export type MensagemProgramadaUpdate = Database['public']['Tables']['mensagens_programadas']['Update'];
+// Tipos simplificados para mensagens programadas
+export interface MensagemProgramada {
+  id: string;
+  titulo: string;
+  conteudo: string;
+  data_envio: string;
+  status: StatusMensagemProgramada;
+  user_id: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type MensagemProgramadaInsert = Omit<MensagemProgramada, 'id' | 'created_at' | 'updated_at'>;
+export type MensagemProgramadaUpdate = Partial<MensagemProgramadaInsert>;
 
 // Status possíveis para mensagens programadas
 export type StatusMensagemProgramada = 'pendente' | 'enviado' | 'erro' | 'cancelado';

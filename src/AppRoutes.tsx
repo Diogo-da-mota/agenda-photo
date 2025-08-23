@@ -21,6 +21,7 @@ import ReferralPage from "./pages/r/[code]";
 
 // Import direto para componente de teste (temporário)
 import { TesteBugCorrecao } from "./components/debug/TesteBugCorrecao";
+import LoginDebugTest from "./components/debug/LoginDebugTest";
 
 // Lazy loading para componentes principais (otimização de performance)
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
@@ -163,6 +164,9 @@ const AppRoutes = () => {
         {/* Landing Page - Rota pública */}
         <Route path="/" element={<Index />} />
         
+        {/* Debug Login - Rota temporária */}
+        <Route path="/debug-login" element={<LoginDebugTest />} />
+        
         {/* Rota de Indicação - Rota pública */}
         <Route path="/r/:code" element={<ReferralPage />} />
         
@@ -189,6 +193,9 @@ const AppRoutes = () => {
         
         {/* ROTA TEMPORÁRIA - Teste de Correção do Bug */}
         <Route path="/teste-bug-templates" element={<TesteBugCorrecao />} />
+        
+        {/* ROTA TEMPORÁRIA - Debug Login */}
+        <Route path="/debug-login" element={<LoginDebugTest />} />
         
         {/* ROTA TEMPORÁRIA - Teste F5 */}
         

@@ -49,7 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/integrations/supabase/types';
+// Removido import problemático: import type { Database } from '@/integrations/supabase/types';
 
 // Activity status types
 type ActivityStatus = 'completed' | 'pending' | 'warning';
@@ -97,7 +97,7 @@ const ActivityHistory: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [expandedActivities, setExpandedActivities] = useState<Record<string, boolean>>({});
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [notifications, setNotifications] = useState<Database['public']['Tables']['notificacoes']['Row'][]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Função para navegar entre abas
   const handleTabChange = (value: string) => {
