@@ -104,14 +104,7 @@ export const buscarAtividades = async (userId: string, limite: number = 10): Pro
     logger.debug(`${data?.length || 0} atividades encontradas`, null, 'atividadeService');
     
     // Converter para formato do componente
-    return (data || []).map((item: any) => ({
-      id: item.id,
-      title: `${item.operation} realizada em ${item.table_name}`,
-      description: `${item.operation} realizada em ${item.table_name}`,
-      timestamp: item.timestamp,
-      type: 'other' as const,
-      status: 'completed' as const
-    }));
+    return (data || []).map(formatarAtividadeParaComponente);
   } catch (error) {
     logger.error('Exceção ao buscar atividades', error, 'atividadeService');
     return [];
@@ -179,16 +172,7 @@ export const buscarHistoricoContrato = async (contratoId: string, userId: string
     }, 'atividadeService');
     
     // Converter para formato do componente ContractHistory
-    const resultado = (data || []).map((item: any) => formatarAtividadeParaHistoricoContrato({
-      id: item.id,
-      table_name: item.table_name,
-      operation: item.operation,
-      timestamp: item.timestamp,
-      record_id: item.record_id,
-      user_id: item.user_id,
-      old_data: item.old_data as Record<string, any>,
-      new_data: item.new_data as Record<string, any>
-    }));
+    const resultado = (data || []).map(formatarAtividadeParaHistoricoContrato);
     
     logger.debug('buscarHistoricoContrato: Resultado formatado', { 
       contratoId, 

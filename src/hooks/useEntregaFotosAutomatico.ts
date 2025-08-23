@@ -17,14 +17,14 @@ export const useEntregaFotosAutomatico = (options: UseEntregaFotosAutomaticoOpti
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const executandoRef = useRef(false);
 
-  const executarProcessos = async (userId?: string) => {
+  const executarProcessos = async () => {
     if (executandoRef.current || !habilitado) return;
 
     executandoRef.current = true;
     
     try {
       console.log('[EntregaFotos] Iniciando processos automáticos...');
-      const resultado = await entregaFotosAutomaticService.executarProcessosAutomaticos(userId);
+      const resultado = await entregaFotosAutomaticService.executarProcessosAutomaticos();
       console.log('[EntregaFotos] Processos automáticos concluídos:', resultado);
     } catch (error) {
       console.error('[EntregaFotos] Erro nos processos automáticos:', error);

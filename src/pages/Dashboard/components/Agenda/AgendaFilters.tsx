@@ -1,46 +1,49 @@
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface AgendaFiltersProps {
-  searchQuery?: string;
-  onSearchChange?: (value: string) => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
-  dateFilter?: Date | null;
-  onClearDateFilter?: () => void;
+  dateFilter: Date | null;
+  onClearDateFilter: () => void;
 }
 
 const AgendaFilters: React.FC<AgendaFiltersProps> = ({
-  searchQuery,
-  onSearchChange,
   statusFilter,
   onStatusFilterChange,
   dateFilter,
   onClearDateFilter
 }) => {
   return (
-    <div className="flex gap-4">
-      {onSearchChange && (
-        <Input
-          placeholder="Buscar eventos..."
-          value={searchQuery || ''}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="max-w-sm"
-        />
+    <div className="flex flex-col space-y-2 md:flex-row md:items-center md:space-y-0 md:gap-2">
+      <select
+        value={statusFilter}
+        onChange={(e) => onStatusFilterChange(e.target.value)}
+        className="border rounded-md h-10 px-3 text-sm text-white bg-[#3c83f6] hover:bg-[#2c73e6] transition-colors w-full md:w-auto"
+      >
+        <option value="all">Todos os eventos</option>
+        <option value="upcoming">Próximos</option>
+        <option value="confirmed">Confirmados</option>
+        <option value="pending">Aguardando</option>
+        <option value="completed">Concluídos</option>
+        <option value="canceled">Cancelados</option>
+        <option value="past">Passados</option>
+      </select>
+
+      {dateFilter && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onClearDateFilter}
+          className="flex items-center gap-1 w-full md:w-auto justify-center"
+        >
+          <Filter className="h-4 w-4" />
+          Limpar filtro: {format(dateFilter, "dd/MM", { locale: ptBR })}
+        </Button>
       )}
-      <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="pendente">Pendente</SelectItem>
-          <SelectItem value="confirmado">Confirmado</SelectItem>
-          <SelectItem value="concluido">Concluído</SelectItem>
-          <SelectItem value="cancelado">Cancelado</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 };

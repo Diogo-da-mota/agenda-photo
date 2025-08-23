@@ -67,12 +67,17 @@ const Financeiro = () => {
     resumoFinanceiro, 
     despesas, 
     isLoading 
-  } = useFinanceiroData();
+  } = useFinanceiroData({
+      typeFilter, 
+    dateRange,
+      categoryFilter,
+    searchQuery
+  });
 
   // Filtrar e agrupar as transações e despesas com verificação de segurança
   const allGroupedTransactions = React.useMemo(() => {
     try {
-      return groupTransactionsByMonth(transactions || []);
+      return groupTransactionsByMonth(transactions || [], despesas || [], transacoesRestantes, transacoesEntradas);
     } catch (error) {
       console.error('[Financeiro] Erro ao agrupar transações:', error);
       return [];
@@ -90,16 +95,20 @@ const Financeiro = () => {
   
   // Usar hook personalizado para gerenciar todas as ações financeiras
   const {
-    createTransaction,
-    updateTransaction,
-    deleteTransaction,
     handleEditTransaction,
     handleTransactionSuccess,
     handleExportClick,
     handleCorrigirTransacoesDiogo,
     handleSincronizarEventosFinanceiro,
     isLoadingSecondaryData
-  } = useFinanceiroActions();
+  } = useFinanceiroActions(
+    groupedTransactions,
+    setTransacaoParaEditar,
+    setIsTransactionModalOpen,
+    setMensagemCorrecao,
+    setTransacoesRestantes,
+    setTransacoesEntradas
+  );
 
   // Estado de carregamento unificado
   const isFullyLoaded = !isLoading && !isLoadingSecondaryData;
@@ -112,7 +121,14 @@ const Financeiro = () => {
       return { totalReceitas: 0, totalDespesas: 0, saldo: 0, totalAReceber: 0, totalEntradas: 0 };
     }
     try {
-      return calcularTotaisDosFiltros(groupedTransactions);
+      return calcularTotaisDosFiltros(
+        groupedTransactions,
+        resumoFinanceiro,
+        transactions || [],
+        transacoesRestantes,
+        transacoesEntradas,
+        { typeFilter, dateRange, categoryFilter }
+      );
     } catch (error) {
       console.error('[Financeiro] Erro ao calcular totais:', error);
       return {
@@ -209,15 +225,13 @@ const Financeiro = () => {
             <div className="space-y-6">
               {groupedTransactions.length > 0 ? (
                 groupedTransactions.map((group, index) => (
-                <TransactionGroupCard
-                  key={index}
-                  group={group}
-                  title={group?.title || 'Transações'}
-                  transactions={group?.transactions || []}
-                  onEditTransaction={handleEditTransaction}
-                          formatarMoeda={formatarMoeda}
-                          formatDate={formatDate}
-                        />
+                  <TransactionGroupCard
+                    key={index}
+                    group={group}
+                    onEditTransaction={handleEditTransaction}
+                            formatarMoeda={formatarMoeda}
+                            formatDate={formatDate}
+                          />
                 ))
               ) : (
                 <Card>

@@ -51,7 +51,7 @@ export const useImageGallery = ({
         }
         
         const { data: imagensData, error } = await supabase
-          .from('entregar_imagens')
+          .from('imagens')
           .select('*')
           .eq('user_id', user.id)
           .order('criado_em', { ascending: false });
@@ -61,13 +61,13 @@ export const useImageGallery = ({
         }
         
         const normalizedImages = (imagensData || []).map(img => ({
-          id: String(img.id),
-          url: img.url_imagem,
-          alt: `Imagem ${img.nome_arquivo || img.id}`,
+          id: img.id,
+          url: img.url,
+          alt: `Imagem ${img.nome || img.id}`,
           metadata: {
-            name: img.nome_arquivo || 'Sem nome',
-            size: img.tamanho_arquivo,
-            type: img.formato
+            name: img.nome || 'Sem nome',
+            size: undefined, // tabela imagens não tem filesize
+            type: undefined  // tabela imagens não tem mimetype
           }
         }));
         
@@ -130,7 +130,7 @@ export const useImageGallery = ({
         
         // Busca o registro da imagem pelo ID
         const { data, error: fetchError } = await supabase
-          .from('entregar_imagens')
+          .from('imagens')
           .select('id')
           .eq('id', imageId)
           .eq('user_id', user.id)
@@ -142,7 +142,7 @@ export const useImageGallery = ({
         } else {
           // Exclui o registro do banco de dados
           const { error: deleteError } = await supabase
-            .from('entregar_imagens')
+            .from('imagens')
             .delete()
             .eq('id', data.id);
           

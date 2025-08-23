@@ -1,28 +1,39 @@
 import React from 'react';
+import { Search, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface AgendaHeaderProps {
-  searchQuery?: string;
-  localSearchQuery?: string;
-  onSearchChange: (query: string) => void;
+  localSearchQuery: string;
+  onSearchChange: (value: string) => void;
   onNewEventClick: () => void;
-  onNewEvent?: () => void;
 }
 
-const AgendaHeader: React.FC<AgendaHeaderProps> = ({ onNewEvent, onNewEventClick, localSearchQuery, onSearchChange }) => {
+const AgendaHeader: React.FC<AgendaHeaderProps> = ({
+  localSearchQuery,
+  onSearchChange,
+  onNewEventClick
+}) => {
   return (
-    <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Agenda</h1>
-        <p className="text-muted-foreground">
-          Gerencie seus eventos e compromissos
-        </p>
+    <div className="flex flex-col space-y-4 mb-6 md:flex-row md:items-center md:justify-between md:space-y-0">
+      <div className="flex items-center justify-center md:justify-start w-full">
+        <h1 className="text-2xl font-bold">Agenda</h1>
       </div>
-      <Button onClick={onNewEventClick || onNewEvent}>
-        <Plus className="mr-2 h-4 w-4" />
-        Novo Evento
-      </Button>
+      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:space-y-0 md:gap-2">
+        <div className="relative w-full md:w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder="Buscar eventos..."
+            value={localSearchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-8 w-full"
+          />
+        </div>
+        
+        <Button onClick={onNewEventClick} className="w-full md:w-auto">
+          <Plus className="h-4 w-4 mr-1" /> Novo Evento
+        </Button>
+      </div>
     </div>
   );
 };

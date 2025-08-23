@@ -1,137 +1,179 @@
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, X, Image } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
-interface ImageUploadBatchProps {
-  onImagesSelected: (files: File[]) => void;
-  maxImages?: number;
-  acceptedFormats?: string[];
-}
+import React, { useState, useRef } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { ImageItem } from './image-batch/types';
+import UploadList from './image-batch/UploadList';
+import BatchProgress from './image-batch/BatchProgress';
+import ActionButtons from './image-batch/ActionButtons';
+import { formatFileSize, createImageItem } from './image-batch/utils';
 
-const ImageUploadBatch: React.FC<ImageUploadBatchProps> = ({
-  onImagesSelected,
-  maxImages = 50,
-  acceptedFormats = ['image/jpeg', 'image/png', 'image/webp']
-}) => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+const ImageUploadBatch: React.FC = () => {
+  const [selectedFiles, setSelectedFiles] = useState<ImageItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const validFiles = acceptedFiles.filter(file => 
-      acceptedFormats.includes(file.type)
-    );
-
-    if (validFiles.length !== acceptedFiles.length) {
+  
+  const { 
+    uploadMultipleImages, 
+    isUploading, 
+    isBatchProcessing, 
+    batchProgress, 
+    statusMessage, 
+    cancelUpload
+  } = useImageUpload({
+    onBatchComplete: (results) => {
+      console.log('Batch upload complete:', results);
       toast({
-        title: 'Alguns arquivos foram ignorados',
-        description: 'Apenas imagens JPEG, PNG e WebP são aceitas.',
-        variant: 'destructive',
+        title: "Uploads concluídos",
+        description: `${results.filter(r => r.success).length} de ${results.length} imagens foram enviadas com sucesso.`
       });
     }
-
-    if (selectedFiles.length + validFiles.length > maxImages) {
-      toast({
-        title: 'Limite excedido',
-        description: `Você pode selecionar no máximo ${maxImages} imagens.`,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const newFiles = [...selectedFiles, ...validFiles];
-    setSelectedFiles(newFiles);
-    onImagesSelected(newFiles);
-  }, [selectedFiles, maxImages, acceptedFormats, onImagesSelected, toast]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': acceptedFormats.map(format => format.split('/')[1])
-    },
-    multiple: true
   });
 
-  const removeFile = (index: number) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    setSelectedFiles(newFiles);
-    onImagesSelected(newFiles);
+  // Função para manipular a seleção de arquivos
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    
+    // Criar items com preview para cada arquivo
+    const newItems: ImageItem[] = files.map(file => createImageItem(file));
+    
+    setSelectedFiles(prev => [...prev, ...newItems]);
+    
+    // Limpar input para permitir selecionar os mesmos arquivos novamente
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    toast({
+      title: "Imagens selecionadas",
+      description: `${files.length} imagens adicionadas à fila de upload.`
+    });
   };
 
-  const clearAll = () => {
+  // Remover um item da fila
+  const removeItem = (id: string) => {
+    setSelectedFiles(prev => {
+      const newFiles = prev.filter(item => item.id !== id);
+      return newFiles;
+    });
+  };
+
+  // Limpar toda a fila
+  const clearQueue = () => {
     setSelectedFiles([]);
-    onImagesSelected([]);
+    toast({
+      title: "Fila limpa",
+      description: "Todos os itens foram removidos da fila de upload."
+    });
+  };
+
+  // Processar upload em lote
+  const processQueue = async () => {
+    if (!selectedFiles.length || isBatchProcessing) return;
+    
+    // Marcar todos como 'processing'
+    setSelectedFiles(prev => 
+      prev.map(item => ({
+        ...item,
+        status: 'processing'
+      }))
+    );
+    
+    // Extrair apenas os arquivos
+    const files = selectedFiles.map(item => item.file);
+    
+    try {
+      // Iniciar upload em lote
+      const results = await uploadMultipleImages(files);
+      
+      // Atualizar status de cada item baseado no resultado
+      setSelectedFiles(prev => {
+        return prev.map((item, index) => {
+          const result = results[index];
+          return {
+            ...item,
+            status: result?.success ? 'success' : 'error',
+            error: result?.error?.message,
+            url: result?.url || ''
+          };
+        });
+      });
+      
+      const successCount = results.filter(r => r.success).length;
+      
+      toast({
+        title: "Processamento concluído",
+        description: `${successCount} de ${files.length} imagens foram processadas com sucesso.`
+      });
+      
+    } catch (error) {
+      console.error('Erro no processamento em lote:', error);
+      
+      // Marcar itens que ainda estão "processing" como "error"
+      setSelectedFiles(prev => 
+        prev.map(item => ({
+          ...item,
+          status: item.status === 'processing' ? 'error' : item.status,
+          error: item.status === 'processing' ? 'Processo interrompido' : item.error
+        }))
+      );
+      
+      toast({
+        title: "Erro no processamento",
+        description: error instanceof Error ? error.message : "Erro inesperado durante o processamento em lote",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Image className="h-5 w-5" />
-          Upload de Imagens em Lote
-        </CardTitle>
+        <CardTitle>Upload em Lote</CardTitle>
         <CardDescription>
-          Selecione múltiplas imagens para upload (máximo {maxImages})
+          Selecione múltiplas imagens para upload simultâneo com monitoramento em tempo real
         </CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-4">
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive
-              ? 'border-primary bg-primary/5'
-              : 'border-muted-foreground/25 hover:border-primary/50'
-          }`}
-        >
-          <input {...getInputProps()} />
-          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          {isDragActive ? (
-            <p>Solte as imagens aqui...</p>
-          ) : (
-            <div>
-              <p className="text-lg font-medium">
-                Arraste imagens aqui ou clique para selecionar
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Formatos aceitos: JPEG, PNG, WebP
-              </p>
-            </div>
-          )}
-        </div>
-
-        {selectedFiles.length > 0 && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-sm font-medium">
-                {selectedFiles.length} arquivo(s) selecionado(s)
-              </p>
-              <Button variant="outline" size="sm" onClick={clearAll}>
-                Limpar Tudo
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="relative group">
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                    <Image className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                  <p className="text-xs text-center mt-1 truncate">
-                    {file.name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Botões de ação */}
+        <ActionButtons
+          onSelectClick={() => fileInputRef.current?.click()}
+          onProcessClick={processQueue}
+          onCancelClick={cancelUpload}
+          onClearClick={clearQueue}
+          isProcessing={isBatchProcessing}
+          hasFiles={selectedFiles.length > 0}
+          fileInputRef={fileInputRef}
+        />
+        
+        {/* Status de processamento em lote */}
+        <BatchProgress
+          isProcessing={isBatchProcessing}
+          statusMessage={statusMessage}
+          batchProgress={batchProgress}
+        />
+        
+        {/* Lista de arquivos */}
+        <UploadList
+          files={selectedFiles}
+          onRemoveItem={removeItem}
+          isProcessing={isBatchProcessing}
+          formatFileSize={formatFileSize}
+        />
+        
+        {/* Input file escondido para seleção de arquivos */}
+        <input 
+          type="file" 
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept="image/*"
+          multiple
+          disabled={isBatchProcessing}
+        />
       </CardContent>
     </Card>
   );

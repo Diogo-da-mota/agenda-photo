@@ -1,103 +1,248 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { ErrorAlert } from '../AuthUtils';
-import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import FormField from './FormField';
+import PasswordField from './PasswordField';
+import { normalizeEmail, isValidEmailFormat } from '@/utils/authUtils';
+import { isBlocked as checkIfBlocked, recordFailedLogin, recordSuccessfulLogin, detectSuspiciousActivity } from '@/utils/authSecurity';
+import { useCSRF } from '@/components/security/CSRFProtection';
+import { securityLogger } from '@/utils/securityLogger';
+import { Mail, Shield } from "lucide-react";
 
 interface LoginFormProps {
-  onSuccess?: () => void;
+  onSuccess: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const { signIn } = useAuth();
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [remainingAttempts, setRemainingAttempts] = useState(5);
+  const { toast } = useToast();
+  const { signIn, signInWithGoogle, session } = useAuth();
+  const { validateToken } = useCSRF();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      setError('Por favor, preencha todos os campos');
-      return;
+  // Monitorar mudanças na sessão para redirecionar após login bem-sucedido
+  useEffect(() => {
+    if (session) {
+      console.log("[LOGIN] Sessão detectada, redirecionando para o dashboard");
+      
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Redirecionando...",
+      });
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+        onSuccess();
+      }, 500);
     }
+  }, [session, navigate, location.search, onSuccess, toast]);
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+    
     try {
-      const result = await signIn(email, password);
-      
-      if (result.success) {
-        onSuccess?.();
-      } else {
-        setError(result.error || 'Erro ao fazer login');
+      // Validação básica
+      if (!email || !password) {
+        setError("Por favor, preencha todos os campos.");
+        setIsLoading(false);
+        return;
       }
-    } catch (err) {
-      setError('Erro interno. Tente novamente.');
-    } finally {
+
+      // Validar formato do email
+      if (!isValidEmailFormat(email)) {
+        setError("Por favor, insira um e-mail válido.");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Normalizar email
+      const normalizedEmail = normalizeEmail(email);
+      
+      // Verificar se está bloqueado por tentativas excessivas
+      if (checkIfBlocked(normalizedEmail)) {
+        setError("Muitas tentativas de login. Aguarde 15 minutos antes de tentar novamente.");
+        setIsBlocked(true);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Detectar atividade suspeita
+      if (detectSuspiciousActivity(normalizedEmail, navigator.userAgent)) {
+        setError("Atividade suspeita detectada. Tente novamente mais tarde.");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Log seguro sem expor email
+      securityLogger.logLoginAttempt(normalizedEmail, false, 'Tentativa de login iniciada');
+      
+      // Login direto com Supabase
+      const result = await signIn(normalizedEmail, password);
+      
+      // Log do resultado sem dados sensíveis
+      securityLogger.logLoginAttempt(normalizedEmail, result.success, result.error);
+      
+      if (!result.success) {
+        console.error("[LOGIN] Login falhou:", result.error);
+        
+        // Registrar tentativa falhada
+        recordFailedLogin(normalizedEmail);
+        
+        // Melhorar mensagens de erro baseadas no erro retornado
+        let errorMessage = result.error || "Falha na autenticação. Verifique suas credenciais.";
+        
+        if (result.error?.includes('Invalid login credentials')) {
+          errorMessage = "E-mail ou senha incorretos. Verifique suas credenciais ou crie uma nova conta se ainda não possui uma.";
+        } else if (result.error?.includes('Email not confirmed')) {
+          errorMessage = "E-mail não confirmado. Verifique sua caixa de entrada e confirme seu e-mail.";
+        } else if (result.error?.includes('Too many requests')) {
+          errorMessage = "Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente.";
+        } else if (result.error?.includes('User not found')) {
+          errorMessage = "Não existe uma conta cadastrada com este e-mail. Verifique o e-mail ou crie uma nova conta.";
+        }
+        
+        setError(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Registrar login bem-sucedido
+      recordSuccessfulLogin(normalizedEmail);
+      
+      console.log("[LOGIN] Login bem-sucedido, aguardando sessão...");
+      // O redirecionamento será tratado pelo useEffect que monitora a sessão
+      
+    } catch (error) {
+      console.error("[LOGIN] Exceção durante login:", error);
+      if (error instanceof Error) {
+        setError(error.message || "Falha na autenticação. Verifique suas credenciais.");
+      } else {
+        setError("Falha na autenticação. Verifique suas credenciais.");
+      }
       setIsLoading(false);
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      console.log("[LOGIN] Iniciando login com Google");
+      const result = await signInWithGoogle('login');
+      
+      if (!result.success) {
+        setError(result.error || "Falha no login com Google. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("[LOGIN] Erro no login com Google:", error);
+      setError("Falha no login com Google. Tente novamente.");
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <>
       <ErrorAlert error={error} />
       
-      <div className="space-y-2">
-        <Label htmlFor="email">E-mail</Label>
-        <Input
+      {isBlocked && (
+        <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm">
+          <Shield className="h-4 w-4" />
+          <span>Conta temporariamente bloqueada por segurança</span>
+        </div>
+      )}
+      
+      <form onSubmit={handleLogin} className="space-y-3">
+        <FormField
           id="email"
+          label="E-mail"
           type="email"
+          placeholder="Digite seu e-mail"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="seu@email.com"
-          disabled={isLoading}
+          onChange={setEmail}
+          icon={<Mail className="h-4 w-4" />}
           required
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="password">Senha</Label>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Sua senha"
-            disabled={isLoading}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+        
+        <PasswordField
+          id="password"
+          label="Senha"
+          placeholder="Digite sua senha"
+          value={password}
+          onChange={setPassword}
+          showPassword={showPassword}
+          toggleVisibility={togglePasswordVisibility}
+          required
+        />
+        
+        <div className="text-right">
+          <Link to="/reset-password" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
+            Esqueci minha senha
+          </Link>
+        </div>
+        
+        <Button 
+          type="submit" 
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 rounded-full shadow-md h-10 text-sm font-medium transition-all duration-200"
+          disabled={isLoading}
+        >
+          {isLoading ? "Entrando..." : "Entrar"}
+        </Button>
+      </form>
+
+      {/* Divisor */}
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            Ou continue com
+          </span>
         </div>
       </div>
-      
+
+      {/* Botão do Google */}
       <Button 
-        type="submit" 
-        className="w-full" 
-        disabled={isLoading}
+        type="button"
+        variant="outline" 
+        className="w-full rounded-full border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 h-10 transition-all duration-200 font-medium"
+        onClick={handleGoogleLogin}
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Entrando...
-          </>
-        ) : (
-          'Entrar'
-        )}
+        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+          />
+        </svg>
+        Continuar com Google
       </Button>
-    </form>
+    </>
   );
 };
+
+export default LoginForm;

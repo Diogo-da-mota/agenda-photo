@@ -190,8 +190,7 @@ export const createContract = async (contractData: CreateContractData, user: Use
       .insert({
         ...contractData,
         user_id: user.id,
-        status: 'pendente',
-        id_contrato: contractData.id_contrato || `CT-${Date.now()}`
+        status: 'pendente'
       })
       .select()
       .single();
@@ -287,7 +286,7 @@ export const listContractTemplates = async (user: User): Promise<ContractTemplat
       .from('contratos')
       .select('id, user_id, titulo, conteudo, criado_em')
       .eq('user_id', user.id)
-      .eq('modelos_contrato', 'true')
+      .eq('modelos_contrato', true)
       .order('criado_em', { ascending: false });
 
     if (error) {
@@ -326,7 +325,7 @@ export const checkTemplateNameExists = async (
       .from('contratos')
       .select('id')
       .eq('user_id', user.id)
-      .eq('modelos_contrato', 'true')
+      .eq('modelos_contrato', true)
       .ilike('titulo', `Template: ${templateName.trim()}`);
     
     // Se estamos editando um template, excluir o próprio template da verificação
@@ -369,7 +368,7 @@ export const createContractTemplate = async (
         conteudo: templateData.conteudo,
         valor_total: 0.00,
         status: 'modelo',
-        id_contrato: `TPL-${Date.now()}`
+        modelos_contrato: true
       })
       .select('id, user_id, titulo, conteudo, criado_em')
       .single();
@@ -430,7 +429,7 @@ export const updateContractTemplate = async (
       .update(updateData)
       .eq('id', templateId)
       .eq('user_id', user.id)
-      .eq('modelos_contrato', 'true')
+      .eq('modelos_contrato', true)
       .select('id, user_id, titulo, conteudo, criado_em')
       .single();
 
@@ -472,7 +471,7 @@ export const deleteContractTemplate = async (
       .delete()
       .eq('id', templateId)
       .eq('user_id', user.id)
-      .eq('modelos_contrato', 'true');
+      .eq('modelos_contrato', true);
 
     if (error) throw error;
     return true;
@@ -493,11 +492,10 @@ export const duplicateContractTemplate = async (
   try {
     // Buscar o template original
     const { data: originalTemplate, error: fetchError } = await supabase
-      .from('contratos')
+      .from('contract_templates')
       .select('*')
       .eq('id', templateId)
       .eq('user_id', user.id)
-      .eq('modelos_contrato', 'true')
       .single();
 
     if (fetchError) throw fetchError;
@@ -505,29 +503,18 @@ export const duplicateContractTemplate = async (
 
     // Criar o novo template
     const { data, error } = await supabase
-      .from('contratos')
+      .from('contract_templates')
       .insert({
         user_id: user.id,
-        titulo: `Template: ${newName}`,
+        nome: newName,
         conteudo: originalTemplate.conteudo,
-        status: 'modelo',
-        modelos_contrato: 'true',
-        valor_total: 0.00,
-        id_contrato: `TPL-${Date.now()}`
+        padrao: false
       })
-      .select('id, user_id, titulo, conteudo, criado_em')
+      .select()
       .single();
 
     if (error) throw error;
-    
-    return {
-      id: data.id,
-      user_id: data.user_id,
-      nome: data.titulo.replace('Template: ', ''),
-      conteudo: data.conteudo,
-      padrao: false,
-      criado_em: data.criado_em
-    };
+    return data;
   } catch (error) {
     console.error('Erro ao duplicar template:', error);
     throw error;
@@ -547,7 +534,7 @@ export async function getContractById(id: string): Promise<Contract | null> {
       return null;
     }
     
-    return data as Contract;
+    return data;
   } catch (error) {
     console.error('Erro ao buscar contrato por ID:', error);
     return null;

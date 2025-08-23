@@ -11,14 +11,14 @@ const securityHeaders = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   
-  // CSP mais restritivo para produção
+  // CSP mais permissivo para desenvolvimento/preview
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'nonce-' 'sha256-' 'strict-dynamic'",
-    "style-src 'self' 'nonce-' https://fonts.googleapis.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.io wss://*.supabase.io",
     "media-src 'self' data: blob:",
     "object-src 'none'",
     "base-uri 'self'",
@@ -30,7 +30,7 @@ const securityHeaders = {
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
     headers: mode === 'development' ? {} : securityHeaders,
     // Configuração para SPA - evita redirecionamento no F5
     historyApiFallback: {

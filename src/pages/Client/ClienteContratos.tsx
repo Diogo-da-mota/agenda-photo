@@ -68,14 +68,11 @@ const ClienteContratos: React.FC = () => {
         return;
       }
 
-      const contratos = (data || []).map(contrato => ({
-        ...contrato,
-        data_inicio: contrato.data_evento || new Date().toISOString(),
-        data_fim: contrato.data_evento || new Date().toISOString(),
-        atualizado_em: contrato.criado_em || new Date().toISOString()
-      }));
-      setContratos(contratos);
+      setContratos(data || []);
     } catch (error) {
+      console.error('Erro ao buscar contratos:', error);
+      toast.error('Erro ao carregar seus contratos.');
+    } finally {
       setIsLoading(false);
     }
   };

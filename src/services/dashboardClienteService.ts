@@ -78,10 +78,7 @@ export const buscarAgendamentosCliente = async (usuarioId: string): Promise<Dash
     }
     
     logger.info(`${data?.length || 0} agendamentos encontrados`);
-    return (data || []).map(item => ({
-      ...item,
-      status_agendamento: (item.status_agendamento as DashboardCliente['status_agendamento']) || 'pendente'
-    }));
+    return data || [];
   } catch (error) {
     logger.error('Erro na função buscarAgendamentosCliente:', error);
     throw error;
@@ -116,10 +113,7 @@ export const criarAgendamentoCliente = async (agendamento: CriarDashboardCliente
     }
     
     logger.info('Agendamento criado com sucesso:', data.id);
-    return {
-      ...data,
-      status_agendamento: (data.status_agendamento as DashboardCliente['status_agendamento']) || 'pendente'
-    };
+    return data;
   } catch (error) {
     logger.error('Erro na função criarAgendamentoCliente:', error);
     throw error;
@@ -151,10 +145,7 @@ export const atualizarAgendamentoCliente = async (
     }
     
     logger.info('Agendamento atualizado com sucesso');
-    return {
-      ...data,
-      status_agendamento: (data.status_agendamento as DashboardCliente['status_agendamento']) || 'pendente'
-    };
+    return data;
   } catch (error) {
     logger.error('Erro na função atualizarAgendamentoCliente:', error);
     throw error;
@@ -203,10 +194,7 @@ export const buscarAgendamentoPorId = async (id: string): Promise<DashboardClien
       throw new Error(`Erro ao buscar agendamento: ${error.message}`);
     }
     
-    return {
-      ...data,
-      status_agendamento: (data.status_agendamento as DashboardCliente['status_agendamento']) || 'pendente'
-    };
+    return data;
   } catch (error) {
     logger.error('Erro na função buscarAgendamentoPorId:', error);
     throw error;
@@ -235,10 +223,7 @@ export const buscarAgendamentosPorStatus = async (
     }
     
     logger.info(`${data?.length || 0} agendamentos encontrados com status ${status}`);
-    return (data || []).map(item => ({
-      ...item,
-      status_agendamento: (item.status_agendamento as DashboardCliente['status_agendamento']) || 'pendente'
-    }));
+    return data || [];
   } catch (error) {
     logger.error('Erro na função buscarAgendamentosPorStatus:', error);
     throw error;

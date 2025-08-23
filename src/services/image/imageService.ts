@@ -22,7 +22,7 @@ export const buscarImagens = async (): Promise<ImageData[]> => {
     }
     
     const { data, error } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .select('*')
       .eq('user_id', user.id)
       .order('criado_em', { ascending: false });
@@ -65,7 +65,7 @@ export const salvarMetadadosImagem = async (
     }
     
     const { data, error } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .insert({
         url,
         user_id: user.id,
@@ -100,7 +100,7 @@ export const deletarImagem = async (id: string): Promise<boolean> => {
     
     // Primeiro verificamos se a imagem pertence ao usuário
     const { data: imagem, error: errorConsulta } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
@@ -113,7 +113,7 @@ export const deletarImagem = async (id: string): Promise<boolean> => {
     
     // Depois deletamos a imagem
     const { error: errorDelete } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .delete()
       .eq('id', id);
       
@@ -212,7 +212,7 @@ export const getPortfolioImages = async (): Promise<ImageData[]> => {
     }
     
     const { data, error } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .select('*')
       .eq('user_id', user.id)
       .order('criado_em', { ascending: false });
@@ -250,7 +250,7 @@ export const deletePortfolioImage = async (imageUrl: string): Promise<boolean> =
     
     // Primeiro verificamos se a imagem pertence ao usuário
     const { data: imagem, error: errorConsulta } = await supabase
-.from('entregar_imagens')
+      .from('imagens')
       .select('id')
       .eq('url', imageUrl)
       .eq('user_id', user.id)
@@ -263,7 +263,7 @@ export const deletePortfolioImage = async (imageUrl: string): Promise<boolean> =
     
     // Depois deletamos a imagem
     const { error: errorDelete } = await supabase
-      .from('entregar_imagens')
+      .from('imagens')
       .delete()
       .eq('id', imagem.id);
       
