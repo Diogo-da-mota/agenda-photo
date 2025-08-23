@@ -98,75 +98,83 @@ const GaleriasLista: React.FC<GaleriasListaProps> = ({
         </Button>
       </div>
       
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {galerias.map((galeria) => (
           <Card key={galeria.slug} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
-                  <h3 className="font-semibold text-lg">{galeria.titulo}</h3>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 space-y-2 sm:space-y-3">
+                  <h3 className="font-semibold text-base sm:text-lg">{galeria.titulo}</h3>
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Criada em: {galeria.data_criacao ? new Date(galeria.data_criacao).toLocaleDateString('pt-BR') : 'Data não disponível'}
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Criada em: </span>
+                      {galeria.data_criacao ? new Date(galeria.data_criacao).toLocaleDateString('pt-BR') : 'Data não disponível'}
                     </span>
                     {galeria.total_fotos_real && (
                       <span className="flex items-center gap-1 font-medium text-primary">
-                        <ImageIcon className="h-4 w-4" />
+                        <ImageIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         {galeria.total_fotos_real} {galeria.total_fotos_real === 1 ? 'imagem' : 'imagens'}
                       </span>
                     )}
                     {galeria.data_expiracao && (
                       <span className="flex items-center gap-1">
-                        <Lock className="h-4 w-4" />
-                        Expira em: {new Date(galeria.data_expiracao).toLocaleDateString('pt-BR')}
+                        <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Expira em: </span>
+                        <span className="sm:hidden">Exp: </span>
+                        {new Date(galeria.data_expiracao).toLocaleDateString('pt-BR')}
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      {galeria.total_acessos_galeria || 0} visualizações
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">{galeria.total_acessos_galeria || 0} visualizações</span>
+                      <span className="sm:hidden">{galeria.total_acessos_galeria || 0} views</span>
                     </span>
-                    {galeria.senha_acesso && (
-                      <span className="flex items-center gap-2 font-medium text-blue-600">
-                        <Key className="h-4 w-4" />
-                        <span>Senha: {galeria.senha_acesso}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyPassword(galeria.senha_acesso!)}
-                          className="h-6 w-6 p-0 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
-                          title="Copiar senha"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </span>
-                    )}
                   </div>
+                  {galeria.senha_acesso && (
+                    <div className="flex items-center gap-2 font-medium text-blue-600">
+                      <Key className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="text-xs sm:text-sm">Senha: {galeria.senha_acesso}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyPassword(galeria.senha_acesso!)}
+                        className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
+                        title="Copiar senha"
+                      >
+                        <Copy className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                      </Button>
+                    </div>
+                  )}
                   {galeria.ultima_atualizacao && (
-                    <p className="text-sm text-muted-foreground">
-                      Última atualização: {new Date(galeria.ultima_atualizacao).toLocaleDateString('pt-BR')}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      <span className="hidden sm:inline">Última atualização: </span>
+                      <span className="sm:hidden">Atualizada: </span>
+                      {new Date(galeria.ultima_atualizacao).toLocaleDateString('pt-BR')}
                     </p>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:ml-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onVisualizar(galeria.slug)}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"
                   >
-                    <Eye className="h-4 w-4" />
-                    Visualizar
+                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Visualizar</span>
+                    <span className="sm:hidden">Ver Galeria</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onCopiarLink(galeria.slug)}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"
                   >
-                    <Copy className="h-4 w-4" />
-                    Copiar Link
+                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Copiar Link</span>
+                    <span className="sm:hidden">Copiar Link</span>
                   </Button>
                   <Button
                     type="button"
@@ -182,10 +190,11 @@ const GaleriasLista: React.FC<GaleriasListaProps> = ({
                       }
                     }}
                     disabled={loadingGalerias}
-                    className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    className="flex items-center justify-center gap-2 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Apagar
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Apagar</span>
+                    <span className="sm:hidden">Apagar Galeria</span>
                   </Button>
                 </div>
               </div>

@@ -1,16 +1,20 @@
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Check, X, FileText, Calendar, DollarSign, Signature } from "lucide-react";
-import { ContractsService } from "@/services/contractsService";
-import { useToast } from "@/hooks/use-toast";
-import type { ContractData } from "@/types/contract";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { sanitizeHtml } from "@/utils/sanitize";
+import React, { useState } from 'react';
+import { sanitizeContractContent } from '@/utils/sanitization';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { SignatureCanvas } from '@/components/contratos/SignatureCanvas';
+import { Check, Pen } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface SignatureModalProps {
   isOpen: boolean;
@@ -165,7 +169,7 @@ const SignatureModal = ({ isOpen, onOpenChange, onConfirm, contractTerms }: Sign
               const match = contractTerms.match(signatureRegex);
               
               // Usar função segura de sanitização
-              const processContractTitle = (text: string) => sanitizeHtml(text);
+              const processContractTitle = (text: string) => sanitizeContractContent(text);
               
               if (match) {
                 // Separar o conteúdo principal das assinaturas
@@ -177,7 +181,7 @@ const SignatureModal = ({ isOpen, onOpenChange, onConfirm, contractTerms }: Sign
                     <div 
                       className="signature-modal-content"
                       dangerouslySetInnerHTML={{ 
-                        __html: sanitizeHtml(processContractTitle(mainContent))
+                        __html: processContractTitle(mainContent)
                       }}
                     />
                     
@@ -202,7 +206,7 @@ const SignatureModal = ({ isOpen, onOpenChange, onConfirm, contractTerms }: Sign
                   <div 
                     className="signature-modal-content"
                     dangerouslySetInnerHTML={{ 
-                      __html: sanitizeHtml(processContractTitle(contractTerms))
+                      __html: processContractTitle(contractTerms)
                     }}
                   />
                 );

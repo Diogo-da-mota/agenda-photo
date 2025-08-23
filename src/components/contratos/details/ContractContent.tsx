@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { FileText, Download, Printer, Eye } from "lucide-react";
+import { FileText, Download, Printer, Eye, Copy, Check } from "lucide-react";
 import { ContractsService } from "@/services/contractsService";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";

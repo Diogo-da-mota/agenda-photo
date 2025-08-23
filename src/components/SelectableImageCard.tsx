@@ -79,11 +79,12 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
       className={cn(
         "group relative bg-white rounded-lg overflow-hidden shadow-sm border",
         "transition-all duration-200 ease-in-out",
-        "hover:shadow-md hover:scale-[1.02]",
+        "hover:shadow-md sm:hover:scale-[1.02]", // Escala apenas no desktop
+        "touch-manipulation", // Otimização para touch
         isSelectionMode && "cursor-pointer",
-        isSelected && "ring-2 ring-blue-500 ring-offset-2",
-        downloadCompleted && "ring-2 ring-green-500 ring-offset-2",
-        downloadFailed && "ring-2 ring-red-500 ring-offset-2",
+        isSelected && "ring-2 ring-blue-500 ring-offset-1 sm:ring-offset-2", // Ring offset menor no mobile
+        downloadCompleted && "ring-2 ring-green-500 ring-offset-1 sm:ring-offset-2",
+        downloadFailed && "ring-2 ring-red-500 ring-offset-1 sm:ring-offset-2",
         className
       )}
       onClick={handleCardClick}
@@ -93,9 +94,10 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
         <div
           className={cn(
             "absolute top-2 left-2 z-10",
-            "w-6 h-6 rounded-full border-2 bg-white shadow-sm",
+            "w-7 h-7 sm:w-6 sm:h-6 rounded-full border-2 bg-white shadow-sm",
             "flex items-center justify-center",
             "transition-all duration-200",
+            "touch-manipulation", // Otimização para touch
             isSelected 
               ? "border-blue-500 bg-blue-500" 
               : "border-gray-300 hover:border-blue-400"
@@ -112,7 +114,8 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
       {image.destaque && (
         <div className="absolute top-2 right-2 z-10">
           <div className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-            Destaque
+            <span className="hidden sm:inline">Destaque</span>
+            <span className="sm:hidden">★</span>
           </div>
         </div>
       )}
@@ -121,17 +124,17 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
       {downloadProgress && (
         <div className="absolute top-2 right-2 z-10">
           {isDownloading && (
-            <div className="bg-blue-500 text-white p-2 rounded-full">
-              <Loader2 className="h-4 w-4 animate-spin" />
+            <div className="bg-blue-500 text-white p-1.5 sm:p-2 rounded-full">
+              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
             </div>
           )}
           {downloadCompleted && (
-            <div className="bg-green-500 text-white p-2 rounded-full">
-              <Check className="h-4 w-4" />
+            <div className="bg-green-500 text-white p-1.5 sm:p-2 rounded-full">
+              <Check className="h-3 w-3 sm:h-4 sm:w-4" />
             </div>
           )}
           {downloadFailed && (
-            <div className="bg-red-500 text-white p-2 rounded-full">
+            <div className="bg-red-500 text-white p-1.5 sm:p-2 rounded-full">
               <span className="text-xs font-bold">!</span>
             </div>
           )}
@@ -172,18 +175,23 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
         <div
           className={cn(
             "absolute inset-0 bg-black bg-opacity-0",
-            "flex items-center justify-center gap-2",
+            "flex items-center justify-center gap-1 sm:gap-2",
             "transition-all duration-200",
-            "group-hover:bg-opacity-40"
+            "group-hover:bg-opacity-40",
+            "sm:opacity-0 sm:group-hover:opacity-100", // No mobile sempre visível, no desktop só no hover
+            "opacity-100" // Sempre visível no mobile
           )}
         >
           <Button
             size="sm"
             variant="secondary"
             className={cn(
-              "opacity-0 group-hover:opacity-100",
+              "sm:opacity-0 sm:group-hover:opacity-100",
+              "opacity-100", // Sempre visível no mobile
               "transition-opacity duration-200",
-              "bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+              "bg-white/10 hover:bg-white/20 backdrop-blur-sm",
+              "p-2 sm:p-2", // Padding consistente
+              "touch-manipulation" // Otimização para touch
             )}
             onClick={handleViewClick}
           >
@@ -193,9 +201,12 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
           <Button
             size="sm"
             className={cn(
-              "opacity-0 group-hover:opacity-100",
+              "sm:opacity-0 sm:group-hover:opacity-100",
+              "opacity-100", // Sempre visível no mobile
               "transition-opacity duration-200",
-              "bg-blue-600 hover:bg-blue-700"
+              "bg-blue-600 hover:bg-blue-700",
+              "p-2 sm:p-2", // Padding consistente
+              "touch-manipulation" // Otimização para touch
             )}
             onClick={handleDownloadClick}
             disabled={isDownloading}
@@ -211,9 +222,10 @@ export const SelectableImageCard: React.FC<SelectableImageCardProps> = ({
 
       {/* Progresso de download */}
       {downloadProgress && isDownloading && (
-        <div className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-90 p-2">
+        <div className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-90 p-1.5 sm:p-2">
           <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-            <span>Baixando...</span>
+            <span className="hidden sm:inline">Baixando...</span>
+            <span className="sm:hidden">↓</span>
             <span>{Math.round(downloadProgress.progress)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1">

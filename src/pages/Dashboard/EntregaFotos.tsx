@@ -259,9 +259,15 @@ export default function EntregaFotos() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="nova-galeria">Nova Galeria</TabsTrigger>
-            <TabsTrigger value="galeria-fotos">Galeria de Fotos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-10 sm:h-11">
+            <TabsTrigger value="nova-galeria" className="text-xs sm:text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">Nova Galeria</span>
+              <span className="sm:hidden">Nova</span>
+            </TabsTrigger>
+            <TabsTrigger value="galeria-fotos" className="text-xs sm:text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">Galeria de Fotos</span>
+              <span className="sm:hidden">Galerias</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="nova-galeria" className="space-y-6">

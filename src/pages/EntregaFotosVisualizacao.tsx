@@ -440,8 +440,7 @@ const EntregaFotosVisualizacao = () => {
     }
   };
 
-  const formatarData = (data: string | undefined) => {
-    if (!data) return 'Data não informada';
+  const formatarData = (data: string) => {
     return new Date(data).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -510,60 +509,81 @@ const EntregaFotosVisualizacao = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header da Galeria */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-gray-900">{galeria.titulo}</h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{formatarData(galeria.data_entrega)}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <ImageIcon className="h-4 w-4" />
-                  <span>{galeria.imagens.length} fotos</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>
-                    {diasRestantes > 0 
-                      ? `Expira em ${diasRestantes} dias` 
-                      : 'Expira hoje'
-                    }
-                  </span>
+            <div className="space-y-3">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center">{galeria.titulo}</h1>
+              
+              <div className="flex flex-col items-center gap-3">
+                {galeria.data_entrega && (
+                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatarData(galeria.data_entrega)}</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <ImageIcon className="h-4 w-4" />
+                    <span>{galeria.imagens.length} fotos</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      <span className="hidden sm:inline">
+                        {diasRestantes > 0 
+                          ? `Expira em ${diasRestantes} dias` 
+                          : 'Expira hoje'
+                        }
+                      </span>
+                      <span className="sm:hidden">
+                        {diasRestantes > 0 
+                          ? `${diasRestantes}d` 
+                          : 'Exp. hoje'
+                        }
+                      </span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {galeria.permitir_download && (
                 <>
                   <Button 
                     onClick={handleDownloadAll}
                     disabled={isDownloading}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+                    size="sm"
                   >
-                    <Download className="h-4 w-4 mr-2" />
-                    {isDownloading ? 'Baixando...' : `Baixar todas (${galeria.imagens.length})`}
+                    <Download className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{isDownloading ? 'Baixando...' : `Baixar todas (${galeria.imagens.length})`}</span>
+                    <span className="sm:hidden">{isDownloading ? 'Baixando...' : `Baixar (${galeria.imagens.length})`}</span>
                   </Button>
                   <Button 
                     variant={isSelectionMode ? "default" : "outline"}
                     onClick={toggleSelectionMode}
-                    className={isSelectionMode ? "bg-blue-600 hover:bg-blue-700" : ""}
+                    className={`w-full sm:w-auto ${isSelectionMode ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+                    size="sm"
                   >
-                    <CheckSquare className="h-4 w-4 mr-2" />
-                    {isSelectionMode ? 'Sair da seleção' : 'Selecionar múltiplas'}
+                    <CheckSquare className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{isSelectionMode ? 'Sair da seleção' : 'Selecionar múltiplas'}</span>
+                    <span className="sm:hidden">{isSelectionMode ? 'Sair' : 'Selecionar'}</span>
                   </Button>
                 </>
               )}
-              <Button variant="outline" onClick={compartilharGaleria}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Compartilhar
+              <Button variant="outline" onClick={compartilharGaleria} className="w-full sm:w-auto" size="sm">
+                <Share2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Compartilhar</span>
+                <span className="sm:hidden">Compartilhar</span>
               </Button>
               {diasRestantes <= 7 && (
-                <Badge variant="destructive" className="px-3 py-1">
+                <Badge variant="destructive" className="px-3 py-1 justify-center sm:justify-start">
                   <Clock className="h-3 w-3 mr-1" />
-                  Expira em breve
+                  <span className="hidden sm:inline">Expira em breve</span>
+                  <span className="sm:hidden">Expira</span>
                 </Badge>
               )}
             </div>
@@ -580,7 +600,7 @@ const EntregaFotosVisualizacao = () => {
         isVisible={isSelectionMode || isDownloading}
         position="bottom"
       >
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
           <SelectableImageGrid
             images={galeria.imagens.map(img => ({
               id: img.id,
@@ -598,12 +618,12 @@ const EntregaFotosVisualizacao = () => {
           />
 
           {galeria.observacoes && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="text-lg">Observações</CardTitle>
+            <Card className="mt-6 sm:mt-8">
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">Observações</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap">{galeria.observacoes}</p>
+              <CardContent className="pt-0">
+                <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap">{galeria.observacoes}</p>
               </CardContent>
             </Card>
           )}

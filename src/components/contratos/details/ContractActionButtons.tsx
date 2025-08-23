@@ -44,7 +44,19 @@ const ContractActionButtons = ({ contractId, contractStatus, contract, onResend,
   const navigate = useNavigate();
   
   const handleViewSite = () => {
-    navigate('/agenda/cliente-contratos');
+    let contractUrl: string;
+    
+    if (contract.id_amigavel && contract.nome_cliente) {
+      contractUrl = `${window.location.origin}${generateContractUrl({
+        id_contrato: contractId,
+        id_amigavel: contract.id_amigavel,
+        nome_cliente: contract.nome_cliente
+      })}`;
+    } else {
+      contractUrl = `${window.location.origin}${generateContractUrl(contractId, contract.tipo_evento)}`;
+    }
+    
+    window.open(contractUrl, '_blank');
   };
   
   const handleDownload = async () => {

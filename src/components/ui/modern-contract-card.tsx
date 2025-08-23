@@ -109,7 +109,7 @@ const ModernContractCard: React.FC<ContractCardProps> = ({
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+    <Card className="group relative overflow-hidden bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 w-full">
       {/* Gradient Background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${getStatusGradient(contrato.status)} opacity-60`} />
       
@@ -119,123 +119,165 @@ const ModernContractCard: React.FC<ContractCardProps> = ({
       
       <CardContent className="relative p-0 overflow-hidden">
         <div className="flex flex-col lg:flex-row">
-          {/* Status Section */}
-          <div className="flex lg:flex-col items-center justify-center p-6 lg:w-24 bg-gradient-to-br from-white/80 via-slate-50/60 to-white/40 backdrop-blur-sm border-r border-slate-100/50">
-            <div className="relative group-hover:scale-110 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent rounded-full blur-sm" />
-              <div className="relative p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-white/50">
-                {getStatusIcon(contrato.status)}
-              </div>
-            </div>
-          </div>
-
           {/* Main Content */}
-          <div className="flex-1 p-6">
-            {/* Header */}
-            <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-900 transition-colors duration-300">
+          <div className="flex-1 p-3 sm:p-4 lg:p-6">
+            {/* Header - Layout responsivo: mobile vertical, desktop horizontal */}
+            <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-4 lg:gap-6 mb-3 sm:mb-4 lg:mb-6">
+              {/* Seção do Título e Informações - Mobile: largura total, Desktop: largura fixa */}
+              <div className="lg:w-80 xl:w-96 space-y-2 sm:space-y-3">
+                {/* Título Principal */}
+                <div className="flex items-center">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 group-hover:text-blue-900 transition-colors duration-300 truncate">
                     Contrato - {eventType}
                   </h3>
-                  {/* Status, Data e Criado em ao lado do tipo de evento */}
-                  <div className="flex items-center gap-3 ml-4">
-                    <Badge className={`${getStatusColor(contrato.status)} font-semibold px-3 py-1 rounded-full shadow-sm`}>
-                      {contrato.status}
-                    </Badge>
+                </div>
+                
+                {/* Badges e Informações */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 ml-0 sm:ml-4">
+                  <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                     {contrato.data_inicio && (
-                      <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-1 rounded-full border border-blue-200/50 shadow-sm">
-                        <Calendar className="h-3 w-3 text-blue-600" />
-                        <span className="text-xs font-semibold text-blue-800">
+                      <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-2 sm:px-3 py-1 rounded-full border border-blue-200/50 shadow-sm">
+                        <Calendar className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                        <span className="text-xs font-semibold text-blue-800 whitespace-nowrap">
                           {format(new Date(contrato.data_inicio), "dd/MM/yyyy", { locale: ptBR })}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm">
-                      <Clock className="h-3 w-3 text-slate-600" />
-                      <span className="text-xs font-semibold text-slate-700">
+                    <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-slate-50 to-gray-50 px-2 sm:px-3 py-1 rounded-full border border-slate-200/50 shadow-sm">
+                      <Clock className="h-3 w-3 text-slate-600 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                         Criado em {format(new Date(contrato.criado_em), "dd/MM/yyyy")}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 ml-4">
-                  <User className="h-4 w-4 text-slate-500" />
-                  <p className="text-base font-semibold text-slate-700">{clientName}</p>
+                
+                {/* Nome do Cliente */}
+                <div className="flex items-center gap-1.5 ml-0 sm:ml-4">
+                  <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 flex-shrink-0" />
+                  <p className="text-sm sm:text-base font-semibold text-slate-700 truncate">{clientName}</p>
+                </div>
+                
+                {/* Valor do Contrato e Status */}
+                <div className="flex flex-row gap-2 sm:gap-3 ml-0 sm:ml-4">
+                  {contrato.valor_total > 0 && (
+                    <div className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-50 to-green-50 px-2.5 sm:px-3 py-1.5 rounded-full border border-emerald-200/50 shadow-sm w-fit">
+                      <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
+                      <span className="text-sm sm:text-base font-bold text-emerald-800 whitespace-nowrap">
+                        {formatCurrency(contrato.valor_total)}
+                      </span>
+                    </div>
+                  )}
+                  <Badge className={`${getStatusColor(contrato.status)} font-semibold px-2 sm:px-3 py-1 rounded-full shadow-sm text-xs sm:text-sm w-fit`}>
+                    {contrato.status}
+                  </Badge>
                 </div>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                {contrato.valor_total > 0 && (
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 rounded-full border border-emerald-200/50 shadow-sm">
-                    <DollarSign className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm font-bold text-emerald-800">
-                      {formatCurrency(contrato.valor_total)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 pt-0 border-t border-slate-100/50">
-              <Button
-                onClick={() => onViewContract(contrato)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 rounded-full font-semibold group-hover:scale-105"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Visualizar Contrato
-              </Button>
+              {/* Cards de Detalhes - Mobile: ocultos, Desktop: visíveis horizontalmente */}
+              {(contrato.descricao || contrato.cpf_cliente || contrato.local_evento) && (
+                <div className="hidden lg:flex lg:flex-1 lg:gap-4 xl:gap-6">
+                  {/* Card Descrição - Largura maior */}
+                  {contrato.descricao && (
+                    <div className="flex-1 min-w-0 p-3 xl:p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 bg-blue-100 rounded-lg flex-shrink-0">
+                          <FileText className="h-3.5 w-3.5 text-blue-600" />
+                        </div>
+                        <h4 className="font-semibold text-slate-800 text-sm">Descrição</h4>
+                      </div>
+                      <p className="text-xs text-slate-700 font-medium ml-7 line-clamp-3">{contrato.descricao}</p>
+                    </div>
+                  )}
+                  
+                  {/* Card CPF - Largura menor */}
+                  {contrato.cpf_cliente && (
+                    <div className="w-32 xl:w-36 flex-shrink-0 p-2.5 xl:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <div className="p-1 bg-purple-100 rounded-lg flex-shrink-0">
+                          <User className="h-3 w-3 text-purple-600" />
+                        </div>
+                        <h4 className="text-sm font-semibold text-slate-800">CPF</h4>
+                      </div>
+                      <p className="text-xs text-slate-600 ml-4 font-mono break-all">
+                        {contrato.cpf_cliente}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Card Local - Largura menor */}
+                  {contrato.local_evento && (
+                    <div className="w-36 xl:w-40 flex-shrink-0 p-2.5 xl:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <div className="p-1 bg-green-100 rounded-lg flex-shrink-0">
+                          <MapPin className="h-3 w-3 text-green-600" />
+                        </div>
+                        <h4 className="text-sm font-semibold text-slate-800">Local</h4>
+                      </div>
+                      <p className="text-xs text-slate-600 ml-4 line-clamp-2">{contrato.local_evento}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Expandable Details */}
+        {/* Seção de Detalhes para Mobile e Botão Visualizar */}
         {(contrato.descricao || contrato.data_fim || contrato.local_evento || contrato.cpf_cliente) && (
           <>
-            <Separator className="bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-            <div className="p-6 bg-gradient-to-br from-slate-50/40 via-white/60 to-blue-50/30 backdrop-blur-sm">
-            
-                  
-
-              
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4">
+            <Separator className="bg-gradient-to-r from-transparent via-slate-200 to-transparent lg:hidden" />
+            <div className="p-1 sm:p-4 lg:p-6 bg-gradient-to-br from-slate-50/40 via-white/60 to-blue-50/30 backdrop-blur-sm">
+              {/* Cards de detalhes - Visíveis apenas em mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5 mb-3 sm:mb-4 lg:hidden">
                 {contrato.descricao && (
-                  <div className="p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <FileText className="h-4 w-4 text-blue-600" />
+                  <div className="sm:col-span-2 p-2.5 sm:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                      <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                       </div>
-                      <h4 className="font-semibold text-slate-800">Descrição</h4>
+                      <h4 className="font-semibold text-slate-800 text-sm sm:text-base">Descrição</h4>
                     </div>
-                    <p className="text-sm text-slate-700 font-medium ml-9">{contrato.descricao}</p>
+                    <p className="text-xs sm:text-sm text-slate-700 font-medium ml-6 sm:ml-9 line-clamp-3">{contrato.descricao}</p>
                   </div>
                 )}
                 
                 {contrato.cpf_cliente && (
-                  <div className="p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <User className="h-4 w-4 text-purple-600" />
+                  <div className="p-1.5 sm:p-2 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                      <div className="p-1 sm:p-1.5 bg-purple-100 rounded-lg flex-shrink-0">
+                        <User className="h-3 w-3 sm:h-2.5 sm:w-3.5 text-purple-600" />
                       </div>
-                      <h4 className="font-semibold text-slate-800">CPF do Cliente</h4>
+                      <h4 className="text-sm sm:text-base font-semibold text-slate-800">CPF</h4>
                     </div>
-                    <p className="text-sm text-slate-700 font-mono tracking-wider ml-9">{contrato.cpf_cliente}</p>
+                    <p className="text-xs sm:text-sm text-slate-600 ml-4 sm:ml-5 font-mono">
+                      {contrato.cpf_cliente}
+                    </p>
                   </div>
                 )}
                 
                 {contrato.local_evento && (
-                  <div className="p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <MapPin className="h-4 w-4 text-green-600" />
+                  <div className="p-2.5 sm:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                      <div className="p-1 sm:p-1.5 bg-green-100 rounded-lg flex-shrink-0">
+                        <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
                       </div>
-                      <h4 className="font-semibold text-slate-800">Local do Evento</h4>
+                      <h4 className="text-sm sm:text-base font-semibold text-slate-800">Local</h4>
                     </div>
-                    <p className="text-sm text-slate-700 font-medium ml-9">{contrato.local_evento}</p>
+                    <p className="text-xs sm:text-sm text-slate-600 ml-4 sm:ml-5 line-clamp-2">{contrato.local_evento}</p>
                   </div>
                 )}
+              </div>
+              
+              {/* Botão Visualizar Contrato */}
+              <div className="-mt-12 flex justify-center">
+                <Button
+                  onClick={() => onViewContract(contrato)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-6 sm:px-8 lg:px-10 py-2 sm:py-2.5 lg:py-3 rounded-full font-semibold group-hover:scale-105 text-sm sm:text-base"
+                >
+                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                  <span className="truncate">Visualizar Contrato</span>
+                </Button>
               </div>
             </div>
           </>

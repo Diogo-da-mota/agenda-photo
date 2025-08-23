@@ -60,8 +60,8 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="space-y-2 sm:space-y-3">
               <Label htmlFor="titulo" className="text-sm font-medium">Título da Galeria *</Label>
               <Input
                 id="titulo"
@@ -69,14 +69,14 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                 value={formData.titulo}
                 onChange={(e) => onInputChange('titulo', e.target.value)}
                 required
-                className="h-11"
+                className="h-10 sm:h-11 text-sm sm:text-base"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Será usado para criar a URL da galeria
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <Link className="h-4 w-4" />
                 URL da Galeria
@@ -85,29 +85,29 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                 <Input
                   value={galeriaSlug ? `${window.location.origin}/entrega-fotos/${galeriaSlug}` : 'URL será gerada após criar a galeria'}
                   readOnly
-                  className="h-11 pr-10 bg-muted/50"
+                  className="h-10 sm:h-11 pr-8 sm:pr-10 bg-muted/50 text-xs sm:text-sm"
                 />
                 {galeriaSlug && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1 h-9 w-9 p-0"
+                    className="absolute right-1 top-1 h-8 w-8 sm:h-9 sm:w-9 p-0"
                     onClick={() => {
                       const fullUrl = `${window.location.origin}/entrega-fotos/${galeriaSlug}`;
                       navigator.clipboard.writeText(fullUrl);
                     }}
                   >
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Link para compartilhar com o cliente
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <Lock className="h-4 w-4" />
                 Senha Atual
@@ -116,30 +116,30 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                 <Input
                   value={galeriaSenha || 'Nenhuma senha definida'}
                   readOnly
-                  className="h-11 pr-10 bg-muted/50"
+                  className="h-10 sm:h-11 pr-8 sm:pr-10 bg-muted/50 text-xs sm:text-sm"
                 />
                 {galeriaSenha && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1 h-9 w-9 p-0"
+                    className="absolute right-1 top-1 h-8 w-8 sm:h-9 sm:w-9 p-0"
                     onClick={() => {
                       navigator.clipboard.writeText(galeriaSenha);
                     }}
                   >
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Senha para acesso à galeria
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-2 sm:space-y-3">
               <Label htmlFor="data_entrega" className="flex items-center gap-2 text-sm font-medium">
                 <Calendar className="h-4 w-4" />
                 Data de Entrega
@@ -149,11 +149,11 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                 type="date"
                 value={formData.data_entrega || ''}
                 onChange={(e) => onInputChange('data_entrega', e.target.value)}
-                className="h-11"
+                className="h-10 sm:h-11 text-sm sm:text-base"
               />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <Label htmlFor="senha_acesso" className="flex items-center gap-2 text-sm font-medium">
                 <Lock className="h-4 w-4" />
                 Senha de Acesso
@@ -164,19 +164,19 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                 placeholder="Senha opcional para proteger a galeria"
                 value={formData.senha_acesso || ''}
                 onChange={(e) => onInputChange('senha_acesso', e.target.value)}
-                className="h-11"
+                className="h-10 sm:h-11 text-sm sm:text-base"
               />
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="descricao" className="text-sm font-medium">Descrição</Label>
             <Textarea
               id="descricao"
               placeholder="Descrição opcional da galeria..."
               value={formData.descricao || ''}
               onChange={(e) => onInputChange('descricao', e.target.value)}
-              className="min-h-[100px] resize-none"
+              className="min-h-[80px] sm:min-h-[100px] resize-none text-sm sm:text-base"
             />
           </div>
         </CardContent>
@@ -198,21 +198,23 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
         <CardContent className="space-y-6">
           {/* Área de Upload */}
           <div
-            className="border-2 border-dashed border-primary/30 bg-primary/5 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-primary/10 transition-all duration-300 cursor-pointer group"
+            className="border-2 border-dashed border-primary/30 bg-primary/5 rounded-xl p-6 sm:p-8 lg:p-12 text-center hover:border-primary/50 hover:bg-primary/10 transition-all duration-300 cursor-pointer group touch-manipulation"
             onDrop={onDrop}
             onDragOver={(e) => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
           >
-            <div className="space-y-4">
-              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Upload className="h-8 w-8 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <div className="mx-auto w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Upload className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary" />
               </div>
-              <div className="space-y-2">
-                <p className="text-xl font-semibold text-foreground">
-                  Clique para selecionar ou arraste as fotos aqui
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-base sm:text-lg lg:text-xl font-semibold text-foreground">
+                  <span className="hidden sm:inline">Clique para selecionar ou arraste as fotos aqui</span>
+                  <span className="sm:hidden">Toque para selecionar fotos</span>
                 </p>
-                <p className="text-muted-foreground">
-                  Suporte para JPG, PNG, GIF e WEBP (máx. 10MB por foto)
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  <span className="hidden sm:inline">Suporte para JPG, PNG, GIF e WEBP (máx. 10MB por foto)</span>
+                  <span className="sm:hidden">JPG, PNG, GIF, WEBP (máx. 10MB)</span>
                 </p>
               </div>
             </div>
@@ -228,23 +230,25 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
 
           {/* Preview das Imagens */}
           {selectedImages.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
-                  Fotos Selecionadas ({selectedImages.length})
+                <h3 className="text-base sm:text-lg font-semibold">
+                  <span className="hidden sm:inline">Fotos Selecionadas ({selectedImages.length})</span>
+                  <span className="sm:hidden">Fotos ({selectedImages.length})</span>
                 </h3>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={onClearImages}
-                  className="hover:bg-destructive hover:text-destructive-foreground"
+                  className="hover:bg-destructive hover:text-destructive-foreground h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
                 >
-                  Limpar Todas
+                  <span className="hidden sm:inline">Limpar Todas</span>
+                  <span className="sm:hidden">Limpar</span>
                 </Button>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 lg:gap-4">
                 {selectedImages.map((image) => (
                   <div key={image.id} className="relative group">
                     <div className="aspect-square overflow-hidden rounded-lg border-2 border-border hover:border-primary/50 transition-colors">
@@ -258,13 +262,18 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
                       type="button"
                       variant="destructive"
                       size="sm"
-                      className="absolute -top-2 -right-2 h-7 w-7 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      className={cn(
+                        "absolute -top-1 -right-1 sm:-top-2 sm:-right-2",
+                        "h-6 w-6 sm:h-7 sm:w-7 rounded-full p-0",
+                        "opacity-100 sm:opacity-0 sm:group-hover:opacity-100", // Sempre visível no mobile
+                        "transition-opacity shadow-lg touch-manipulation"
+                      )}
                       onClick={() => onRemoveImage(image.id)}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white text-xs p-2 rounded-b-lg">
-                      <p className="truncate font-medium">{image.file.name}</p>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white text-xs p-1 sm:p-2 rounded-b-lg">
+                      <p className="truncate font-medium text-xs">{image.file.name}</p>
                     </div>
                   </div>
                 ))}
@@ -280,17 +289,23 @@ const GaleriaForm: React.FC<GaleriaFormProps> = ({
           type="submit"
           size="lg"
           disabled={isUploading || !formData.titulo.trim() || selectedImages.length === 0}
-          className="min-w-[240px] h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          className="min-w-[180px] sm:min-w-[240px] h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
         >
           {isUploading ? (
             <>
-              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-              Criando Galeria... {uploadProgress > 0 && `${Math.round(uploadProgress)}%`}
+              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 animate-spin" />
+              <span className="hidden sm:inline">
+                Criando Galeria... {uploadProgress > 0 && `${Math.round(uploadProgress)}%`}
+              </span>
+              <span className="sm:hidden">
+                {uploadProgress > 0 ? `${Math.round(uploadProgress)}%` : 'Criando...'}
+              </span>
             </>
           ) : (
             <>
-              <Camera className="h-5 w-5 mr-3" />
-              Enviar Galeria
+              <Camera className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+              <span className="hidden sm:inline">Enviar Galeria</span>
+              <span className="sm:hidden">Enviar</span>
             </>
           )}
         </Button>

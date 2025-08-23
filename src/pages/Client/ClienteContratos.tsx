@@ -151,71 +151,71 @@ const ClienteContratos: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4" style={{backgroundColor: '#0B0F17'}}>
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8" style={{backgroundColor: '#0B0F17'}}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         
         {/* Cabeçalho da Página */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Meus Contratos</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">Meus Contratos</h1>
         </div>
 
         {/* Seção de Filtros e Busca */}
-        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center mb-4 sm:mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar contratos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-10 sm:h-11"
             />
           </div>
         </div>
 
         {/* Tabs de Status */}
-        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full mb-6">
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="todos">Todos</TabsTrigger>
-            <TabsTrigger value="pendente" className="flex items-center gap-2">
-              <Clock size={16} className="text-yellow-500" />
-              Pendentes
+        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full mb-4 sm:mb-6">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full gap-1 sm:gap-0">
+            <TabsTrigger value="todos" className="text-xs sm:text-sm">Todos</TabsTrigger>
+            <TabsTrigger value="pendente" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Clock size={14} className="text-yellow-500 hidden sm:block" />
+              <span className="truncate">Pendentes</span>
             </TabsTrigger>
-            <TabsTrigger value="confirmado" className="flex items-center gap-2">
-              <Check size={16} className="text-green-500" />
-              Confirmados
+            <TabsTrigger value="confirmado" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Check size={14} className="text-green-500 hidden sm:block" />
+              <span className="truncate">Confirmados</span>
             </TabsTrigger>
-            <TabsTrigger value="concluido" className="flex items-center gap-2">
-              <Check size={16} className="text-blue-500" />
-              Concluídos
+            <TabsTrigger value="concluido" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Check size={14} className="text-blue-500 hidden sm:block" />
+              <span className="truncate">Concluídos</span>
             </TabsTrigger>
-            <TabsTrigger value="cancelado" className="flex items-center gap-2">
-              <X size={16} className="text-red-500" />
-              Cancelados
+            <TabsTrigger value="cancelado" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm col-span-2 sm:col-span-1">
+              <X size={14} className="text-red-500 hidden sm:block" />
+              <span className="truncate">Cancelados</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         {/* Lista de Contratos com Design Melhorado */}
         {filteredContratos.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-soft border border-white/60 overflow-hidden">
-            <div className="text-center py-20 px-8">
-              <div className="relative mb-8">
-                <div className="bg-gradient-to-br from-brand-blue/20 to-brand-purple/20 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <div className="bg-gradient-to-br from-brand-blue to-brand-purple rounded-full w-20 h-20 flex items-center justify-center">
-                    <FileText className="h-12 w-12 text-white" />
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-soft border border-white/60 overflow-hidden">
+            <div className="text-center py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+              <div className="relative mb-6 sm:mb-8">
+                <div className="bg-gradient-to-br from-brand-blue/20 to-brand-purple/20 rounded-full w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+                  <div className="bg-gradient-to-br from-brand-blue to-brand-purple rounded-full w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 flex items-center justify-center">
+                    <FileText className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-white" />
                   </div>
                 </div>
                 {/* Elementos decorativos */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-4 h-4 bg-brand-yellow rounded-full opacity-60"></div>
-                <div className="absolute top-8 right-1/4 w-3 h-3 bg-brand-green rounded-full opacity-40"></div>
-                <div className="absolute bottom-8 left-1/4 w-2 h-2 bg-brand-red rounded-full opacity-50"></div>
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 sm:-translate-y-4 w-3 h-3 sm:w-4 sm:h-4 bg-brand-yellow rounded-full opacity-60"></div>
+                <div className="absolute top-4 sm:top-8 right-1/4 w-2 h-2 sm:w-3 sm:h-3 bg-brand-green rounded-full opacity-40"></div>
+                <div className="absolute bottom-4 sm:bottom-8 left-1/4 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-brand-red rounded-full opacity-50"></div>
               </div>
               
-              <div className="space-y-4 max-w-md mx-auto">
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+              <div className="space-y-3 sm:space-y-4 max-w-sm sm:max-w-md mx-auto">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">
                   {searchQuery || statusFilter !== 'todos' ? '🔍 Nenhum contrato encontrado' : '📄 Nenhum contrato cadastrado'}
                 </h3>
-                <p className="text-gray-600 text-lg leading-relaxed">
+                <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
                   {searchQuery || statusFilter !== 'todos' 
                     ? 'Tente ajustar os filtros de busca para encontrar o que procura.' 
                     : 'Seus contratos aparecerão aqui assim que forem criados.'}
@@ -227,7 +227,7 @@ const ClienteContratos: React.FC = () => {
                       setSearchQuery('');
                       setStatusFilter('todos');
                     }}
-                    className="mt-6 bg-gradient-to-r from-brand-blue to-brand-purple text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                    className="mt-4 sm:mt-6 w-full sm:w-auto bg-gradient-to-r from-brand-blue to-brand-purple text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-sm sm:text-base"
                   >
                     Limpar Filtros
                   </Button>
@@ -236,15 +236,15 @@ const ClienteContratos: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            <div className="grid gap-6">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {filteredContratos.map((contrato, index) => (
                 <div 
                   key={contrato.id} 
-                  className="group transform transition-all duration-500 hover:scale-[1.02] animate-slide-in"
+                  className="group transform transition-all duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] animate-slide-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-soft border border-white/60 overflow-hidden hover:shadow-elevation transition-all duration-300">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-soft border border-white/60 overflow-hidden hover:shadow-elevation transition-all duration-300">
                     <ModernContractCard
                       contrato={contrato}
                       onViewContract={(contrato) => {
