@@ -318,8 +318,27 @@ const Reports: React.FC = () => {
           <RevenueExpenseChart
             period={period}
             setPeriod={setPeriod}
-            dadosMensaisReais={dadosMensaisReais}
-            monthlyData={monthlyData}
+            obterDadosPorPeriodo={() => {
+              switch (period) {
+                case 'monthly':
+                  return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
+                case 'quarterly':
+                  return dadosTrimestraisReais.length > 0 ? dadosTrimestraisReais : [
+                    { name: 'Q1', receita: 25500, despesas: 9800 },
+                    { name: 'Q2', receita: 32500, despesas: 11900 },
+                    { name: 'Q3', receita: 38500, despesas: 13900 },
+                    { name: 'Q4', receita: 46500, despesas: 16300 }
+                  ];
+                case 'yearly':
+                  return dadosAnuaisReais.length > 0 ? dadosAnuaisReais : [
+                    { name: '2022', receita: 120000, despesas: 45000 },
+                    { name: '2023', receita: 143000, despesas: 51900 },
+                    { name: '2024', receita: 165000, despesas: 58200 }
+                  ];
+                default:
+                  return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
+              }
+            }}
           />
         </TabsContent>
 

@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { WifiOff, Wifi, RefreshCw, HardDrive } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useServiceWorker } from '@/utils/serviceWorker';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
 
 interface OfflineIndicatorProps {
   className?: string;
@@ -154,4 +154,4 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = memo(({
 
 OfflineIndicator.displayName = 'OfflineIndicator';
 
-export default OfflineIndicator; 
+export default OfflineIndicator;

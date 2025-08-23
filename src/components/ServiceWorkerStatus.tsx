@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Wifi, WifiOff, Download, Trash2, RefreshCw } from 'lucide-react';
-import { useServiceWorker } from '@/utils/serviceWorkerManager';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
 import { useToast } from '@/hooks/use-toast';
 
 interface ServiceWorkerStatusProps {

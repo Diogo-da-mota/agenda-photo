@@ -1,27 +1,42 @@
+import serviceWorkerSingleton from './utils/serviceWorkerSingleton';
+
 export function register() {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      const swUrl = '/sw.js';
-      navigator.serviceWorker
-        .register(swUrl)
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-          console.error('Service Worker registration failed:', error);
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await serviceWorkerSingleton.register({
+          onSuccess: (registration) => {
+            console.log('[SW Registration] Service Worker registered with scope:', registration.scope);
+          },
+          onError: (error) => {
+            console.error('[SW Registration] Service Worker registration failed:', error);
+          },
+          onUpdate: (registration) => {
+            console.log('[SW Registration] Service Worker update available');
+          }
         });
+        
+        if (registration) {
+          console.log('[SW Registration] Registration successful');
+        }
+      } catch (error) {
+        console.error('[SW Registration] Registration error:', error);
+      }
     });
   }
 }
 
-export function unregister() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then(registration => {
-        registration.unregister();
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
+export async function unregister() {
+  try {
+    const result = await serviceWorkerSingleton.unregister();
+    if (result) {
+      console.log('[SW Registration] Service Worker unregistered successfully');
+    } else {
+      console.log('[SW Registration] No Service Worker to unregister');
+    }
+    return result;
+  } catch (error) {
+    console.error('[SW Registration] Error unregistering Service Worker:', error);
+    return false;
   }
-} 
+}
