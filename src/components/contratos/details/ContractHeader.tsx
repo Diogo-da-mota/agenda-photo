@@ -67,7 +67,7 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
     };
   
   const handleViewSite = () => {
-    const clientUrl = 'http://localhost:8082/agenda/cliente-login';
+    const clientUrl = '/agenda/cliente-login';
     window.open(clientUrl, '_blank');
   };
   
