@@ -206,23 +206,24 @@ const ContractAttachments = ({
       ) : (
         <div className="space-y-2">
           {attachments.map((attachment, index) => (
-            <div key={index} className="flex items-center justify-between bg-muted/30 p-3 rounded-md">
-              <div className="flex items-center gap-3">
+            <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between bg-muted/30 p-3 rounded-md gap-3 sm:gap-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {getFileIcon(attachment.name)}
-                <div>
-                  <span className="text-sm font-medium">{attachment.name}</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-sm font-medium block truncate">{attachment.name}</span>
                   <p className="text-xs text-muted-foreground mt-0.5">({attachment.size})</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {isPreviewable(attachment.name) && (
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => handlePreview(attachment)}
-                    className="gap-1"
+                    className="gap-1 flex-1 sm:flex-initial"
                   >
                     <Eye size={14} />
+                    <span className="sm:hidden">Ver</span>
                     <span className="hidden sm:inline">Visualizar</span>
                   </Button>
                 )}
@@ -230,9 +231,10 @@ const ContractAttachments = ({
                   variant="outline" 
                   size="sm"
                   onClick={() => handleDownload(attachment)}
-                  className="gap-1"
+                  className="gap-1 flex-1 sm:flex-initial"
                 >
                   <Download size={14} />
+                  <span className="sm:hidden">Baixar</span>
                   <span className="hidden sm:inline">Baixar</span>
                 </Button>
                 {showRemoveButton && onRemoveAttachment && (
@@ -240,9 +242,10 @@ const ContractAttachments = ({
                     variant="ghost" 
                     size="sm"
                     onClick={() => onRemoveAttachment(index)}
-                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 flex-1 sm:flex-initial"
                   >
                     <X size={14} />
+                    <span className="sm:hidden">Remover</span>
                     <span className="hidden sm:inline">Remover</span>
                   </Button>
                 )}
@@ -254,28 +257,28 @@ const ContractAttachments = ({
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-auto">
+        <DialogContent className="w-[95vw] max-w-[800px] max-h-[90vh] overflow-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>{previewAttachment?.name}</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg truncate pr-8">{previewAttachment?.name}</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
             {previewAttachment && (
               <>
                 {previewAttachment.name.toLowerCase().endsWith('.pdf') ? (
-                  <div className="h-[500px] w-full bg-muted flex items-center justify-center">
-                    <p className="text-muted-foreground">Visualização de PDF não disponível. Por favor, faça o download.</p>
+                  <div className="h-[300px] sm:h-[500px] w-full bg-muted flex items-center justify-center rounded-md">
+                    <p className="text-muted-foreground text-center px-4">Visualização de PDF não disponível. Por favor, faça o download.</p>
                   </div>
                 ) : (
                   <img 
                     src={previewAttachment.url || `https://placehold.co/600x400?text=${encodeURIComponent(previewAttachment.name)}`} 
                     alt={previewAttachment.name}
-                    className="max-w-full max-h-[500px] mx-auto object-contain"
+                    className="max-w-full max-h-[300px] sm:max-h-[500px] mx-auto object-contain rounded-md"
                   />
                 )}
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-center sm:justify-end">
                   <Button 
                     onClick={() => handleDownload(previewAttachment)} 
-                    className="gap-1"
+                    className="gap-1 w-full sm:w-auto"
                   >
                     <Download size={16} />
                     Baixar

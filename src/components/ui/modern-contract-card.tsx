@@ -270,7 +270,7 @@ const ModernContractCard: React.FC<ContractCardProps> = ({
               </div>
               
               {/* Botão Visualizar Contrato */}
-              <div className="-mt-12 flex justify-center">
+              <div className="mt-4 sm:-mt-12 flex justify-center">
                 <Button
                   onClick={() => onViewContract(contrato)}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-6 sm:px-8 lg:px-10 py-2 sm:py-2.5 lg:py-3 rounded-full font-semibold group-hover:scale-105 text-sm sm:text-base"

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
 import { SidebarProps } from './types';
-import MobileSidebar from './MobileSidebar';
+
 import SidebarContent from './SidebarContent';
 import { createMenuItems } from './menuItems';
 import { useSidebarState, useSidebarBadges } from './hooks';
@@ -24,8 +24,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   } = useSidebarBadges();
   
   const closeMobileSidebar = () => {
-    if (isMobile) {
-      setIsMobileOpen(false);
+    if (isMobile && isOpen) {
+      toggleSidebar();
     }
   };
   
@@ -40,19 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      {/* Mobile Toggle Button in MobileSidebar component */}
-      <MobileSidebar 
-        isMobileOpen={isMobileOpen}
-        setIsMobileOpen={setIsMobileOpen}
-        isMobile={isMobile}
-      />
-      
       {/* Sidebar */}
       <aside
         className={cn(
            "fixed h-full z-40 bg-[#0B0F17] border-r border-[#1F2937] transition-all duration-300 flex flex-col",
            // Em dispositivos móveis, sidebar mais compacta
-           isMobile ? (isMobileOpen ? "left-0 w-[60%] max-w-[220px]" : "-left-full") : "left-0",
+           isMobile ? (isOpen ? "left-0 w-[60%] max-w-[220px]" : "-left-full") : "left-0",
            // Em desktop, largura menor para mais espaço
            !isMobile && (isOpen ? "w-44" : "w-12")
         )}

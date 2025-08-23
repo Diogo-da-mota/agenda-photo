@@ -174,22 +174,43 @@ const ClienteContratos: React.FC = () => {
 
         {/* Tabs de Status */}
         <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full mb-4 sm:mb-6">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full gap-1 sm:gap-0">
-            <TabsTrigger value="todos" className="text-xs sm:text-sm">Todos</TabsTrigger>
-            <TabsTrigger value="pendente" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Clock size={14} className="text-yellow-500 hidden sm:block" />
+          <div className="block sm:hidden">
+            <TabsList className="grid grid-cols-2 w-full gap-1 mb-2">
+              <TabsTrigger value="todos" className="text-xs">Todos</TabsTrigger>
+              <TabsTrigger value="pendente" className="flex items-center gap-1 text-xs">
+                <span className="truncate">Pendentes</span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsList className="grid grid-cols-2 w-full gap-1 mb-2">
+              <TabsTrigger value="confirmado" className="flex items-center gap-1 text-xs">
+                <span className="truncate">Confirmados</span>
+              </TabsTrigger>
+              <TabsTrigger value="concluido" className="flex items-center gap-1 text-xs">
+                <span className="truncate">Concluídos</span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsList className="grid grid-cols-1 w-full">
+              <TabsTrigger value="cancelado" className="flex items-center gap-1 text-xs">
+                <span className="truncate">Cancelados</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsList className="hidden sm:grid sm:grid-cols-5 w-full gap-0">
+            <TabsTrigger value="todos" className="text-sm">Todos</TabsTrigger>
+            <TabsTrigger value="pendente" className="flex items-center gap-2 text-sm">
+              <Clock size={14} className="text-yellow-500" />
               <span className="truncate">Pendentes</span>
             </TabsTrigger>
-            <TabsTrigger value="confirmado" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Check size={14} className="text-green-500 hidden sm:block" />
+            <TabsTrigger value="confirmado" className="flex items-center gap-2 text-sm">
+              <Check size={14} className="text-green-500" />
               <span className="truncate">Confirmados</span>
             </TabsTrigger>
-            <TabsTrigger value="concluido" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Check size={14} className="text-blue-500 hidden sm:block" />
+            <TabsTrigger value="concluido" className="flex items-center gap-2 text-sm">
+              <Check size={14} className="text-blue-500" />
               <span className="truncate">Concluídos</span>
             </TabsTrigger>
-            <TabsTrigger value="cancelado" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm col-span-2 sm:col-span-1">
-              <X size={14} className="text-red-500 hidden sm:block" />
+            <TabsTrigger value="cancelado" className="flex items-center gap-2 text-sm">
+              <X size={14} className="text-red-500" />
               <span className="truncate">Cancelados</span>
             </TabsTrigger>
           </TabsList>

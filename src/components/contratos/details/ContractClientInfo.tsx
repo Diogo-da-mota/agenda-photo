@@ -45,12 +45,12 @@ const ContractClientInfo = ({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-4 mb-2">
           <h2 className="text-xl font-bold">{clientName}</h2>
-          <p className="text-muted-foreground">{eventType}</p>
+          {getStatusBadge()}
         </div>
-        {getStatusBadge()}
+        <p className="text-muted-foreground">{eventType}</p>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

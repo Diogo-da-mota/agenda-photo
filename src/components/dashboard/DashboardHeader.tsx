@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ThemeToggle from '@/components/ThemeToggle';
 import Notifications from '@/components/dashboard/Notifications';
+import Logo from '@/components/Logo';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -120,9 +121,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
   return (
     <header className="sticky top-0 z-10 h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="flex h-16 items-center px-4">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
-          <AlignJustify className="h-5 w-5" />
-        </Button>
+        {/* Logo - apenas mobile */}
+        <div className="md:hidden mr-4">
+          <Logo />
+        </div>
         
         {/* Busca Global */}
         <div className="relative ml-4 md:ml-6 flex-1 max-w-md">
@@ -134,7 +136,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
         </div>
         
         {/* Ações do lado direito */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-0 ml-auto">
           {/* Indique e Ganhe */}
           <Button 
             variant="outline" 
@@ -175,6 +177,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
             className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
             <LogOut className="h-5 w-5" />
+          </Button>
+          
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
+            <AlignJustify className="h-5 w-5" />
           </Button>
         </div>
       </div>

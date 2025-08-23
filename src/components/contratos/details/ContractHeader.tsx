@@ -72,42 +72,49 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
   };
   
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon" onClick={handleBackToList}>
           <ArrowLeft size={16} />
         </Button>
-        <h1 className="text-2xl font-bold">Detalhes do Contrato</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Detalhes do Contrato</h1>
       </div>
-      <div className="flex items-center gap-2">
-        {contractStatus === 'pendente' && (
-          <Button className="gap-2" onClick={handleResend}>
-            <Send size={16} />
-            Reenviar
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+        {/* Primeira linha em mobile: Copiar Link e Ver Site */}
+        <div className="flex gap-2 sm:contents">
+          <Button variant="outline" className="gap-2 flex-1 sm:w-auto" onClick={() => {
+            if (contract.id_amigavel && contract.nome_cliente) {
+              copyContractLink({
+                id_contrato: contractId,
+                id_amigavel: contract.id_amigavel,
+                nome_cliente: contract.nome_cliente
+              });
+            } else {
+              copyContractLink(contractId, contract.tipo_evento);
+            }
+          }}>
+            <Copy size={16} />
+            Copiar Link
           </Button>
-        )}
-        <Button variant="outline" className="gap-2" onClick={() => {
-          if (contract.id_amigavel && contract.nome_cliente) {
-            copyContractLink({
-              id_contrato: contractId,
-              id_amigavel: contract.id_amigavel,
-              nome_cliente: contract.nome_cliente
-            });
-          } else {
-            copyContractLink(contractId, contract.tipo_evento);
-          }
-        }}>
-          <Copy size={16} />
-          Copiar Link
-        </Button>
-        <Button variant="outline" className="gap-2" onClick={handleViewSite}>
-          <ExternalLink size={16} />
-          Ver Site
-        </Button>
-        <Button variant="outline" className="gap-2" onClick={handleDownload}>
-          <Download size={16} />
-          Download
-        </Button>
+          <Button variant="outline" className="gap-2 flex-1 sm:w-auto" onClick={handleViewSite}>
+            <ExternalLink size={16} />
+            Ver Site
+          </Button>
+        </div>
+        
+        {/* Segunda linha em mobile: Reenviar e Download */}
+        <div className="flex gap-2 sm:contents">
+          {contractStatus === 'pendente' && (
+            <Button className="gap-2 flex-1 sm:w-auto" onClick={handleResend}>
+              <Send size={16} />
+              Reenviar
+            </Button>
+          )}
+          <Button variant="outline" className="gap-2 flex-1 sm:w-auto" onClick={handleDownload}>
+            <Download size={16} />
+            Download
+          </Button>
+        </div>
       </div>
     </div>
   );
