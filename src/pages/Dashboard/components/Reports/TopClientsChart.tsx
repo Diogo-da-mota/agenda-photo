@@ -12,7 +12,7 @@ export const TopClientsChart: React.FC<TopClientsChartProps> = ({
   buscarClientesDuplicados
 }) => {
   return (
-    <Card className="col-span-1">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-base md:text-lg">Principais Clientes</CardTitle>
         <CardDescription className="text-xs md:text-sm">
@@ -30,7 +30,7 @@ export const TopClientsChart: React.FC<TopClientsChartProps> = ({
                 margin={{
                   top: 10,
                   right: 10,
-                  left: -20,
+                  left: 50,
                   bottom: 5,
                 }}
               >
@@ -43,9 +43,10 @@ export const TopClientsChart: React.FC<TopClientsChartProps> = ({
                 <YAxis 
                   type="category" 
                   dataKey="nome" 
-                  fontSize={10}
-                  width={80}
-                  tickFormatter={(value) => value.length > 10 ? `${value.substring(0, 8)}...` : value}
+                  fontSize={15}
+                  width={100}
+                  tick={{ fill: '#ffffff' }}
+                  tickFormatter={(value) => value.length > 122 ? `${value.substring(0, 10)}...` : value}
                 />
                 <Tooltip 
                   formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Valor Total']}
@@ -61,7 +62,7 @@ export const TopClientsChart: React.FC<TopClientsChartProps> = ({
                     dataKey="nome" 
                     position="insideLeft"
                     fill="white"
-                    fontSize={12}
+                    fontSize={11}
                     fontWeight="bold"
                   />
                 </Bar>

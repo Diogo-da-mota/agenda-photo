@@ -14,7 +14,7 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
   categoryData
 }) => {
   return (
-    <Card className="col-span-1">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-base md:text-lg">Receita por Categoria</CardTitle>
         <CardDescription className="text-xs md:text-sm">
@@ -41,13 +41,29 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value, name) => [`R$ ${value.toLocaleString('pt-BR')}`, name]}
-                contentStyle={{ fontSize: '12px', borderRadius: '0.5rem' }}
+              <Tooltip
+                formatter={(value, name, props) => [
+                  `${props.payload.quantidade || 1} ${props.payload.nome}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                  ''
+                ]}
               />
-              <Legend wrapperStyle={{ fontSize: '12px', marginTop: '10px' }} />
             </PieChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Legenda personalizada */}
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          {(dadosCategoriaReais.length > 0 ? dadosCategoriaReais : categoryData).map((entry, index) => (
+            <div key={`legend-${index}`} className="flex items-center gap-1">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {entry.nome || entry.name}
+              </span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

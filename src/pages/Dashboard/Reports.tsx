@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Removido import de Tabs - não será mais usado
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
@@ -17,7 +17,7 @@ import { SavedReports } from './components/Reports/SavedReports';
 
 // Serviços
 import { reportsService, RelatorioData } from '@/services/reportsService';
-import { buscarEventosComValoresEntradas, buscarEventosComValoresRestantes } from '@/services/agendaService';
+import { buscarEventosComValoresEntradas, buscarEventosComValoresRestantes, buscarEventos } from '@/services/agendaService';
 import { buscarTransacoes } from '@/services/financeiroService';
 import { buscarDespesas } from '@/services/financeiroDespesasService';
 import { salvarRelatorio, buscarRelatorios, formatarPeriodo } from '@/services/relatoriosService';
@@ -228,22 +228,62 @@ const Reports: React.FC = () => {
       const inicioAno = new Date(anoAtual, 0, 1);
       const fimAno = new Date(anoAtual, 11, 31, 23, 59, 59, 999);
       
+      // Buscar transações financeiras
       const transacoes = await buscarTransacoes(user.id, {
         dataInicio: inicioAno,
         dataFim: fimAno
       });
       
-      const categorias = transacoes
+      // Buscar eventos do ano atual
+      const eventos = await buscarEventos(user.id);
+      const eventosAnoAtual = eventos.filter(evento => {
+        const dataEvento = new Date(evento.date || evento.data_inicio);
+        return dataEvento >= inicioAno && dataEvento <= fimAno;
+      });
+      
+      // Agrupar transações por categoria
+      const categoriasTransacoes = transacoes
         .filter(t => t.tipo === 'receita')
         .reduce((acc, transacao) => {
           const categoria = transacao.categoria || 'Outros';
-          acc[categoria] = (acc[categoria] || 0) + transacao.valor;
+          if (!acc[categoria]) {
+            acc[categoria] = { valor: 0, quantidade: 0 };
+          }
+          acc[categoria].valor += transacao.valor;
+          acc[categoria].quantidade += 1;
           return acc;
-        }, {} as Record<string, number>);
+        }, {} as Record<string, { valor: number; quantidade: number }>);
       
-      const dadosCategoria = Object.entries(categorias).map(([nome, valor]) => ({
+      // Agrupar eventos por tipo
+      const categoriasEventos = eventosAnoAtual.reduce((acc, evento) => {
+        const categoria = evento.eventType || evento.tipo || evento.titulo || 'Outros';
+        const valorEvento = (evento.totalValue || evento.valor_total || 0) + 
+                           (evento.downPayment || evento.valor_entrada || 0) + 
+                           (evento.remainingValue || evento.valor_restante || 0);
+        
+        if (!acc[categoria]) {
+          acc[categoria] = { valor: 0, quantidade: 0 };
+        }
+        acc[categoria].valor += valorEvento;
+        acc[categoria].quantidade += 1;
+        return acc;
+      }, {} as Record<string, { valor: number; quantidade: number }>);
+      
+      // Combinar dados de transações e eventos
+      const todasCategorias = { ...categoriasTransacoes };
+      
+      Object.entries(categoriasEventos).forEach(([categoria, dados]) => {
+        if (!todasCategorias[categoria]) {
+          todasCategorias[categoria] = { valor: 0, quantidade: 0 };
+        }
+        todasCategorias[categoria].valor += dados.valor;
+        todasCategorias[categoria].quantidade += dados.quantidade;
+      });
+      
+      const dadosCategoria = Object.entries(todasCategorias).map(([nome, dados]) => ({
         nome,
-        valor
+        valor: dados.valor,
+        quantidade: dados.quantidade
       }));
       
       setDadosCategoriaReais(dadosCategoria);
@@ -297,65 +337,56 @@ const Reports: React.FC = () => {
         obterAnoAtual={() => anoAtual}
       />
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="revenue">Receita vs Despesas</TabsTrigger>
-          <TabsTrigger value="categories">Por Categoria</TabsTrigger>
-          <TabsTrigger value="clients">Top Clientes</TabsTrigger>
-        </TabsList>
+      {/* Card grande: Receita vs. Despesas no topo */}
+      <div className="w-full">
+        <RevenueExpenseChart
+          period={period}
+          setPeriod={setPeriod}
+          obterDadosPorPeriodo={() => {
+            switch (period) {
+              case 'monthly':
+                return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
+              case 'quarterly':
+                return dadosTrimestraisReais.length > 0 ? dadosTrimestraisReais : [
+                  { name: 'Q1', receita: 25500, despesas: 9800 },
+                  { name: 'Q2', receita: 32500, despesas: 11900 },
+                  { name: 'Q3', receita: 38500, despesas: 13900 },
+                  { name: 'Q4', receita: 46500, despesas: 16300 }
+                ];
+              case 'yearly':
+                return dadosAnuaisReais.length > 0 ? dadosAnuaisReais : [
+                  { name: '2022', receita: 120000, despesas: 45000 },
+                  { name: '2023', receita: 143000, despesas: 51900 },
+                  { name: '2024', receita: 165000, despesas: 58200 }
+                ];
+              default:
+                return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
+            }
+          }}
+        />
+      </div>
 
-        <TabsContent value="overview" className="space-y-4">
-          <PeriodAnalysis
-            dadosMensaisReais={dadosMensaisReais}
-            dadosTrimestraisReais={dadosTrimestraisReais}
-            dadosAnuaisReais={dadosAnuaisReais}
-            monthlyData={monthlyData}
-          />
-        </TabsContent>
+      {/* Cards lado a lado: Receita por Categoria e Principais Clientes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CategoryChart
+          dadosCategoriaReais={dadosCategoriaReais}
+          categoryData={categoryData}
+        />
+        <TopClientsChart
+          clientesDuplicados={clientesDuplicados}
+          buscarClientesDuplicados={buscarClientesDuplicados}
+        />
+      </div>
 
-        <TabsContent value="revenue" className="space-y-4">
-          <RevenueExpenseChart
-            period={period}
-            setPeriod={setPeriod}
-            obterDadosPorPeriodo={() => {
-              switch (period) {
-                case 'monthly':
-                  return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
-                case 'quarterly':
-                  return dadosTrimestraisReais.length > 0 ? dadosTrimestraisReais : [
-                    { name: 'Q1', receita: 25500, despesas: 9800 },
-                    { name: 'Q2', receita: 32500, despesas: 11900 },
-                    { name: 'Q3', receita: 38500, despesas: 13900 },
-                    { name: 'Q4', receita: 46500, despesas: 16300 }
-                  ];
-                case 'yearly':
-                  return dadosAnuaisReais.length > 0 ? dadosAnuaisReais : [
-                    { name: '2022', receita: 120000, despesas: 45000 },
-                    { name: '2023', receita: 143000, despesas: 51900 },
-                    { name: '2024', receita: 165000, despesas: 58200 }
-                  ];
-                default:
-                  return dadosMensaisReais.length > 0 ? dadosMensaisReais : monthlyData;
-              }
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="categories" className="space-y-4">
-          <CategoryChart
-            dadosCategoriaReais={dadosCategoriaReais}
-            categoryData={categoryData}
-          />
-        </TabsContent>
-
-        <TabsContent value="clients" className="space-y-4">
-          <TopClientsChart
-            clientesDuplicados={clientesDuplicados}
-            buscarClientesDuplicados={buscarClientesDuplicados}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Card grande: Tendência de Receita no final */}
+      <div className="w-full">
+        <PeriodAnalysis
+          dadosMensaisReais={dadosMensaisReais}
+          dadosTrimestraisReais={dadosTrimestraisReais}
+          dadosAnuaisReais={dadosAnuaisReais}
+          monthlyData={monthlyData}
+        />
+      </div>
 
       <SavedReports
         relatorios={relatorios}

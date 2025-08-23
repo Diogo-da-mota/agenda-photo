@@ -15,7 +15,7 @@ export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({
   obterDadosPorPeriodo
 }) => {
   return (
-    <Card className="col-span-1 lg:col-span-2">
+    <Card className="w-full">
       <CardHeader>
         <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:justify-between md:items-center">
           <div className="flex-1 min-w-0">

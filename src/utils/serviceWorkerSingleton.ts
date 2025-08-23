@@ -240,33 +240,36 @@ class ServiceWorkerSingleton {
   /**
    * Forçar atualização
    */
-  public async update(): Promise<void> {
+  public async update(): Promise<boolean> {
     if (!this.registration) {
-      throw new Error('Service Worker não está registrado');
+      console.warn('[SW Singleton] Service Worker não está registrado');
+      return false;
     }
 
     try {
       await this.registration.update();
       console.log('[SW Singleton] Atualização forçada');
+      return true;
     } catch (error) {
       console.error('[SW Singleton] Erro ao forçar atualização:', error);
-      throw error;
+      return false;
     }
   }
 
   /**
    * Limpar cache
    */
-  public async clearCache(): Promise<void> {
+  public async clearCache(): Promise<boolean> {
     try {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       );
       console.log('[SW Singleton] Cache limpo');
+      return true;
     } catch (error) {
       console.error('[SW Singleton] Erro ao limpar cache:', error);
-      throw error;
+      return false;
     }
   }
 
@@ -292,6 +295,32 @@ class ServiceWorkerSingleton {
   }
 
   /**
+   * Verificar se o Service Worker está registrado
+   */
+  public async isRegistered(): Promise<boolean> {
+    if (!this.isSupported()) return false;
+    
+    // Verificar se temos um registro local
+    if (this.registration) {
+      return true;
+    }
+    
+    try {
+      // Verificar se há registros ativos no navegador
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        this.registration = registration;
+        this.setupEventListeners(registration);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.warn('[SW Singleton] Erro ao verificar registro:', error);
+      return false;
+    }
+  }
+
+  /**
    * Obter informações do Service Worker
    */
   public getInfo(): {
@@ -310,6 +339,30 @@ class ServiceWorkerSingleton {
       isRegistered,
       isActive,
       state
+    };
+  }
+
+  /**
+   * Obter informações detalhadas do Service Worker
+   */
+  public async getServiceWorkerInfo(): Promise<{
+    isSupported: boolean;
+    isRegistered: boolean;
+    isActive: boolean;
+    state?: string;
+    registration: ServiceWorkerRegistration | null;
+  }> {
+    const isSupported = this.isSupported();
+    const isRegistered = await this.isRegistered();
+    const isActive = !!this.registration?.active;
+    const state = this.registration?.active?.state;
+
+    return {
+      isSupported,
+      isRegistered,
+      isActive,
+      state,
+      registration: this.registration
     };
   }
 
