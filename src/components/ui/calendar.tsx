@@ -40,7 +40,7 @@ function Calendar({
     // Definir o estilo para este modificador com ajustes para mobile
     modifiersStyles[key] = {
       color: 'white',
-      backgroundColor: eventDate.color || '#3c83f6',
+      backgroundColor: eventDate.color || '#1f2937', // Mudança de azul claro para cinza escuro
       borderRadius: '9999px', // Usando 9999px para garantir forma circular perfeita
       width: '32px', // Largura fixa
       height: '32px', // Altura fixa
@@ -82,7 +82,7 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
+        day_today: "bg-white text-black",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
