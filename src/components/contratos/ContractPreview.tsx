@@ -1,9 +1,11 @@
-import React from 'react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Paperclip } from 'lucide-react';
-import { useEmpresa } from '@/hooks/useEmpresa';
-import { sanitizeContractContent } from '@/utils/sanitization';
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar, MapPin, User, Phone, Mail, FileText, DollarSign } from "lucide-react";
+import type { ContractData } from "@/types/contract";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 interface ContractData {
   clientName: string;
@@ -122,7 +124,7 @@ export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, atta
                 const match = contractText.match(signatureRegex);
                 
                 // Usar função segura de sanitização
-                const processContractTitle = (text: string) => sanitizeContractContent(text);
+                const processContractTitle = (text: string) => sanitizeHtml(text);
                 
                 if (match) {
                   // Separar o conteúdo principal das assinaturas
@@ -134,7 +136,7 @@ export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, atta
                       <div 
                         className="contract-content"
                         dangerouslySetInnerHTML={{ 
-                          __html: processContractTitle(mainContent)
+                          __html: sanitizeHtml(processContractTitle(mainContent))
                         }}
                       />
                       
@@ -159,7 +161,7 @@ export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, atta
                     <div 
                       className="contract-content"
                       dangerouslySetInnerHTML={{ 
-                        __html: processContractTitle(contractText)
+                        __html: sanitizeHtml(processContractTitle(contractText))
                       }}
                     />
                   );

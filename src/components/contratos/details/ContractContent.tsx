@@ -1,9 +1,17 @@
 
-import React, { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { sanitizeContractContent } from '@/utils/sanitization';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { FileText, Download, Printer, Eye } from "lucide-react";
+import { ContractsService } from "@/services/contractsService";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
+import type { ContractData } from "@/types/contract";
+import ContractPreviewModal from "@/components/contratos/ContractPreviewModal";
+import { useState } from "react";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 interface ContractContentProps {
   termsAndConditions: string;
@@ -164,7 +172,7 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
           const match = termsAndConditions.match(signatureRegex);
           
           // Usar função segura de sanitização
-          const processContractTitle = (text: string) => sanitizeContractContent(text);
+          const processContractTitle = (text: string) => sanitizeHtml(text);
           
           if (match) {
             // Separar o conteúdo principal das assinaturas
@@ -176,7 +184,7 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
                 <div 
                   className="contract-content"
                   dangerouslySetInnerHTML={{ 
-                    __html: processContractTitle(mainContent)
+                    __html: sanitizeHtml(processContractTitle(mainContent))
                   }}
                 />
                 
@@ -201,7 +209,7 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
               <div 
                 className="contract-content"
                 dangerouslySetInnerHTML={{ 
-                  __html: processContractTitle(termsAndConditions)
+                  __html: sanitizeHtml(processContractTitle(termsAndConditions))
                 }}
               />
             );
