@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import PdfPreview from './PdfPreview';
 
@@ -260,6 +261,9 @@ const ContractAttachments = ({
         <DialogContent className="w-[95vw] max-w-[800px] max-h-[90vh] overflow-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg truncate pr-8">{previewAttachment?.name}</DialogTitle>
+            <DialogDescription>
+              Visualização do anexo do contrato
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
             {previewAttachment && (
