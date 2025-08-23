@@ -14,6 +14,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { createQueryClient } from "./lib/react-query-config";
 import { useIsMobile } from "./hooks/use-mobile";
 import { useEntregaFotosAutomatico } from "@/hooks/useEntregaFotosAutomatico";
+import { useLovableBadgeRemover } from "@/hooks/useLovableBadgeRemover";
 
 // A criação do client foi movida para dentro do componente App
 // para usar o hook useIsMobile e aplicar a lógica de cache dinâmica.
@@ -26,6 +27,9 @@ const AppWithRoutes = () => {
     executarAoIniciar: true,
     habilitado: true
   });
+
+  // Remover badge do Lovable
+  useLovableBadgeRemover();
 
   return <AppRoutes />;
 };
