@@ -30,7 +30,7 @@ const securityHeaders = {
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8081,
+    port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
     // Configuração para SPA - evita redirecionamento no F5
     historyApiFallback: {
