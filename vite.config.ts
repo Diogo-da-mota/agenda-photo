@@ -1,26 +1,14 @@
-<<<<<<< HEAD
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import path from 'path'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-=======
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// Headers de segurança básicos para desenvolvimento
+// Security headers for development and production
 const securityHeaders = {
-  // Headers básicos de segurança
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'SAMEORIGIN', // Menos restritivo para desenvolvimento
+  'X-Frame-Options': 'SAMEORIGIN',
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  
-  // CSP mais permissivo para desenvolvimento/preview
   'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -37,11 +25,14 @@ const securityHeaders = {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean),
   server: {
     host: "::",
     port: 8080,
     headers: mode === 'development' ? {} : securityHeaders,
-    // Configuração para SPA - evita redirecionamento no F5
     historyApiFallback: {
       index: '/index.html',
       rewrites: [
@@ -56,47 +47,14 @@ export default defineConfig(({ mode }) => ({
         { from: /^\/r\/.*$/, to: '/index.html' }
       ]
     },
-    // N8N REMOVIDO - Sistema usa Amazon S3
-    // Proxy para resolver problema CORS com N8N
-    /* COMENTADO - INTEGRAÇÃO N8N REMOVIDA
-    proxy: {
-      '/api/n8n': {
-        target: 'https://webhook.n8n.agendaphoto.com.br',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api\/n8n/, ''),
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            proxyReq.removeHeader('origin');
-          });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            proxyRes.headers['access-control-allow-origin'] = 'http://localhost:8080';
-            proxyRes.headers['access-control-allow-credentials'] = 'true';
-          });
-        }
-      }
-    }
-    */
   },
   preview: {
     headers: securityHeaders
   },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-<<<<<<< Updated upstream
-=======
->>>>>>> 3a0f733958fd3439ae43a47af2271af6d51c9d47
->>>>>>> Stashed changes
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
-  },
-  server: {
-    port: 8081,
-    host: true,
   },
   build: {
     outDir: 'dist',
@@ -113,4 +71,4 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ['react', 'react-dom'],
   },
-})
+}))

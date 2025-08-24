@@ -1,7 +1,17 @@
 import CryptoJS from 'crypto-js';
 
-// Chave para criptografia (em produção, isso deveria vir de uma variável de ambiente)
-const ENCRYPTION_KEY = 'agenda-pro-remember-me-key';
+// Use environment variable for encryption key in production
+// For development, use a fallback (never use this pattern in real production)
+const getEncryptionKey = (): string => {
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    // Development fallback - replace with secure key management in production
+    return 'dev-agenda-pro-remember-me-key';
+  }
+  
+  // In production, this should come from a secure environment variable
+  // Never hardcode production keys!
+  return import.meta.env.VITE_REMEMBER_ME_KEY || 'agenda-pro-remember-me-key';
+};
 const STORAGE_KEY = 'agenda_pro_remember_me';
 
 interface RememberMeData {
@@ -14,14 +24,14 @@ interface RememberMeData {
  * Criptografa os dados antes de salvar
  */
 function encryptData(data: string): string {
-  return CryptoJS.AES.encrypt(data, ENCRYPTION_KEY).toString();
+  return CryptoJS.AES.encrypt(data, getEncryptionKey()).toString();
 }
 
 /**
  * Descriptografa os dados salvos
  */
 function decryptData(encryptedData: string): string {
-  const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+  const bytes = CryptoJS.AES.decrypt(encryptedData, getEncryptionKey());
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 

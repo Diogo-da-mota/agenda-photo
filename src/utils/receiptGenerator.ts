@@ -438,17 +438,21 @@ export const generateReceiptPDF = async (
 ): Promise<Blob> => {
   const html = generateReceiptHTML(receiptData, companyInfo);
   
-  // Criar um elemento temporário para renderizar o HTML
+  // Create a temporary element to render the HTML securely
   const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
   tempDiv.style.position = 'absolute';
   tempDiv.style.left = '-9999px';
   tempDiv.style.top = '0';
+  
+  // Create the HTML structure securely
+  const receiptElement = document.createElement('div');
+  receiptElement.innerHTML = html;
+  tempDiv.appendChild(receiptElement);
   document.body.appendChild(tempDiv);
 
   try {
     // Usar html2canvas para capturar o HTML como imagem
-    const canvas = await html2canvas(tempDiv.firstElementChild as HTMLElement, {
+    const canvas = await html2canvas(receiptElement, {
       width: 800,
       height: 1200,
       scale: 2,

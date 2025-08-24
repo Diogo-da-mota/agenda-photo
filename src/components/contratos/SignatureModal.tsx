@@ -181,7 +181,7 @@ const SignatureModal = ({ isOpen, onOpenChange, onConfirm, contractTerms }: Sign
                     <div 
                       className="signature-modal-content"
                       dangerouslySetInnerHTML={{ 
-                        __html: processContractTitle(mainContent)
+                        __html: sanitizeContractContent(mainContent)
                       }}
                     />
                     
@@ -206,7 +206,7 @@ const SignatureModal = ({ isOpen, onOpenChange, onConfirm, contractTerms }: Sign
                   <div 
                     className="signature-modal-content"
                     dangerouslySetInnerHTML={{ 
-                      __html: processContractTitle(contractTerms)
+                      __html: sanitizeContractContent(contractTerms)
                     }}
                   />
                 );
