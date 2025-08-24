@@ -22,7 +22,7 @@ async function updateCORSPolicies() {
     // Atualizar configurações de CORS para Edge Functions
     const corsConfig = {
       allowed_origins: [
-        // Vercel URL removida conforme solicitado
+        'https://bright-spark-welcome.vercel.app',
         'https://agendaphoto.com.br',
         'https://www.agendaphoto.com.br'
       ],

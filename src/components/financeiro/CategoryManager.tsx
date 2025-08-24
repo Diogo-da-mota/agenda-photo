@@ -5,8 +5,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogFooter,
-  DialogTrigger,
-  DialogDescription
+  DialogTrigger 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,9 +162,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Gerenciar Categorias de {tipo === 'receita' ? 'Receitas' : 'Despesas'}</DialogTitle>
-          <DialogDescription>
-            Adicione, edite ou remova categorias para organizar suas {tipo === 'receita' ? 'receitas' : 'despesas'}
-          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
@@ -292,4 +288,4 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   );
 };
 
-export default CategoryManager;
+export default CategoryManager; 

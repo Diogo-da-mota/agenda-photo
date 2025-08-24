@@ -96,9 +96,6 @@ export function fixCommonSelectorIssues(selector: string): string {
   // Corrigir espaços extras
   selector = selector.replace(/\s+/g, ' ').trim();
   
-  // Corrigir seletores com escape incorreto de pontos decimais
-  selector = selector.replace(/\\\.5/g, '\\.5');
-  
   return selector;
 }
 
@@ -108,23 +105,30 @@ export function fixCommonSelectorIssues(selector: string): string {
  * @returns Array de elementos encontrados
  */
 export function findFlexItemsCenterGapElements(gapSize?: string): Element[] {
-  // Usar seletores de atributo mais seguros
-  const baseSelector = '.flex.items-center';
+  const selectors = [
+    '.flex.items-center.gap-2',
+    '.flex.items-center.gap-1\\.5',
+    '.flex.items-center.gap-1',
+    '.flex.items-center.gap-3',
+    '.flex.items-center.gap-4'
+  ];
   
   if (gapSize) {
-    // Usar seletor de atributo para gaps específicos
-    const specificSelector = `${baseSelector}[class*="gap-${gapSize}"]`;
+    const specificSelector = `.flex.items-center.gap-${gapSize}`;
     return Array.from(document.querySelectorAll(specificSelector));
   }
   
-  // Buscar todos os elementos flex items-center com qualquer gap
-  try {
-    const elements = document.querySelectorAll(`${baseSelector}[class*="gap-"]`);
-    return Array.from(elements);
-  } catch (error) {
-    console.warn('Erro ao buscar elementos flex com gap:', error);
-    return [];
+  const allElements: Element[] = [];
+  for (const selector of selectors) {
+    try {
+      const elements = document.querySelectorAll(selector);
+      allElements.push(...Array.from(elements));
+    } catch (error) {
+      console.warn('Erro no seletor:', selector, error);
+    }
   }
+  
+  return allElements;
 }
 
 /**

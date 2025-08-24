@@ -9,84 +9,52 @@
   
   console.log('[Lovable Badge Remover] Script iniciado');
   
-  // Função auxiliar para verificar se um elemento ainda está no DOM
-  function isElementInDOM(element) {
-    return element && element.parentNode && document.contains(element);
-  }
-  
-  // Função auxiliar para remover elemento com segurança
-  function safeRemoveElement(element, description) {
-    try {
-      if (isElementInDOM(element)) {
-        element.remove();
-        console.log(`[Lovable Badge Remover] ${description}`);
-        return true;
-      }
-    } catch (error) {
-      console.warn(`[Lovable Badge Remover] Erro ao remover ${description}:`, error);
-    }
-    return false;
-  }
-
   function removeLovableBadge() {
     let removed = false;
     
     // Remove elementos com ID lovable-badge
     const badgeById = document.getElementById('lovable-badge');
-    if (badgeById && safeRemoveElement(badgeById, 'Badge removido por ID')) {
+    if (badgeById) {
+      badgeById.remove();
       removed = true;
+      console.log('[Lovable Badge Remover] Badge removido por ID');
     }
     
     // Remove links para lovable.dev
     const lovableLinks = document.querySelectorAll('a[href*="lovable.dev"]');
     if (lovableLinks.length > 0) {
-      let linksRemoved = 0;
-      lovableLinks.forEach(link => {
-        if (safeRemoveElement(link, 'Link do Lovable removido')) {
-          linksRemoved++;
-          removed = true;
-        }
-      });
-      if (linksRemoved > 0) {
-        console.log('[Lovable Badge Remover] Links do Lovable removidos:', linksRemoved);
-      }
+      lovableLinks.forEach(link => link.remove());
+      removed = true;
+      console.log('[Lovable Badge Remover] Links do Lovable removidos:', lovableLinks.length);
     }
     
     // Remove elementos com classes ou IDs contendo 'lovable'
     const lovableElements = document.querySelectorAll('[class*="lovable"]:not(#root):not(#root *), [id*="lovable"]:not(#root)');
     if (lovableElements.length > 0) {
-      let elementsRemoved = 0;
       lovableElements.forEach(element => {
         // Não remove se estiver dentro do root da aplicação
-        if (!element.closest('#root') && safeRemoveElement(element, 'Elemento do Lovable removido')) {
-          elementsRemoved++;
+        if (!element.closest('#root')) {
+          element.remove();
           removed = true;
         }
       });
-      if (elementsRemoved > 0) {
-        console.log('[Lovable Badge Remover] Elementos do Lovable removidos:', elementsRemoved);
-      }
+      console.log('[Lovable Badge Remover] Elementos do Lovable removidos:', lovableElements.length);
     }
     
     // Remove elementos com position fixed que possam ser badges
     const fixedElements = document.querySelectorAll('*');
     fixedElements.forEach(element => {
-      try {
-        if (!isElementInDOM(element)) return;
-        
-        const style = window.getComputedStyle(element);
-        if (style.position === 'fixed' && 
-            (element.innerHTML.includes('lovable') || 
-             element.innerHTML.includes('Lovable') ||
-             element.outerHTML.includes('lovable') ||
-             element.outerHTML.includes('Lovable'))) {
-          if (!element.closest('#root') && safeRemoveElement(element, 'Elemento fixo do Lovable removido')) {
-            removed = true;
-          }
+      const style = window.getComputedStyle(element);
+      if (style.position === 'fixed' && 
+          (element.innerHTML.includes('lovable') || 
+           element.innerHTML.includes('Lovable') ||
+           element.outerHTML.includes('lovable') ||
+           element.outerHTML.includes('Lovable'))) {
+        if (!element.closest('#root')) {
+          element.remove();
+          removed = true;
+          console.log('[Lovable Badge Remover] Elemento fixo do Lovable removido');
         }
-      } catch (error) {
-        // Ignora erros de elementos que podem ter sido removidos durante a iteração
-        console.warn('[Lovable Badge Remover] Erro ao processar elemento fixo:', error);
       }
     });
     

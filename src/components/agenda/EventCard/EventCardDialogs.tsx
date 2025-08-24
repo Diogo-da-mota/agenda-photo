@@ -37,9 +37,6 @@ const EventCardDialogs: React.FC<EventCardDialogsProps> = ({
         <DialogContent className="sm:max-w-[600px] md:max-w-[800px]">
           <DialogHeader>
             <DialogTitle>Editar Evento</DialogTitle>
-            <DialogDescription>
-              Modifique as informações do evento selecionado
-            </DialogDescription>
           </DialogHeader>
           <EventForm 
             event={event} 
@@ -56,9 +53,6 @@ const EventCardDialogs: React.FC<EventCardDialogsProps> = ({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogDescription className="sr-only">
-              Confirme a exclusão do evento
-            </DialogDescription>
             <DialogTitle>Confirmar exclusão</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja excluir o evento "<strong>{event.clientName}</strong>"? 
@@ -93,9 +87,6 @@ const EventCardDialogs: React.FC<EventCardDialogsProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reagendar Evento</DialogTitle>
-            <DialogDescription>
-              Selecione uma nova data e horário para o evento
-            </DialogDescription>
           </DialogHeader>
           <RescheduleForm 
             event={event} 
@@ -112,11 +103,11 @@ const EventCardDialogs: React.FC<EventCardDialogsProps> = ({
       >
         <DialogContent>
           <DialogHeader>
-              <DialogTitle>Registrar Pagamento</DialogTitle>
-              <DialogDescription>
-                Informe o valor do pagamento recebido. Valor restante atual: R$ {event.remainingValue.toFixed(2).replace('.', ',')}
-              </DialogDescription>
-            </DialogHeader>
+            <DialogTitle>Registrar Pagamento</DialogTitle>
+            <DialogDescription>
+              Valor restante atual: R$ {event.remainingValue.toFixed(2).replace('.', ',')}
+            </DialogDescription>
+          </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="payment-amount">Valor do Pagamento</Label>

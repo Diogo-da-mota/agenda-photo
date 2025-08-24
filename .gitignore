@@ -37,7 +37,7 @@ performance-metrics/
 # Supabase
 .supabase/
 
-# Deploy platforms
+# Vercel
 .vercel
 .vercel/*
 *.vercel.app

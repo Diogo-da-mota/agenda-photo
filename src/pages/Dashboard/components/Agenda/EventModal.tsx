@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EventForm from '@/components/agenda/EventForm';
 import { Event } from '@/components/agenda/types';
 
@@ -19,9 +19,6 @@ const EventModal: React.FC<EventModalProps> = ({
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Novo Evento</DialogTitle>
-          <DialogDescription>
-            Preencha os dados abaixo para criar um novo evento na agenda.
-          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto pr-2">
           <EventForm onClose={onClose} onEventCreated={onEventCreated} />

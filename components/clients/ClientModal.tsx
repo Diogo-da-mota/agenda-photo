@@ -8,8 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogDescription
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Plus } from 'lucide-react';
 import ClientForm, { ClientFormValues } from './ClientForm';
@@ -113,9 +112,6 @@ const ClientModal: React.FC<ClientModalProps> = ({ onSuccess }) => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Novo Cliente</DialogTitle>
-            <DialogDescription>
-              Adicione um novo cliente ao sistema
-            </DialogDescription>
           </DialogHeader>
           <ClientForm 
             onSubmit={handleSubmit} 

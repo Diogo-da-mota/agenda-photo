@@ -36,7 +36,7 @@ const requiredSecurityConfig = {
   // Configurações de CORS
   ALLOWED_ORIGINS: {
     description: 'Domínios permitidos para CORS',
-    default: 'https://agendaphoto.com.br',
+    default: 'https://bright-spark-welcome.vercel.app,https://agendaphoto.com.br',
     validate: (value) => value && value.includes('https://')
   },
   

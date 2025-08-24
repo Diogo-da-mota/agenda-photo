@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -49,9 +50,6 @@ const ClientLoginModal = ({ isOpen, onOpenChange }: ClientLoginModalProps) => {
             <Calendar className="h-5 w-5" />
             Portal do Cliente
           </DialogTitle>
-          <DialogDescription>
-            Clique no botão abaixo para acessar diretamente a agenda do cliente.
-          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">

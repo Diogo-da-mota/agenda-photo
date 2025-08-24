@@ -281,41 +281,16 @@ class ServiceWorkerSingleton {
       const cacheNames = await caches.keys();
       const stats: CacheStats = {};
 
-      // Limitar o número de caches processados para evitar 'Operation too large'
-      const maxCaches = 5;
-      const limitedCacheNames = cacheNames.slice(0, maxCaches);
-
-      for (const cacheName of limitedCacheNames) {
-        try {
-          const cache = await caches.open(cacheName);
-          // Usar um timeout para evitar operações muito longas
-          const keysPromise = cache.keys();
-          const timeoutPromise = new Promise<Request[]>((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout')), 2000);
-          });
-          
-          const keys = await Promise.race([keysPromise, timeoutPromise]);
-          stats[cacheName] = keys.length;
-        } catch (cacheError) {
-          console.warn(`[SW Singleton] Erro ao processar cache ${cacheName}:`, cacheError);
-          stats[cacheName] = 0;
-        }
-      }
-
-      // Se há mais caches do que processamos, indicar isso
-      if (cacheNames.length > maxCaches) {
-        stats['_total_caches'] = cacheNames.length;
-        stats['_processed_caches'] = limitedCacheNames.length;
+      for (const cacheName of cacheNames) {
+        const cache = await caches.open(cacheName);
+        const keys = await cache.keys();
+        stats[cacheName] = keys.length;
       }
 
       return stats;
     } catch (error) {
       console.error('[SW Singleton] Erro ao obter estatísticas do cache:', error);
-      // Retornar estatísticas básicas em caso de erro
-      return {
-        error: 'Failed to get cache stats',
-        timestamp: Date.now()
-      };
+      return {};
     }
   }
 

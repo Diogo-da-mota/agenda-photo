@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import PdfPreview from './PdfPreview';
 
@@ -261,22 +260,19 @@ const ContractAttachments = ({
         <DialogContent className="w-[95vw] max-w-[800px] max-h-[90vh] overflow-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg truncate pr-8">{previewAttachment?.name}</DialogTitle>
-            <DialogDescription>
-              Visualização do anexo do contrato
-            </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
             {previewAttachment && (
               <>
                 {previewAttachment.name.toLowerCase().endsWith('.pdf') ? (
-                  <div className="h-[300px] sm:h-[500px] w-full bg-muted flex items-center justify-center rounded-md">
+                  <div className="h-[150px] sm:h-[250px] w-full bg-muted flex items-center justify-center rounded-md">
                     <p className="text-muted-foreground text-center px-4">Visualização de PDF não disponível. Por favor, faça o download.</p>
                   </div>
                 ) : (
                   <img 
                     src={previewAttachment.url || `https://placehold.co/600x400?text=${encodeURIComponent(previewAttachment.name)}`} 
                     alt={previewAttachment.name}
-                    className="max-w-full max-h-[300px] sm:max-h-[500px] mx-auto object-contain rounded-md"
+                    className="max-w-full max-h-[150px] sm:max-h-[250px] mx-auto object-contain rounded-md"
                   />
                 )}
                 <div className="mt-4 flex justify-center sm:justify-end">
