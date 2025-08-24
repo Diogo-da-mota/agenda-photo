@@ -215,6 +215,18 @@ const ContractAttachments = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                {isPreviewable(attachment.name) && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handlePreview(attachment)}
+                    className="gap-1 flex-1 sm:flex-initial"
+                  >
+                    <Eye size={14} />
+                    <span className="sm:hidden">Ver</span>
+                    <span className="hidden sm:inline">Visualizar</span>
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm"

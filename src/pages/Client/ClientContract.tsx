@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { 
   Check, Download, FileText, Calendar, 
   MapPin, DollarSign, Pen, Info,
-  Clock, CheckCircle, Loader2, Upload, X
+  Clock, CheckCircle, Loader2, Upload, X, Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -148,6 +148,10 @@ const ClientContract = () => {
   // Estado para PDF do contrato
   const [contractPdfUrl, setContractPdfUrl] = useState<string | null>(null);
   const [savedContractPdfUrl, setSavedContractPdfUrl] = useState<string | null>(null);
+  
+  // Estados para preview de imagens
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState<FileAttachment | null>(null);
 
   const nomeContratado = configuracoes?.nome_empresa || mockContract.photographerName;
   
@@ -412,7 +416,21 @@ const ClientContract = () => {
       </ResponsiveContainer>
     );
   }
-    const handleDownload = async () => {
+  
+  // Função para verificar se um arquivo é uma imagem
+  const isImageFile = (fileName: string) => {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    return extension ? imageExtensions.includes(extension) : false;
+  };
+  
+  // Função para abrir preview de imagem
+  const handlePreviewImage = (attachment: FileAttachment) => {
+    setPreviewAttachment(attachment);
+    setPreviewOpen(true);
+  };
+  
+  const handleDownload = async () => {
     try {
       if (!contract) return;
 
@@ -783,28 +801,7 @@ const ClientContract = () => {
                   </div>
                 )} */}
                 
-                {/* Visualização do PDF do Contrato */}
-                {(savedContractPdfUrl || contractPdfUrl) && (
-                  <div className="mb-6">
-                    <h3 className="font-medium mb-4">Visualização do Contrato</h3>
-                    <PdfPreview 
-                      pdfUrl={savedContractPdfUrl || contractPdfUrl || undefined}
-                      fileName={`Contrato - ${contract.clientName}.pdf`}
-                      showPreview={!!(savedContractPdfUrl || contractPdfUrl)}
-                      className="mb-4"
-                    />
-                    {savedContractPdfUrl && (
-                      <p className="text-xs text-muted-foreground">
-                        📄 Contrato salvo no sistema
-                      </p>
-                    )}
-                    {!savedContractPdfUrl && contractPdfUrl && (
-                      <p className="text-xs text-muted-foreground">
-                        📄 Visualização gerada dinamicamente
-                      </p>
-                    )}
-                  </div>
-                )}
+
                 
                 {/* Área de Upload */}
                 <div
@@ -862,14 +859,27 @@ const ClientContract = () => {
                             </div>
                           </div>
                           
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeClientAttachment(attachment.id)}
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            {isImageFile(attachment.name) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handlePreviewImage(attachment)}
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                                title="Visualizar imagem"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeClientAttachment(attachment.id)}
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -943,6 +953,35 @@ const ClientContract = () => {
               Ir para Minha Área
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Image Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Visualizar Imagem
+            </DialogTitle>
+            <DialogDescription>
+              {previewAttachment?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex items-center justify-center p-4 bg-muted/30 rounded-lg max-h-[70vh] overflow-auto">
+            {previewAttachment?.file ? (
+              <img
+                src={URL.createObjectURL(previewAttachment.file)}
+                alt={previewAttachment.name}
+                className="max-w-full max-h-full object-contain rounded"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 text-muted-foreground">
+                <p>Não foi possível carregar a imagem</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </ResponsiveContainer>

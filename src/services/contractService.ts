@@ -171,13 +171,15 @@ export const getPublicContract = async (id: string) => {
  */
 export const createContract = async (contractData: CreateContractData, user: User) => {
   try {
+    const dataToInsert = {
+      ...contractData,
+      user_id: user.id,
+      status: 'pendente'
+    };
+    
     const { data, error } = await supabase
       .from('contratos')
-      .insert({
-        ...contractData,
-        user_id: user.id,
-        status: 'pendente'
-      })
+      .insert(dataToInsert)
       .select()
       .single();
 

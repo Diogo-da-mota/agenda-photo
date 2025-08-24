@@ -499,7 +499,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
           nome_cliente: data.clientName, // Agora incluindo o nome do cliente
           email_cliente: data.clientEmail || '',
           telefone_cliente: data.phoneNumber,
-          cpf_cliente: data.cpfCliente || '', // Adicionando CPF do cliente
+          cpf_cliente: data.cpfCliente || '', // Mantendo formatação do CPF com pontos e hífens
           endereco_cliente: data.enderecoCliente || '', // Adicionando endereço do cliente
           tipo_evento: data.eventType,
           data_evento: data.eventDate.toISOString(),
@@ -511,6 +511,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
           observacoes: '',
           evento_id: initialData?.eventoId || null,
         };
+        
+        // Dados preparados para criação do contrato
 
         // Criar contrato no Supabase
         const novoContrato = await createContract(contractData, user);

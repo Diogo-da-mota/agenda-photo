@@ -1,11 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, MapPin, User, Phone, Mail, FileText, DollarSign } from "lucide-react";
+import { Calendar, MapPin, User, Phone, Mail, FileText, DollarSign, Paperclip } from "lucide-react";
 import type { ContractData } from "@/types/contract";
 import { sanitizeHtml } from "@/utils/sanitize";
+import { useEmpresa } from "@/hooks/useEmpresa";
 
 interface ContractData {
   clientName: string;
