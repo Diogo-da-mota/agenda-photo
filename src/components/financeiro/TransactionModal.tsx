@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -190,6 +190,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             {transaction ? 'Editar ' : 'Nova '}
             {isDespesaEspecifica || (transaction?.tipo === 'despesa' || transaction?.isDespesaEspecifica) ? 'Despesa' : isEventTransaction ? 'Evento' : 'Transação'}
           </DialogTitle>
+          <DialogDescription>
+            {isEventTransaction 
+              ? 'Edite os dados do evento e suas informações financeiras.'
+              : isDespesaEspecifica || (transaction?.tipo === 'despesa' || transaction?.isDespesaEspecifica)
+                ? 'Preencha os dados da despesa abaixo.'
+                : 'Preencha os dados da transação financeira abaixo.'
+            }
+          </DialogDescription>
         </DialogHeader>
         
         {isEventTransaction ? (
@@ -229,4 +237,4 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   );
 };
 
-export default TransactionModal; 
+export default TransactionModal;
