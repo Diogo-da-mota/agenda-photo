@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+=======
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -76,69 +85,32 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
+<<<<<<< Updated upstream
+=======
+>>>>>>> 3a0f733958fd3439ae43a47af2271af6d51c9d47
+>>>>>>> Stashed changes
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  // Build config otimizado para evitar constructor errors
+  server: {
+    port: 8081,
+    host: true,
+  },
   build: {
+    outDir: 'dist',
     sourcemap: false,
-    target: 'es2020',
-    minify: mode === 'production' ? 'esbuild' : false,
     rollupOptions: {
       output: {
-        // Ofuscar nomes de chunks em produção para segurança
-        chunkFileNames: mode === 'production' ? '[hash].js' : '[name]-[hash].js',
-        assetFileNames: mode === 'production' ? '[hash].[ext]' : '[name]-[hash].[ext]',
         manualChunks: {
-          // Core React libraries
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'query-vendor': ['@tanstack/react-query'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          
-          // UI Components (separados por tamanho)
-          'radix-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-tooltip'
-          ],
-          'icons-vendor': ['lucide-react'],
-          
-          // Charts (carregamento sob demanda)
-          'charts-vendor': ['recharts', 'd3-scale', 'd3-shape'],
-          
-          // Utilities
-          'utils-vendor': ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
-          
-          // Form libraries
-          'forms-vendor': ['react-hook-form', '@hookform/resolvers', 'zod']
-        }
-      }
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-toast', '@radix-ui/react-dialog'],
+        },
+      },
     },
-    cssCodeSplit: false,
-    emptyOutDir: true,
   },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      '@tanstack/react-query',
-      '@supabase/supabase-js',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      'lucide-react',
-      'class-variance-authority',
-      'clsx',
-      'tailwind-merge'
-    ],
-    exclude: ['lovable-tagger']
+    include: ['react', 'react-dom'],
   },
-  esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
-  }
-}));
+})

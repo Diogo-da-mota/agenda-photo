@@ -47,7 +47,14 @@ export class ErrorBoundary extends Component<Props, State> {
       isBuildError: error.message.includes('constructor') || 
                    error.message.includes('Minified React error') ||
                    error.message.includes('_e is not'),
-      isReactError31: error.message.includes('Minified React error #31')
+      isReactError31: error.message.includes('Minified React error #31'),
+      // Detectar erros de DOM relacionados ao Lovable Badge Remover
+      isDOMError: error.name === 'NotFoundError' || 
+                 error.message.includes('removeChild') ||
+                 error.message.includes('The node to be removed is not a child'),
+      isLovableBadgeError: error.message.includes('Lovable') || 
+                          error.stack?.includes('remove-lovable-badge') ||
+                          error.stack?.includes('useLovableBadgeRemover')
     };
     
     console.error('🔍 [ErrorBoundary] Detalhes do erro:', errorDetails);
@@ -60,6 +67,20 @@ export class ErrorBoundary extends Component<Props, State> {
     // Para constructor errors, mostrar instruções específicas  
     if (errorDetails.isBuildError) {
       console.error('🚨 [ErrorBoundary] Constructor/Build error detectado - verifique imports/exports');
+    }
+    
+    // Para erros de DOM relacionados ao Lovable Badge Remover
+    if (errorDetails.isDOMError || errorDetails.isLovableBadgeError) {
+      console.warn('⚠️ [ErrorBoundary] Erro de DOM detectado (possivelmente relacionado ao Lovable Badge Remover)');
+      console.warn('💡 [ErrorBoundary] Este erro foi tratado e não deve afetar a funcionalidade da aplicação');
+      
+      // Para erros de removeChild, tentar recuperação automática
+      if (errorDetails.isDOMError) {
+        setTimeout(() => {
+          console.log('🔄 [ErrorBoundary] Tentando recuperação automática do erro de DOM...');
+          this.setState({ hasError: false, error: null, errorInfo: null });
+        }, 1000);
+      }
     }
   }
 

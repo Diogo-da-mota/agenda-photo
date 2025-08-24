@@ -129,7 +129,7 @@ export async function verificarRotaAcessivel(): Promise<boolean> {
     console.log('🌐 Verificando acessibilidade da rota /agenda/cliente...');
     
     // Simula uma requisição para a rota (em ambiente de desenvolvimento)
-    const baseUrl = 'http://localhost:8081'; // Porta do servidor de desenvolvimento
+    const baseUrl = 'http://localhost:8080'; // Porta do servidor de desenvolvimento
     const rotaCompleta = `${baseUrl}/agenda/cliente`;
     
     console.log(`   Testando: ${rotaCompleta}`);

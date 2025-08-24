@@ -95,9 +95,16 @@ const ContractDetails = () => {
   
   // Função para gerar URL do PDF do contrato
   const generateContractPdfUrl = React.useCallback(async () => {
-    if (!contract || !configuracoes) return;
+    console.log('🔍 PDF Generation Debug: Iniciando geração do PDF');
+    
+    if (!contract || !configuracoes) {
+      console.log('❌ PDF Generation Debug: Dados insuficientes', { contract: !!contract, configuracoes: !!configuracoes });
+      return;
+    }
     
     try {
+      console.log('🔍 PDF Generation Debug: Preparando dados do contrato');
+      
       // Construir objeto do contrato para geração do PDF
       const contractForPdf = {
         id: (contract as any).id,
@@ -117,8 +124,18 @@ const ContractDetails = () => {
         signatureInfo: null
       };
 
+      console.log('🔍 PDF Generation Debug: Dados do contrato preparados', {
+        clientName: contractForPdf.clientName,
+        status: contractForPdf.status,
+        hasContent: !!contractForPdf.termsAndConditions
+      });
+
       // Gera o conteúdo completo do contrato usando o template
       const conteudoContrato = generateContractTemplate(contractForPdf, configuracoes);
+      console.log('🔍 PDF Generation Debug: Template gerado', {
+        contentLength: conteudoContrato?.length || 0,
+        hasContent: !!conteudoContrato
+      });
 
       const pdfData = {
         conteudoContrato,
@@ -129,22 +146,52 @@ const ContractDetails = () => {
         clientName: contractForPdf.status === 'assinado' ? contractForPdf.clientName : undefined
       };
 
+      console.log('🔍 PDF Generation Debug: Dados do PDF preparados', pdfData);
+
       // Gerar o PDF blob
+      console.log('🔍 PDF Generation Debug: Chamando generateContractPdf...');
       const pdfBlob = generateContractPdf(pdfData);
+      
+      console.log('🔍 PDF Generation Debug: PDF blob gerado', {
+        size: pdfBlob.size,
+        type: pdfBlob.type,
+        isValid: pdfBlob.size > 0
+      });
+      
+      if (pdfBlob.size === 0) {
+        console.error('❌ PDF Generation Debug: Blob gerado está vazio!');
+        toast({
+          title: "Erro na geração do PDF",
+          description: "O PDF gerado está vazio. Verifique o conteúdo do contrato.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Criar URL temporária para o blob
       const pdfUrl = URL.createObjectURL(pdfBlob);
+      console.log('🔍 PDF Generation Debug: URL do blob criada', pdfUrl);
+      
       setContractPdfUrl(prevUrl => {
         // Limpar URL anterior se existir
         if (prevUrl) {
+          console.log('🔍 PDF Generation Debug: Limpando URL anterior', prevUrl);
           URL.revokeObjectURL(prevUrl);
         }
+        console.log('🔍 PDF Generation Debug: Definindo nova URL', pdfUrl);
         return pdfUrl;
       });
+      
+      console.log('✅ PDF Generation Debug: Processo concluído com sucesso');
     } catch (error) {
-      // console.error('Erro ao gerar PDF para preview:', error); // Removido para produção
+      console.error('❌ PDF Generation Debug: Erro durante geração:', error);
+      toast({
+        title: "Erro na geração do PDF",
+        description: `Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        variant: "destructive",
+      });
     }
-  }, [contract, configuracoes, eventLocation, attachments]);
+  }, [contract, configuracoes, eventLocation, attachments, toast]);
   
   // Carregar anexos salvos do Supabase e buscar PDF salvo
   const loadContractAttachments = React.useCallback(async () => {

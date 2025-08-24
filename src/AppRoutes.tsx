@@ -113,7 +113,17 @@ class LazyLoadErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Erro no lazy loading:', error, errorInfo);
+    // Log específico para erros do DOM
+    if (error.name === 'NotFoundError' || error.message.includes('removeChild')) {
+      console.error('Erro no lazy loading (DOM):', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack
+      });
+    } else {
+      console.error('Erro no lazy loading:', error, errorInfo);
+    }
   }
 
   render() {
