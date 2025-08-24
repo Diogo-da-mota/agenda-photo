@@ -13,7 +13,8 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger
+  DialogTrigger,
+  DialogDescription
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -115,6 +116,9 @@ const FinanceiroHeader: React.FC<FinanceiroHeaderProps> = ({
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Filtros Avançados</DialogTitle>
+              <DialogDescription>
+                Configure filtros personalizados para suas transações financeiras
+              </DialogDescription>
             </DialogHeader>
             <AdvancedFilters 
               dateRange={dateRange}
@@ -161,4 +165,4 @@ const FinanceiroHeader: React.FC<FinanceiroHeaderProps> = ({
   );
 };
 
-export default FinanceiroHeader; 
+export default FinanceiroHeader;

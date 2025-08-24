@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 
@@ -146,6 +147,9 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
                 <FileText className="h-5 w-5 text-red-600" />
                 <span className="text-gray-900 font-medium">{fileName}</span>
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Visualização completa do arquivo PDF {fileName}
+              </DialogDescription>
               
               <div className="flex items-center gap-2">
                 <Button
