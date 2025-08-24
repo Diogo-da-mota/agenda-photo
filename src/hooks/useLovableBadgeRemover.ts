@@ -30,6 +30,17 @@ export const useLovableBadgeRemover = () => {
           return false;
         }
         
+        // NOVO: Evitar elementos dentro de modais, dialogs ou portals
+        if (element.closest('[data-radix-portal]') || 
+            element.closest('[role="dialog"]') || 
+            element.closest('[role="modal"]') ||
+            element.closest('.modal') ||
+            element.closest('iframe') ||
+            element.closest('[data-state]')) {
+          console.log(`[Badge Remover React] Elemento em modal/dialog ignorado: ${description}`);
+          return false;
+        }
+        
         // Usar requestAnimationFrame para evitar conflitos de renderização
         requestAnimationFrame(() => {
           try {
@@ -90,6 +101,18 @@ export const useLovableBadgeRemover = () => {
       mutations.forEach((mutation) => {
         // Verificar apenas adições de nós, ignorar remoções para evitar conflitos
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // NOVO: Evitar processar mudanças em modais/dialogs ativos
+          const target = mutation.target as Element;
+          if (target && (
+            target.closest('[data-radix-portal]') || 
+            target.closest('[role="dialog"]') || 
+            target.closest('[role="modal"]') ||
+            target.closest('.modal') ||
+            target.closest('iframe')
+          )) {
+            return; // Pular processamento de mudanças em modais
+          }
+          
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
