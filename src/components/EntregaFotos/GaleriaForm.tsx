@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, X, Calendar, Lock, FileText, Camera, Loader2, Copy, Link } from 'lucide-react';
 import { EntregarFotosFormData } from '@/types/entregar-fotos';
+import { cn } from '@/lib/utils';
 
 interface ImageFile {
   file: File;

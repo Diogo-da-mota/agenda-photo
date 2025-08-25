@@ -19,7 +19,7 @@ import {
 
 const EntregaFotosAdmin = () => {
   const [loading, setLoading] = useState(false);
-  const [estatisticas, setEstatisticas] = useState<EstatisticasGalerias | null>(null);
+  const [estatisticas, setEstatisticas] = useState<any>(null);
   const [ultimaExecucao, setUltimaExecucao] = useState<string | null>(null);
   const [executandoProcessos, setExecutandoProcessos] = useState(false);
 
@@ -50,7 +50,7 @@ const EntregaFotosAdmin = () => {
       setUltimaExecucao(new Date().toLocaleString('pt-BR'));
       await carregarEstatisticas();
       
-      toast.success(`Processos concluídos! ${resultado.resumo.total_processadas} galerias processadas`);
+      toast.success(`Processos concluídos! ${resultado?.resumo?.totalProcessado || 0} galerias processadas`);
     } catch (error) {
       console.error('Erro ao executar processos:', error);
       toast.error('Erro ao executar processos automáticos');
@@ -189,7 +189,7 @@ const EntregaFotosAdmin = () => {
               <BarChart3 className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Acessos</p>
-                <p className="text-2xl font-bold text-purple-600">{estatisticas?.totalAcessos || 0}</p>
+                <p className="text-2xl font-bold text-purple-600">{estatisticas?.total_acessos || 0}</p>
               </div>
             </div>
           </CardContent>

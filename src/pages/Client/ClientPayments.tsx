@@ -182,7 +182,7 @@ const ClientPayments = () => {
                                   variant="default" 
                                   size="sm"
                                   className="flex items-center gap-1"
-                                  onClick={() => }
+                                  onClick={() => console.log('Pagar online não implementado')}
                                 >
                                   <CreditCard className="h-4 w-4" />
                                   Pagar Online

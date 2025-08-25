@@ -124,7 +124,9 @@ export const useEventCardLogic = (
     }
 
     if (valorPagamento > event.remainingValue) {
-      .`,
+      toast({
+        title: "Valor inválido",
+        description: "O valor do pagamento não pode ser maior que o valor restante.",
         variant: "destructive"
       });
       return;
