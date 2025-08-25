@@ -194,12 +194,7 @@ const PortfolioDetalhes: React.FC = () => {
       await atualizarTrabalho(updatedFormData);
       
       // console.log('Salvamento concluído com sucesso.'); // Removido para produção
-      
-      toast({
-        title: "Sucesso!",
-        description: "Portfolio salvo com sucesso!",
-        variant: "default"
-      });
+
       setArquivos([]); // Limpa a lista de arquivos a serem enviados
       
     } catch (error) {

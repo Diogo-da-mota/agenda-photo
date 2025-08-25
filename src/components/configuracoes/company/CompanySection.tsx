@@ -29,10 +29,7 @@ export const CompanySection = () => {
   };
 
   const handleSaveCompany = () => {
-    toast({
-      title: "Dados da empresa atualizados",
-      description: "As informações da empresa foram salvas com sucesso.",
-    });
+    
   };
 
   const openWhatsApp = () => {

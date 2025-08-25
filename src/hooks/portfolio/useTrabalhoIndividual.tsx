@@ -45,11 +45,7 @@ export const useTrabalhoIndividual = (trabalhoId: string) => {
     onSuccess: () => {
       // Invalidar e atualizar o cache
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });
-      
-      toast({
-        title: "Trabalho atualizado",
-        description: "O trabalho foi atualizado com sucesso."
-      });
+
     },
     onError: (error: Error) => {
       toast({
@@ -110,11 +106,7 @@ export const useTrabalhoIndividualPorTitulo = (titulo: string) => {
     onSuccess: () => {
       // Invalidar e atualizar o cache
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });
-      
-      toast({
-        title: "Trabalho atualizado",
-        description: "O trabalho foi atualizado com sucesso."
-      });
+
     },
     onError: (error: Error) => {
       toast({

@@ -53,11 +53,7 @@ const NotificationsPage: React.FC = () => {
           : notification
       )
     );
-    
-    toast({
-      title: "Notificação marcada como lida",
-      description: "A notificação foi marcada como lida com sucesso."
-    });
+
   };
   
   // Excluir notificação
@@ -65,11 +61,7 @@ const NotificationsPage: React.FC = () => {
     setNotifications(prevNotifications => 
       prevNotifications.filter(notification => notification.id !== id)
     );
-    
-    toast({
-      title: "Notificação excluída",
-      description: "A notificação foi removida com sucesso."
-    });
+
   };
   
   // Redefinir filtros
@@ -78,11 +70,7 @@ const NotificationsPage: React.FC = () => {
     setFilterType('all');
     setFilterStatus('all');
     setFilterDate('all');
-    
-    toast({
-      title: "Filtros redefinidos",
-      description: "Todos os filtros foram limpos."
-    });
+
   };
   
   return (

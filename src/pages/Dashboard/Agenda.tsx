@@ -87,10 +87,7 @@ const Agenda = () => {
   // Função para limpar o filtro de data e mostrar todos os eventos
   const clearDateFilter = () => {
     setDateFilter(null);
-    toast({
-      title: 'Filtro removido',
-      description: 'Mostrando todos os eventos',
-    });
+    
   };
 
   // Carregar eventos do Supabase
@@ -146,11 +143,7 @@ const Agenda = () => {
     
     // Atualizar o calendário
     agendaBusinessService.atualizarCalendario(serviceProps);
-    
-    toast({
-      title: "Evento atualizado",
-      description: `O evento foi atualizado com sucesso.`
-    });
+
   };
   
   // Função para adicionar novo evento criado à lista

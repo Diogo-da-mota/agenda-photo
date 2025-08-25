@@ -35,7 +35,7 @@ export function useImageUploadUI(options: ImageUploadUIOptions = {}) {
   };
 
   const showToast = (title: string, description: string, variant: "default" | "destructive" = "default") => {
-    toast({ title, description, variant });
+    
   };
 
   const resetUpload = () => {

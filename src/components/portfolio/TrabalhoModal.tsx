@@ -194,11 +194,6 @@ const TrabalhoModal: React.FC<TrabalhoModalProps> = ({
         
         resultado = await criarTrabalhoComImagens(dadosParaCriar, user.id);
       }
-      
-      toast({
-        title: isEditing ? "Trabalho atualizado com sucesso" : "Trabalho criado com sucesso",
-        description: `Trabalho "${trabalhoData.trabalho.titulo}" ${isEditing ? 'atualizado' : 'criado'} ${trabalhoData.arquivos.length > 0 ? `com ${trabalhoData.arquivos.length} imagens` : ''}.`,
-      });
 
       const event = new CustomEvent('portfolioUpdated', { 
         detail: { 

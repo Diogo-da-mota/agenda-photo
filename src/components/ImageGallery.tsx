@@ -98,11 +98,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       } else {
         // Para dados simulados, apenas remove da lista local
         setGalleryImages(prev => prev.filter(img => img.id !== imageId));
-        
-        toast({
-          title: "Imagem excluída",
-          description: "A imagem foi removida da galeria.",
-        });
+
       }
     } catch (err) {
       console.error('Erro ao excluir imagem:', err);

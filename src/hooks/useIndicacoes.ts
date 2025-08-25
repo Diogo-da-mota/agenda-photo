@@ -78,11 +78,6 @@ export function useIndicacoes() {
       setIndicacoes(prev => [novaIndicacao, ...prev]);
       await carregarDados(); // Recarrega os dados para atualizar as estatísticas
 
-      toast({
-        title: "Indicação criada",
-        description: "Sua indicação foi registrada com sucesso!",
-      });
-
       return novaIndicacao;
     } catch (err) {
       console.error('Erro ao criar indicação:', err);
@@ -105,11 +100,6 @@ export function useIndicacoes() {
       ));
 
       await carregarDados(); // Recarrega os dados para atualizar as estatísticas
-
-      toast({
-        title: "Indicação atualizada",
-        description: "As alterações foram salvas com sucesso!",
-      });
 
       return true;
     } catch (err) {

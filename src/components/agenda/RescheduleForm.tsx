@@ -43,19 +43,11 @@ const RescheduleForm: React.FC<RescheduleFormProps> = ({ event, onClose, onResch
       if (onReschedule) {
         onReschedule(event.id, newDate);
       }
-      
-      toast({
-        title: "Evento reagendado",
-        description: `${event.clientName} - Nova data: ${format(newDate, "dd/MM/yyyy 'às' HH:mm")}`,
-      });
-      
+
       // Se a opção de notificar cliente estiver marcada
       if (notifyClient) {
         // Aqui você poderia implementar a lógica para enviar uma notificação ao cliente
-        toast({
-          title: "Notificação enviada",
-          description: "O cliente foi notificado sobre o reagendamento."
-        });
+        
       }
       
       // Fechar o formulário

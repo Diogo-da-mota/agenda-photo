@@ -42,10 +42,7 @@ const SupabaseTestButton = () => {
 
       const successLog = "✅ Dados inseridos na tabela `clientes` com sucesso.";
       setLogs([successLog]);
-      toast({
-        title: "✅ Teste salvo com sucesso!",
-        description: successLog
-      });
+      
     } catch (error) {
       const errorLog = `❌ Supabase retornou erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
       console.error('Erro ao inserir dados:', error);

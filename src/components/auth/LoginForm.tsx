@@ -89,11 +89,7 @@ const LoginForm = () => {
         }
         
         // Login bem-sucedido sem 2FA
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo à Agenda PRO",
-        });
-        
+
         navigate('/dashboard');
       } else {
         // Fallback para autenticação direta com Supabase (sem 2FA)
@@ -105,12 +101,7 @@ const LoginForm = () => {
         if (error) {
           throw new Error(error.message);
         }
-        
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo à Agenda PRO",
-        });
-        
+
         navigate('/dashboard');
       }
     } catch (error: any) {
@@ -150,11 +141,7 @@ const LoginForm = () => {
   
   // Manipular o resultado bem-sucedido da validação 2FA
   const handle2FASuccess = (userData: any) => {
-    toast({
-      title: "Login realizado com sucesso!",
-      description: "Autenticação de dois fatores validada",
-    });
-    
+
     navigate('/dashboard');
   };
   

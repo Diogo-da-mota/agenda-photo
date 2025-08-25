@@ -42,10 +42,7 @@ const ServiceWorkerStatus: React.FC<ServiceWorkerStatusProps> = ({ className }) 
   const handleClearCache = async () => {
     try {
       await clearCache();
-      toast({
-        title: "Cache limpo",
-        description: "O cache foi limpo e a página será recarregada.",
-      });
+      
     } catch (error) {
       toast({
         title: "Erro",
@@ -58,10 +55,7 @@ const ServiceWorkerStatus: React.FC<ServiceWorkerStatusProps> = ({ className }) 
   const handleUpdate = async () => {
     try {
       await updateApp();
-      toast({
-        title: "Aplicação atualizada",
-        description: "A página será recarregada para aplicar as atualizações.",
-      });
+      
     } catch (error) {
       toast({
         title: "Erro",

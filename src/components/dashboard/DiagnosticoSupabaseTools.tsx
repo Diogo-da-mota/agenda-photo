@@ -69,11 +69,6 @@ const DiagnosticoSupabaseTools = () => {
       
       const existingTables = results.filter(t => t.exists).length;
       const totalTables = results.length;
-      
-      toast({
-        title: "Diagnóstico concluído",
-        description: `${existingTables}/${totalTables} tabelas encontradas`
-      });
 
     } catch (error) {
       console.error('Erro no diagnóstico:', error);

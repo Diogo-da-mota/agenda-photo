@@ -70,10 +70,7 @@ export const useConfiguracoes = () => {
       if (sucesso) {
         // Atualizar estado local com as novas configurações
         setConfiguracoes(prev => prev ? { ...prev, ...novasConfiguracoes } : { ...novasConfiguracoes } as ConfiguracoesApp);
-        toast({
-          title: 'Sucesso',
-          description: 'Configurações atualizadas com sucesso',
-        });
+        
       }
       
       return sucesso;

@@ -106,10 +106,7 @@ export const exportToExcel = (data: any[], filename: string) => {
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     saveAs(blob, `${filename}.xlsx`);
-    toast({
-      title: "Exportação Concluída",
-      description: `O arquivo ${filename}.xlsx foi gerado com sucesso.`
-    });
+    
   } catch (error) {
     console.error("Erro ao exportar para Excel:", error);
     toast({

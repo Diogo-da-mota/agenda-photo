@@ -49,10 +49,7 @@ const ClientNotifications = () => {
   };
   
   const handleSavePreferences = () => {
-    toast({
-      title: "Preferências salvas",
-      description: "Suas configurações de notificação foram atualizadas com sucesso."
-    });
+    
   };
   
   const sendWhatsAppMessage = (type: string) => {
@@ -78,11 +75,7 @@ const ClientNotifications = () => {
     
     // Abrir WhatsApp com o número e mensagem
     window.open(`https://wa.me/55${phoneNumber}?text=${mensagemCodificada}`, '_blank');
-    
-    toast({
-      title: "WhatsApp aberto",
-      description: "Uma mensagem personalizada foi preparada para o cliente."
-    });
+
   };
   
   return (

@@ -85,11 +85,7 @@ const ContractActionButtons = ({ contractId, contractStatus, contract, onResend,
       // Gera o PDF e faz o download
       const pdfBlob = await generateContractPdf(pdfData);
       downloadBlob(pdfBlob, `contrato-${contractId}.pdf`);
-      
-      toast({
-        title: "Download iniciado",
-        description: "O contrato está sendo baixado.",
-      });
+
     } catch (error) {
       console.error('Erro ao fazer download do contrato:', error);
       toast({

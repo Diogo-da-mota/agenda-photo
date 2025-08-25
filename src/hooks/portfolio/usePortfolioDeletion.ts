@@ -23,10 +23,7 @@ export const usePortfolioDeletion = () => {
       return result
     },
     onSuccess: () => {
-      toast({
-        title: 'Trabalho Removido',
-        description: 'O card e todas as suas imagens foram removidos permanentemente.',
-      })
+      
       // Invalida a query principal do portfólio para forçar a atualização da lista
       queryClient.invalidateQueries({ queryKey: ['portfolio_trabalhos'] })
     },
@@ -51,10 +48,7 @@ export const usePortfolioDeletion = () => {
       return result
     },
     onSuccess: (data, variables) => {
-      toast({
-        title: 'Imagem Removida',
-        description: 'A imagem foi removida do seu trabalho.',
-      })
+      
       // Invalida a query do trabalho específico para atualizar suas imagens
       queryClient.invalidateQueries({ queryKey: ['portfolio_trabalho', variables.cardId] })
       // Também invalida a lista geral, caso a imagem de capa tenha mudado

@@ -47,12 +47,7 @@ const FixEventsButton: React.FC<FixEventsButtonProps> = ({ onSuccess, className 
           queryClient.refetchQueries({ queryKey: ['financeiro-transacoes', user.id] });
         }, 500);
       }
-      
-      toast({
-        title: "Eventos corrigidos",
-        description: `${eventosCorridos} eventos foram corrigidos com sucesso.`
-      });
-      
+
       // Chamar callback de sucesso, se fornecido
       if (onSuccess) {
         onSuccess();

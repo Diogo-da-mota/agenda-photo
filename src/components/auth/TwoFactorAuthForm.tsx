@@ -66,14 +66,7 @@ export function TwoFactorAuthForm({ email, tempToken, onSuccess, onCancel }: Two
       }
       
       const userData = await loginResponse.json();
-      
-      toast({
-        title: "Login bem-sucedido",
-        description: validateData.isRecoveryCode 
-          ? "Você usou um código de recuperação. Recomendamos configurar um novo dispositivo 2FA." 
-          : "Autenticação de dois fatores validada com sucesso.",
-      });
-      
+
       onSuccess(userData);
     } catch (error: any) {
       toast({

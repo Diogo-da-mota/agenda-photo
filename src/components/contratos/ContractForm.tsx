@@ -240,7 +240,6 @@ Cláusula 16. Fica eleito o foro da comarca de ${cidadeEmpresa}/${estadoEmpresa}
 
 E por estarem justos e contratados, firmam o presente instrumento em duas vias de igual teor e forma.
 
-
 ______________________________________________________
 ${nomeCliente}
 Contratante
@@ -516,12 +515,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
 
         // Criar contrato no Supabase
         const novoContrato = await createContract(contractData, user);
-        
-        toast({
-          title: "Contrato criado com sucesso!",
-          description: `O contrato foi criado para ${data.clientName}`,
-        });
-        
+
         if (onSuccess) {
           onSuccess();
         }

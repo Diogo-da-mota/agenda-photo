@@ -156,12 +156,7 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
         console.log(`[EventForm] Atualizando evento ${event.id} com dados:`, dadosEvento);
         
         const eventoAtualizado = await atualizarEvento(event.id, dadosEvento, user.id);
-        
-        toast({
-          title: "Evento atualizado",
-          description: `${clientName} - ${format(eventDate, "dd/MM/yyyy 'às' HH:mm")}`,
-        });
-        
+
         // Verificar se houve alteração nos valores financeiros OU na data do evento
         const valoresAlterados = (
           dadosEvento.totalValue !== event.totalValue ||
@@ -222,12 +217,7 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
         };
         
         const eventoCriado = await criarEvento(novoEventoComId, user.id);
-        
-        toast({
-          title: "Evento criado",
-          description: `${clientName} - ${format(eventDate, "dd/MM/yyyy 'às' HH:mm")}`,
-        });
-        
+
         // Usar o serviço de sincronização automática
         console.log('[EventForm] Iniciando sincronização automática para novo evento');
         // DISPATCH DE EVENTO PARA ATUALIZAR UI

@@ -131,12 +131,7 @@ const ExtendedClientForm = () => {
       if (data) {
         setLog(prev => `${prev}\n📄 Dados retornados: ${JSON.stringify(data, null, 2)}`);
       }
-      
-      toast({
-        title: "Sucesso",
-        description: "Cliente salvo com sucesso!",
-      });
-      
+
       // Reset form
       setNome('');
       setEmail('');

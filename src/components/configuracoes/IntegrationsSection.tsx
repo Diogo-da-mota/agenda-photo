@@ -62,11 +62,7 @@ export const IntegrationsSection = () => {
     const messages: Record<string, string> = {
       webhook: integrations.webhook ? "Webhook desativado" : "Webhook ativado"
     };
-    
-    toast({
-      title: "Integração alterada",
-      description: messages[integration],
-    });
+
   };
 
   return (

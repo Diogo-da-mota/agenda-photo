@@ -51,11 +51,7 @@ const ContractHeader = ({ contract, handleResend, contractStatus, contractId }: 
         // Usar nome_cliente ou nome do cliente relacionado, sem ID no nome do arquivo
         const clientName = contract.nome_cliente || contract.clientes?.nome || 'cliente';
         downloadBlob(pdfBlob, `${clientName}.pdf`);
-        
-        toast({
-          title: "Download iniciado",
-          description: "O contrato está sendo baixado em formato PDF.",
-        });
+
       } catch (error) {
         console.error('Erro ao gerar PDF:', error);
         toast({

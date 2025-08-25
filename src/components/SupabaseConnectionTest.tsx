@@ -25,10 +25,7 @@ const SupabaseConnectionTest = () => {
       }
 
       setResult('✅ Conexão com Supabase funcionando!');
-      toast({
-        title: "Sucesso!",
-        description: "Conexão com Supabase está funcionando corretamente"
-      });
+      
     } catch (error: any) {
       console.error('Erro de conexão:', error);
       setResult(`❌ Erro: ${error.message}`);

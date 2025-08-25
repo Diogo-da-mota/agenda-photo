@@ -119,10 +119,7 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
   };
   
   const handleResend = (id: string, email: string) => {
-    toast({
-      title: "Contrato reenviado",
-      description: `Um novo link foi enviado para ${email}`,
-    });
+    
   };
   
   // Função de cópia de link agora centralizada no hook useCopyLink
@@ -156,11 +153,7 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
       // Gerar o PDF e fazer o download
       const pdfBlob = await generateContractPdf(contractData);
       downloadBlob(pdfBlob, `contrato-${mappedContract.clientName}.pdf`);
-      
-      toast({
-        title: "Download iniciado",
-        description: "O contrato está sendo baixado em formato PDF.",
-      });
+
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       toast({
@@ -184,12 +177,7 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
     setIsDeleting(true);
     try {
       await deleteContract(contractToDelete.id, user);
-      
-      toast({
-        title: "Contrato excluído",
-        description: `O contrato de ${contractToDelete.clientName} foi excluído com sucesso.`,
-      });
-      
+
       // Recarregar a lista de contratos
       refetch();
       

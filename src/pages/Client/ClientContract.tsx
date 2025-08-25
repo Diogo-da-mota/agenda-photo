@@ -449,11 +449,7 @@ const ClientContract = () => {
       // Gerar o PDF e fazer o download
       const pdfBlob = await generateContractPdf(pdfData);
       downloadBlob(pdfBlob, `contrato-${contract.clientName}.pdf`);
-      
-      toast({
-        title: "Download iniciado",
-        description: "O contrato está sendo baixado em formato PDF.",
-      });
+
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       toast({
@@ -530,12 +526,7 @@ const ClientContract = () => {
       
       // Recarregar anexos existentes para mostrar os novos
       await loadExistingAttachments();
-      
-      toast({
-        title: "Anexos salvos com sucesso",
-        description: `${newAttachments.length} arquivo(s) foram salvos no contrato.`,
-      });
-      
+
       setLoading(false);
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -655,19 +646,13 @@ const ClientContract = () => {
     setClientAttachments(prev => [...prev, ...newAttachments]);
     
     if (newAttachments.length > 0) {
-      toast({
-        title: "Arquivos adicionados",
-        description: `${newAttachments.length} arquivo(s) adicionado(s) com sucesso.`,
-      });
+      
     }
   };
 
   const removeClientAttachment = (id: string) => {
     setClientAttachments(prev => prev.filter(attachment => attachment.id !== id));
-    toast({
-      title: "Arquivo removido",
-      description: "O arquivo foi removido da lista de anexos.",
-    });
+    
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -800,9 +785,7 @@ const ClientContract = () => {
                     />
                   </div>
                 )} */}
-                
 
-                
                 {/* Área de Upload */}
                 <div
                   className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${

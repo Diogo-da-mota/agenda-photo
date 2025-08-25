@@ -135,11 +135,7 @@ export const useFinanceiroActions = (
       // Atualizar os dados após a correção
       queryClient.invalidateQueries({ queryKey: ['financeiro-transacoes'] });
       queryClient.invalidateQueries({ queryKey: ['financeiro-resumo'] });
-      
-      toast({
-        title: "Correção concluída",
-        description: resultado
-      });
+
     } catch (error) {
       // console.error("Erro ao corrigir transações:", error);
       setMensagemCorrecao(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -158,12 +154,7 @@ export const useFinanceiroActions = (
     
     try {
       setMensagemCorrecao("FUNCIONALIDADE DESABILITADA: Os valores financeiros são salvos corretamente na tabela agenda_eventos. Não é necessária sincronização automática entre agenda e financeiro.");
-      
-      toast({
-        title: "Funcionalidade Desabilitada",
-        description: "Os valores financeiros já são salvos corretamente na agenda. Sincronização automática não é necessária.",
-        variant: "default"
-      });
+
     } catch (error) {
       // console.error("Erro inesperado:", error);
       setMensagemCorrecao(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);

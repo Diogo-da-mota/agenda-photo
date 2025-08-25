@@ -210,10 +210,7 @@ export const useBackgroundSync = (options: UseBackgroundSyncOptions = {}) => {
       }));
 
       if (syncedCount > 0) {
-        toast({
-          title: "Sincronização concluída",
-          description: `${syncedCount} operação(ões) sincronizada(s) com sucesso.`,
-        });
+        
       }
 
       if (errors.length > 0) {
@@ -298,11 +295,7 @@ export const useBackgroundSync = (options: UseBackgroundSyncOptions = {}) => {
       });
 
       setState(prev => ({ ...prev, pendingOperations: 0 }));
-      
-      toast({
-        title: "Operações limpas",
-        description: "Todas as operações pendentes foram removidas.",
-      });
+
     } catch (error) {
       console.error('[BackgroundSync] Erro ao limpar operações:', error);
       throw error;

@@ -174,10 +174,7 @@ const ActivityHistory: React.FC = () => {
   const clearHistory = () => {
     setActivities([]);
     setShowDeleteDialog(false);
-    toast({
-      title: "Histórico limpo",
-      description: "Todas as atividades foram removidas com sucesso.",
-    });
+    
   };
 
   // Filter activities
@@ -274,7 +271,7 @@ const ActivityHistory: React.FC = () => {
     if (error) {
       toast({ title: 'Erro ao salvar notificação', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Notificação salva', description: 'Notificação criada com sucesso.' });
+      
       // Recarregar notificações
       const { data } = await supabase
         .from('notificacoes')

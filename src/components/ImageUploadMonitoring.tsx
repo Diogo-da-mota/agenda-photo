@@ -72,11 +72,7 @@ const ImageUploadMonitoring: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 800));
       await loadStats();
-      
-      toast({
-        title: "Estatísticas atualizadas",
-        description: "Os dados de monitoramento foram atualizados"
-      });
+
     } catch (error) {
       toast({
         title: "Erro ao atualizar",
@@ -91,12 +87,7 @@ const ImageUploadMonitoring: React.FC = () => {
   // Handle upload complete
   const handleUploadComplete = (url: string) => {
     console.log('Upload completed with url:', url);
-    
-    toast({
-      title: "Upload Concluído",
-      description: "Imagem enviada e métricas registradas"
-    });
-    
+
     // Update stats after upload
     handleRefreshStats();
   };

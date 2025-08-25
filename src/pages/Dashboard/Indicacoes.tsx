@@ -39,10 +39,7 @@ export default function Indicacoes() {
 
   const handleCopyLink = (link: string) => {
     navigator.clipboard.writeText(link);
-    toast({
-      title: "Link copiado!",
-      description: "O link de indicação foi copiado para sua área de transferência.",
-    });
+    
   };
 
   const handleShare = async (link: string) => {

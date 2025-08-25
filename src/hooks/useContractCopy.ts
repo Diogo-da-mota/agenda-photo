@@ -62,11 +62,6 @@ export const useContractCopy = () => {
         eventLocation: eventLocation || 'N/A'
       });
 
-      toast({
-        title: "Contrato Copiado",
-        description: "Uma cópia do contrato foi criada com funcionalidade de assinatura digital.",
-      });
-
       return copiedContract;
     } catch (error) {
       console.error('Erro ao criar cópia do contrato:', error);
@@ -119,11 +114,6 @@ export const useContractCopy = () => {
         copiedContract: signedContract
       }));
 
-      toast({
-        title: "Contrato Assinado",
-        description: "A assinatura digital foi aplicada com sucesso ao contrato.",
-      });
-
       return signedContract;
     } catch (error) {
       console.error('Erro ao assinar contrato:', error);
@@ -154,11 +144,6 @@ export const useContractCopy = () => {
       // Em produção, aqui seria gerado um PDF da cópia com assinatura digital
       
       const fileName = `contrato-copia-${copyState.copiedContract.id_contrato}.pdf`;
-      
-      toast({
-        title: "Download Iniciado",
-        description: `Baixando ${fileName}...`,
-      });
 
       // Aqui seria implementada a lógica real de download
       console.log('Download da cópia do contrato:', copyState.copiedContract);

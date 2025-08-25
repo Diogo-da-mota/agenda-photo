@@ -46,10 +46,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
       setNotificationPermission(permission);
 
       if (permission === 'granted') {
-        toast({
-          title: "Notificações ativadas!",
-          description: "Você receberá lembretes dos seus eventos.",
-        });
 
         try {
             const swRegistration = await navigator.serviceWorker.ready;
@@ -69,11 +65,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
             //     'Content-Type': 'application/json',
             //   },
             // });
-
-            toast({
-              title: "Inscrição realizada com sucesso!",
-              description: "Tudo pronto para receber notificações.",
-            });
 
         } catch (error) {
             console.error('Falha ao se inscrever para notificações push:', error);
@@ -104,10 +95,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ toggleSidebar, sideba
       // console.log('[DEBUG] Iniciando processo de logout...'); // Removido para produção
       await signOut();
       // console.log('[DEBUG] Logout executado com sucesso'); // Removido para produção
-      toast({
-        title: "Sessão encerrada",
-        description: "Você saiu do sistema com sucesso."
-      });
+      
     } catch (error) {
       // console.error('[ERROR] Erro ao fazer logout:', error); // Removido para produção
       toast({

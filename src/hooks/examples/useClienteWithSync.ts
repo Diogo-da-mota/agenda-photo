@@ -68,13 +68,6 @@ export const useClienteWithSync = () => {
         return [...old, data];
       });
 
-      toast({
-        title: "Cliente criado",
-        description: data._offline 
-          ? "Cliente salvo offline. Será sincronizado quando a conexão retornar."
-          : "Cliente criado com sucesso.",
-        variant: data._offline ? "default" : "default"
-      });
     },
     onError: (error) => {
       toast({
@@ -113,12 +106,6 @@ export const useClienteWithSync = () => {
         );
       });
 
-      toast({
-        title: "Cliente atualizado",
-        description: data._offline 
-          ? "Alterações salvas offline. Serão sincronizadas quando a conexão retornar."
-          : "Cliente atualizado com sucesso.",
-      });
     },
     onError: (error) => {
       toast({
@@ -152,12 +139,6 @@ export const useClienteWithSync = () => {
         return old.filter(cliente => cliente.id !== data.id);
       });
 
-      toast({
-        title: "Cliente excluído",
-        description: data._offline 
-          ? "Cliente marcado para exclusão. Será removido quando a conexão retornar."
-          : "Cliente excluído com sucesso.",
-      });
     },
     onError: (error) => {
       toast({

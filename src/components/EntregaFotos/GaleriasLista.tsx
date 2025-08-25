@@ -39,11 +39,7 @@ const GaleriasLista: React.FC<GaleriasListaProps> = ({
   const copyPassword = async (senha: string) => {
     try {
       await navigator.clipboard.writeText(senha);
-      toast({
-        title: "Senha copiada!",
-        description: "A senha foi copiada para a área de transferência.",
-        variant: "default"
-      });
+      
     } catch (error) {
       toast({
         title: "Erro ao copiar",

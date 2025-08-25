@@ -24,11 +24,7 @@ const ContractContent = ({ termsAndConditions }: ContractContentProps) => {
   const handleCopyContent = () => {
     navigator.clipboard.writeText(termsAndConditions);
     setCopied(true);
-    toast({
-      title: "Conteúdo copiado",
-      description: "O conteúdo do contrato foi copiado para a área de transferência.",
-    });
-    
+
     setTimeout(() => {
       setCopied(false);
     }, 2000);

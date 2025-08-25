@@ -44,11 +44,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
       // Limpar
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Download iniciado",
-        description: `O arquivo ${fileName} está sendo baixado.`,
-      });
+
     } catch (error) {
       console.error('Erro ao fazer download:', error);
       toast({
@@ -60,8 +56,6 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <>
@@ -114,7 +108,6 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
           </div>
         </CardContent>
       </Card>
-
 
     </>
   );

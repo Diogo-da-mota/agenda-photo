@@ -73,10 +73,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       await criarCategoria(novaCategoria, tipo, user.id);
       await carregarCategorias();
       setNovaCategoria('');
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria adicionada com sucesso.',
-      });
+      
       if (onCategoriesChanged) onCategoriesChanged();
     } catch (error: any) {
       toast({
@@ -111,10 +108,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       await carregarCategorias();
       setCategoriaEditando(null);
       setNomeEditado('');
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria atualizada com sucesso.',
-      });
+      
       if (onCategoriesChanged) onCategoriesChanged();
     } catch (error: any) {
       toast({
@@ -138,10 +132,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     try {
       await excluirCategoria(id, user.id);
       await carregarCategorias();
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria excluída com sucesso.',
-      });
+      
       if (onCategoriesChanged) onCategoriesChanged();
     } catch (error: any) {
       toast({

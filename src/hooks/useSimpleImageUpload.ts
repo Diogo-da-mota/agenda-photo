@@ -55,10 +55,7 @@ export const useSimpleImageUpload = (options: UseSimpleImageUploadOptions = {}) 
       
       if (url) {
         options.onSuccess?.(url);
-        toast({
-          title: "Upload concluído",
-          description: "Sua imagem foi enviada com sucesso.",
-        });
+        
       }
       
       return url;

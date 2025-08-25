@@ -113,10 +113,7 @@ const ClientPayments = () => {
   
   // Generate receipt handler
   const handleGenerateReceipt = (paymentId) => {
-    toast({
-      title: "Recibo gerado",
-      description: "O recibo foi gerado e está disponível para download.",
-    });
+    
   };
 
   return (
@@ -185,10 +182,7 @@ const ClientPayments = () => {
                                   variant="default" 
                                   size="sm"
                                   className="flex items-center gap-1"
-                                  onClick={() => toast({
-                                    title: "Pagar online",
-                                    description: "A funcionalidade de pagamento online está em desenvolvimento."
-                                  })}
+                                  onClick={() => }
                                 >
                                   <CreditCard className="h-4 w-4" />
                                   Pagar Online

@@ -16,10 +16,7 @@ const ClientForms: React.FC<ClientFormsProps> = () => {
   
   // Handler para formulário direto
   const handleSaveCliente = async (data: ClienteFormData) => {
-    toast({
-      title: "Formulário enviado",
-      description: "Dados do cliente recebidos."
-    });
+    
     console.log("Dados do cliente:", data);
   };
 

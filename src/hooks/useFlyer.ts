@@ -88,11 +88,7 @@ export const useFlyer = () => {
       };
       
       setFlyerData(updatedData);
-      
-      toast({
-        title: "Configurações salvas",
-        description: "Suas personalizações foram salvas localmente.",
-      });
+
     } catch (error) {
       console.error('Erro ao salvar dados do flyer:', error);
       toast({

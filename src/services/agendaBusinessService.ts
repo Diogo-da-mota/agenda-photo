@@ -119,10 +119,7 @@ export const agendaBusinessService = {
       await this.atualizarCalendario(props);
       
       logger.debug(`Status do evento ${eventId} atualizado com sucesso`, null, 'Agenda');
-      toast({
-        title: "Status atualizado",
-        description: `O status do evento foi alterado para ${newStatus}.`
-      });
+      
     } catch (err) {
       logger.error('Erro ao atualizar status do evento', err, 'Agenda');
       toast({
@@ -154,10 +151,7 @@ export const agendaBusinessService = {
       await this.atualizarCalendario(props);
       
       logger.debug(`Evento ${eventId} reagendado com sucesso`, null, 'Agenda');
-      toast({
-        title: "Evento reagendado",
-        description: `O evento foi reagendado para ${newDate.toLocaleDateString()}.`
-      });
+      
     } catch (err) {
       logger.error('Erro ao reagendar evento', err, 'Agenda');
       toast({
@@ -186,10 +180,7 @@ export const agendaBusinessService = {
       ));
       
       logger.debug(`Lembrete enviado com sucesso para evento ${eventId}`, null, 'Agenda');
-      toast({
-        title: "Lembrete enviado",
-        description: "Um lembrete foi enviado para o cliente via WhatsApp."
-      });
+      
     } catch (err) {
       logger.error('Erro ao enviar lembrete', err, 'Agenda');
       toast({
@@ -229,12 +220,7 @@ export const agendaBusinessService = {
       
       // Simular geração de recibo (implementar integração real aqui)
       logger.debug(`Recibo gerado com sucesso para evento ${eventId}`, null, 'Agenda');
-      
-      toast({
-        title: "Recibo gerado",
-        description: `Recibo para ${event.clientName} foi gerado com sucesso.`
-      });
-      
+
     } catch (error) {
       logger.error('Erro ao gerar recibo', error, 'Agenda');
       toast({
@@ -269,11 +255,7 @@ export const agendaBusinessService = {
       await this.atualizarCalendario(props);
       
       // Mostrar mensagem de sucesso
-      toast({
-        title: "Evento excluído",
-        description: "O evento e suas transações relacionadas foram removidos com sucesso."
-      });
-      
+
       logger.debug(`Exclusão do evento ${eventId} concluída com sucesso`, null, 'Agenda');
     } catch (err) {
       logger.error(`Erro ao excluir evento ${eventId}`, err, 'Agenda');
@@ -322,18 +304,9 @@ export const agendaBusinessService = {
     
     try {
       setIsFixingEvents(true);
-      toast({
-        title: 'Correção iniciada',
-        description: 'Iniciando correção de eventos financeiros...'
-      });
-      
+
       const eventosCorrigidos = await corrigirTodosEventosFinanceiros(user.id);
-      
-      toast({
-        title: 'Correção concluída',
-        description: `${eventosCorrigidos} eventos processados com sucesso!`
-      });
-      
+
       // Forçar recarregar os eventos após correção
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['transacoes'] });
@@ -367,10 +340,7 @@ export const agendaBusinessService = {
       await this.carregarEventos(props);
       
       setError(null);
-      toast({
-        title: 'Eventos atualizados',
-        description: 'Os eventos foram recarregados com sucesso.',
-      });
+      
     } catch (err) {
       logger.error('Erro ao recarregar eventos', err, 'Agenda');
       setError('Não foi possível recarregar os eventos. Por favor, tente novamente.');

@@ -100,11 +100,7 @@ const FinanceiroSupabaseTest: React.FC = () => {
           status: 'success',
           message: "Teste concluído com sucesso! Os dados financeiros estão sendo salvos corretamente no Supabase."
         }));
-        
-        toast({
-          title: "Teste concluído",
-          description: "O teste de persistência de dados financeiros foi concluído com sucesso.",
-        });
+
       } else {
         throw new Error("Falha na verificação dos dados salvos.");
       }

@@ -34,10 +34,7 @@ export const usePortfolioMutations = (pageSize: number = 12) => {
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Trabalho criado",
-        description: "O trabalho foi adicionado ao seu portfólio com sucesso."
-      });
+      
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });
@@ -61,10 +58,7 @@ export const usePortfolioMutations = (pageSize: number = 12) => {
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Trabalho excluído",
-        description: "O trabalho foi removido do seu portfólio."
-      });
+      
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });

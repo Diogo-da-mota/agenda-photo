@@ -108,11 +108,7 @@ const SupabaseConnectionTester = () => {
       addDiagnostic(`📄 Dados retornados: ${JSON.stringify(data, null, 2)}`);
       
       setTestResults(prev => ({ ...prev, status: 'success', data }));
-      
-      toast({
-        title: "Teste concluído",
-        description: "Cliente teste inserido com sucesso!",
-      });
+
     } catch (error) {
       console.error("Erro detalhado:", error);
       

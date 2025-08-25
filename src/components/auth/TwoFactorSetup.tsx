@@ -103,11 +103,7 @@ export function TwoFactorSetup({ onSuccess, onCancel }: TwoFactorSetupProps) {
       setQrCodeUrl(data.qrCode);
       setSecret(data.secret);
       setSetupStarted(true);
-      
-      toast({
-        title: "Configuração iniciada",
-        description: "Escaneie o código QR com seu aplicativo autenticador",
-      });
+
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -144,12 +140,7 @@ export function TwoFactorSetup({ onSuccess, onCancel }: TwoFactorSetupProps) {
       const data = await response.json();
       setRecoveryCodes(data.recoveryCodes || []);
       setSetupComplete(true);
-      
-      toast({
-        title: "2FA Ativado",
-        description: "Autenticação de dois fatores ativada com sucesso",
-      });
-      
+
       if (onSuccess) onSuccess();
     } catch (error: any) {
       toast({
@@ -188,12 +179,7 @@ export function TwoFactorSetup({ onSuccess, onCancel }: TwoFactorSetupProps) {
       setSetupComplete(false);
       setSetupStarted(false);
       setVerificationCode('');
-      
-      toast({
-        title: "2FA Desativado",
-        description: "Autenticação de dois fatores desativada com sucesso",
-      });
-      
+
       if (onSuccess) onSuccess();
     } catch (error: any) {
       toast({

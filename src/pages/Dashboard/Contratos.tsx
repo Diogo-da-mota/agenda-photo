@@ -33,10 +33,7 @@ const Contratos = () => {
   }, [error, toast]);
 
   const handleSendReminders = () => {
-    toast({
-      title: "Lembretes enviados",
-      description: "Lembretes foram enviados para todos os clientes com contratos pendentes.",
-    });
+    
   };
 
   return (

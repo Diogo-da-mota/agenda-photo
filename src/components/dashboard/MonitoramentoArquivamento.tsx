@@ -52,12 +52,7 @@ const MonitoramentoArquivamento = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setStatusTabelas(mockData);
-      
-      toast({
-        title: "Verificação concluída",
-        description: "Status de arquivamento atualizado"
-      });
-      
+
     } catch (error) {
       console.error('Erro na verificação:', error);
       toast({

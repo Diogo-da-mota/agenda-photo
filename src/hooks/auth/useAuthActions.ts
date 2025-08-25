@@ -82,16 +82,10 @@ export const useAuthActions = () => {
       }
 
       if (data.user && !data.session) {
-        toast({
-          title: "Confirmação necessária",
-          description: "Verifique seu e-mail para confirmar sua conta.",
-        });
+        
         SecureLogger.info('[AUTH] Conta criada - confirmação pendente.', { userId: data.user.id });
       } else if (data.user && data.session) {
-        toast({
-          title: "Conta criada com sucesso",
-          description: "Bem-vindo à plataforma!",
-        });
+        
         SecureLogger.info('[AUTH] Nova conta criada e sessão iniciada.', { userId: data.user.id });
       }
 
@@ -175,11 +169,6 @@ export const useAuthActions = () => {
         SecureLogger.error('[AUTH] Erro ao atualizar usuário:', error, { userId });
         return { success: false, error: error.message };
       }
-
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram salvas.",
-      });
 
       return { success: true };
     } catch (error: unknown) {

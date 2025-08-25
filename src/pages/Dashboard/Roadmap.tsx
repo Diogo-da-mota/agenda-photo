@@ -96,18 +96,11 @@ const Roadmap: React.FC = () => {
       )
     );
 
-    toast({
-      title: "Voto registrado!",
-      description: "Obrigado por ajudar a definir nossas prioridades.",
-    });
   };
 
   const handleSubmitSuggestion = () => {
     if (suggestion.trim()) {
-      toast({
-        title: "Sugestão enviada!",
-        description: "Agradecemos sua contribuição para melhorar nossa plataforma.",
-      });
+      
       setSuggestion('');
     }
   };

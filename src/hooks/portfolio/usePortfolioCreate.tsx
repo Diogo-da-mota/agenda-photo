@@ -25,11 +25,7 @@ export const usePortfolioCreate = () => {
     onSuccess: (trabalhoSalvo) => {
       // Invalidar e atualizar o cache
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });
-      
-      toast({
-        title: "Trabalho criado",
-        description: "O trabalho foi adicionado ao seu portfólio com sucesso."
-      });
+
     },
     onError: (error: Error) => {
       toast({
@@ -49,11 +45,7 @@ export const usePortfolioCreate = () => {
     onSuccess: (resultado: ResultadoTrabalhoComImagens) => {
       // Invalidar e atualizar o cache
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] });
-      
-      toast({
-        title: "Trabalho criado",
-        description: `Trabalho criado com ${resultado.imagens.length} imagens com sucesso.`
-      });
+
     },
     onError: (error: Error) => {
       toast({

@@ -66,10 +66,6 @@ const ContractAttachments = ({
 
     try {
       // Mostrar toast de início do download
-      toast({
-        title: "Download iniciado",
-        description: `Baixando ${attachment.name}...`,
-      });
 
       // Fazer fetch do arquivo real do Supabase Storage
       const response = await fetch(attachment.url);
@@ -131,11 +127,7 @@ const ContractAttachments = ({
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 100);
-      
-      toast({
-        title: "Download concluído",
-        description: `O arquivo ${attachment.name} foi baixado com sucesso.`,
-      });
+
     } catch (error) {
       console.error('Erro no download:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -154,10 +146,7 @@ const ContractAttachments = ({
       setPreviewAttachment(attachment);
       setPreviewOpen(true);
     } else {
-      toast({
-        title: "Visualização não disponível",
-        description: "Este tipo de arquivo não pode ser visualizado diretamente. Faça o download para visualizá-lo.",
-      });
+      
     }
   };
   

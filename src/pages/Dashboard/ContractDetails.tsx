@@ -30,8 +30,6 @@ import ResendDialog from '@/components/contratos/details/ResendDialog';
 import ContractCopyWithSignature from '@/components/contratos/ContractCopyWithSignature';
 import { formatarTelefoneExibicao } from '@/utils/formatters';
 
-
-
 const ContractDetails = () => {
   // Usar slug como parâmetro principal para suportar URLs amigáveis
   const { slug, id_contrato } = useParams<{ slug?: string; id_contrato?: string }>();
@@ -352,12 +350,7 @@ const ContractDetails = () => {
 
       // Recarregar anexos para mostrar os salvos
       // await loadContractAttachments();
-      
-      toast({
-        title: "Anexos salvos com sucesso",
-        description: `${newAttachments.length} arquivo(s) foram salvos no contrato.`,
-      });
-      
+
     } catch (error) {
       // console.error('Erro ao salvar anexos:', error); // Removido para produção
       toast({
@@ -456,31 +449,20 @@ const ContractDetails = () => {
   
   const handleConfirmResend = () => {
     // Aqui faria uma chamada para API para reenviar o contrato
-    
-    toast({
-      title: "Contrato reenviado",
-      description: `Um novo link foi enviado para ${recipientEmail}`,
-    });
+
     setIsResendDialogOpen(false);
   };
   
   const handleCancelContract = () => {
     if (contract.status === 'cancelado') {
-      toast({
-        title: "Aviso",
-        description: "Este contrato já está cancelado.",
-      });
+      
       return;
     }
     
     // Confirmar antes de cancelar
     if (window.confirm("Tem certeza que deseja cancelar este contrato? Esta ação não pode ser desfeita.")) {
       // Aqui faria uma chamada para API para cancelar o contrato
-      
-      toast({
-        title: "Contrato cancelado",
-        description: "O status do contrato foi alterado para cancelado."
-      });
+
     }
   };
   
@@ -556,10 +538,7 @@ const ContractDetails = () => {
     setAttachments(prev => [...prev, ...newAttachments]);
 
     if (newAttachments.length > 0) {
-      toast({
-        title: "Arquivos adicionados",
-        description: `${newAttachments.length} arquivo(s) foram adicionados com sucesso.`,
-      });
+      
     }
   };
 
@@ -624,10 +603,6 @@ const ContractDetails = () => {
       return;
     }
 
-    toast({
-      title: "Arquivo removido",
-      description: "O arquivo foi removido da lista de anexos.",
-    });
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {

@@ -42,12 +42,7 @@ const WebhookDomainConfig: React.FC<WebhookDomainConfigProps> = ({
     try {
       await navigator.clipboard.writeText(generatedWebhookUrl);
       setIsCopied(true);
-      
-      toast({
-        title: "URL copiada!",
-        description: "A URL do webhook foi copiada para a área de transferência.",
-      });
-      
+
       // Reset the "Copied" state after 2 seconds
       setTimeout(() => {
         setIsCopied(false);

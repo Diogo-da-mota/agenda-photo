@@ -164,10 +164,7 @@ export const CreateContractButton = () => {
   };
 
   const handleContractSuccess = () => {
-    toast({
-      title: "Contrato criado com sucesso!",
-      description: "O contrato foi salvo e aparecerá na lista de contratos.",
-    });
+    
     setIsOpen(false);
     setSelectedClientData(null);
     // Recarregar a página para mostrar o novo contrato na lista

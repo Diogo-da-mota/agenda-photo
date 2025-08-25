@@ -17,6 +17,6 @@ export const createToastHandler = (
   }) => void
 ) => {
   return (title: string, description: string, variant?: 'default' | 'destructive') => {
-    toast({ title, description, variant });
+    
   };
 };

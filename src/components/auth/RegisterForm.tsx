@@ -139,12 +139,7 @@ const RegisterForm = () => {
           console.error('Erro ao atualizar perfil de usuário:', updateError);
         }
       }
-      
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Verifique seu e-mail para confirmar seu cadastro.",
-      });
-      
+
       navigate('/login');
     } catch (error) {
       console.error('Erro inesperado:', error);

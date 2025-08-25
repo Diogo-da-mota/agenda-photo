@@ -164,10 +164,7 @@ export const useS3Upload = (options: UseS3UploadOptions = {}) => {
       });
 
       if (showToasts) {
-        toast({
-          title: 'Upload iniciado',
-          description: `Enviando ${files.length} arquivo(s)...`,
-        });
+        
       }
 
       const result = await uploadMultipleFilesConcurrent(
@@ -188,10 +185,7 @@ export const useS3Upload = (options: UseS3UploadOptions = {}) => {
 
       if (result.success) {
         if (showToasts) {
-          toast({
-            title: '🎉 Upload concluído!',
-            description: `✅ ${result.urls?.length} arquivo(s) enviado(s) com sucesso para o S3.`,
-          });
+          
         }
         if (onSuccess) onSuccess(result.urls || []);
       } else {
@@ -274,11 +268,7 @@ export const useS3Upload = (options: UseS3UploadOptions = {}) => {
     logger.warn('[useS3Upload] Tentativa de cancelamento - não implementado para Amazon S3');
     
     if (showToasts) {
-      toast({
-        title: 'Cancelamento',
-        description: 'Upload não pode ser cancelado após iniciado.',
-        variant: 'default'
-      });
+      
     }
 
     // TODO: Implementar cancelamento se necessário

@@ -123,12 +123,7 @@ export const SecuritySection = () => {
       });
       return;
     }
-    
-    toast({
-      title: "Senha alterada",
-      description: "Sua senha foi alterada com sucesso.",
-    });
-    
+
     setPassword({
       current: "",
       new: "",
@@ -137,10 +132,7 @@ export const SecuritySection = () => {
   };
 
   const handleExportData = () => {
-    toast({
-      title: "Exportação iniciada",
-      description: "Seus dados estão sendo preparados para download.",
-    });
+    
     // Implementação real exportaria para CSV/JSON
   };
 
@@ -157,12 +149,7 @@ export const SecuritySection = () => {
   const handle2FAComplete = () => {
     setIsSetup2FAOpen(false);
     setIs2FAEnabled(true);
-    
-    toast({
-      title: "2FA Ativado",
-      description: "Autenticação de dois fatores configurada com sucesso.",
-    });
-    
+
     fetchSecurityInfo();
   };
   

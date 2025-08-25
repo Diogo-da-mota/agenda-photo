@@ -39,10 +39,7 @@ const SimpleClientes = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       setIsDialogOpen(false);
-      toast({
-        title: "Cliente adicionado",
-        description: "O cliente foi adicionado com sucesso.",
-      });
+      
     },
     onError: (error) => {
       toast({
@@ -61,10 +58,7 @@ const SimpleClientes = () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       setIsDialogOpen(false);
       setEditingCliente(null);
-      toast({
-        title: "Cliente atualizado",
-        description: "As informações do cliente foram atualizadas com sucesso.",
-      });
+      
     },
     onError: (error) => {
       toast({
@@ -80,10 +74,7 @@ const SimpleClientes = () => {
     mutationFn: (id: string) => deleteCliente(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      toast({
-        title: "Cliente excluído",
-        description: "O cliente foi excluído com sucesso.",
-      });
+      
     },
     onError: (error) => {
       toast({

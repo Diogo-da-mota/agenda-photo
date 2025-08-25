@@ -97,10 +97,7 @@ const TrabalhoForm: React.FC<TrabalhoFormProps> = ({
 
       await onSaveWithImages(trabalhoComImagens);
 
-      // toast({
-      //   title: "✅ Trabalho publicado!",
-      //   description: `Dados salvos e ${formData.arquivos.length} imagem(ns) enviada(s) com sucesso`,
-      // });
+      // 
 
       resetForm();
 

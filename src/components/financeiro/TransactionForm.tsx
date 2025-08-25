@@ -155,10 +155,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       await carregarCategorias();
       setNovaCategoria('');
       setMostrarAdicionarCategoria(false);
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria adicionada com sucesso.',
-      });
+      
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -177,10 +174,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       await carregarFormasPagamento();
       setNovaFormaPagamento('');
       setMostrarAdicionarFormaPagamento(false);
-      toast({
-        title: 'Sucesso',
-        description: 'Forma de pagamento adicionada com sucesso.',
-      });
+      
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -205,10 +199,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       
       setCategoriaEditando(null);
       setNomeEditado('');
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria atualizada com sucesso.',
-      });
+      
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -233,10 +224,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       
       setFormaPagamentoEditando(null);
       setNomeFormaPagamentoEditado('');
-      toast({
-        title: 'Sucesso',
-        description: 'Forma de pagamento atualizada com sucesso.',
-      });
+      
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -258,11 +246,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       if (categoria === nome) {
       setCategoria('');
     }
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Categoria excluída com sucesso.',
-      });
+
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -284,11 +268,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       if (formaPagamento === nome) {
         setFormaPagamento('');
       }
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Forma de pagamento excluída com sucesso.',
-      });
+
     } catch (error: any) {
       toast({
         title: 'Erro',

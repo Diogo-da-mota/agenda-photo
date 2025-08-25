@@ -35,11 +35,7 @@ export const InstallPwaButton: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (!installPrompt) {
-      toast({
-        title: "App já instalado ou não suportado",
-        description: "O aplicativo já pode estar instalado ou seu navegador não suporta a instalação.",
-        variant: "default",
-      });
+      
       return;
     }
 
@@ -51,10 +47,7 @@ export const InstallPwaButton: React.FC = () => {
 
     if (outcome === 'accepted') {
       console.log('Usuário aceitou a instalação do PWA');
-      toast({
-        title: "Aplicativo instalado!",
-        description: "O AgendaPRO foi adicionado à sua tela inicial.",
-      });
+      
     } else {
       console.log('Usuário recusou a instalação do PWA');
     }

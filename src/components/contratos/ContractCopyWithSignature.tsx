@@ -48,21 +48,13 @@ const ContractCopyWithSignature = ({
 
   const handleDigitalSignature = () => {
     // Simular processo de assinatura digital
-    toast({
-      title: "Assinatura Digital",
-      description: "Iniciando processo de assinatura digital...",
-    });
-    
+
     // Chamar função de assinatura
     onSign();
   };
 
   const handleDownloadCopy = () => {
-    toast({
-      title: "Download da Cópia",
-      description: "Baixando cópia do contrato com assinatura digital...",
-    });
-    
+
     onDownload();
   };
 

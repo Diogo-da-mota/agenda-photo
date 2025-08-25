@@ -132,11 +132,7 @@ const AgendaClienteContratos = () => {
 
       const pdfBlob = await generateContractPdf(pdfData);
       downloadBlob(pdfBlob, `contrato-${contract.clientName}.pdf`);
-      
-      toast({
-        title: "Download iniciado",
-        description: "O contrato está sendo baixado em formato PDF.",
-      });
+
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       toast({

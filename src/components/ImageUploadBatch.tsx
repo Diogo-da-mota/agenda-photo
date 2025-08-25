@@ -24,10 +24,7 @@ const ImageUploadBatch: React.FC = () => {
   } = useImageUpload({
     onBatchComplete: (results) => {
       console.log('Batch upload complete:', results);
-      toast({
-        title: "Uploads concluídos",
-        description: `${results.filter(r => r.success).length} de ${results.length} imagens foram enviadas com sucesso.`
-      });
+      
     }
   });
 
@@ -45,11 +42,7 @@ const ImageUploadBatch: React.FC = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    
-    toast({
-      title: "Imagens selecionadas",
-      description: `${files.length} imagens adicionadas à fila de upload.`
-    });
+
   };
 
   // Remover um item da fila
@@ -63,10 +56,7 @@ const ImageUploadBatch: React.FC = () => {
   // Limpar toda a fila
   const clearQueue = () => {
     setSelectedFiles([]);
-    toast({
-      title: "Fila limpa",
-      description: "Todos os itens foram removidos da fila de upload."
-    });
+    
   };
 
   // Processar upload em lote
@@ -102,12 +92,7 @@ const ImageUploadBatch: React.FC = () => {
       });
       
       const successCount = results.filter(r => r.success).length;
-      
-      toast({
-        title: "Processamento concluído",
-        description: `${successCount} de ${files.length} imagens foram processadas com sucesso.`
-      });
-      
+
     } catch (error) {
       console.error('Erro no processamento em lote:', error);
       

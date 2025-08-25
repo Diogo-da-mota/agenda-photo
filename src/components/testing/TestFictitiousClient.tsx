@@ -129,11 +129,7 @@ FOR INSERT WITH CHECK (auth.uid() = user_id);`);
 
       addDiagnostic(`✅ Cliente fictício salvo com sucesso! ID: ${data?.[0]?.id || 'N/A'}`);
       addDiagnostic(`✅ Dados retornados do Supabase: ${JSON.stringify(data, null, 2)}`);
-      
-      toast({
-        title: "✅ Cliente fictício salvo com sucesso no Supabase!"
-      });
-      
+
       setResult({
         success: true,
         data: data,

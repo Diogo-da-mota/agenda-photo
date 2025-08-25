@@ -53,10 +53,7 @@ export const useAppSettings = () => {
       if (success) {
         // Atualizar estado local com as novas configurações
         setSettings(prev => prev ? { ...prev, ...newSettings } : { ...newSettings } as ConfiguracaoEmpresa);
-        toast({
-          title: 'Sucesso',
-          description: 'Configurações atualizadas com sucesso',
-        });
+        
       }
       
       return success;

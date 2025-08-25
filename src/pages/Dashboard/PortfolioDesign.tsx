@@ -52,19 +52,12 @@ const PortfolioDesign: React.FC = () => {
     setIsLoading(true);
     // Simular salvamento
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "✅ Configurações salvas!",
-      description: "As alterações no design foram aplicadas com sucesso.",
-    });
+
     setIsLoading(false);
   };
 
   const handlePreview = () => {
-    toast({
-      title: "🔍 Preview do site",
-      description: "Abrindo preview em nova janela...",
-    });
+    
     // Aqui abriria o preview em nova janela
   };
   return (

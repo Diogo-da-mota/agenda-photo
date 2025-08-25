@@ -96,16 +96,11 @@ const CompanySection = () => {
         logo_url: logoUrl?.trim() || null
       };
 
-
-
       // Salvar configurações da empresa usando o hook
       const success = await atualizarConfiguracoes(dadosParaSalvar);
 
       if (success) {
-        toast({
-          title: "Configurações salvas!",
-          description: "As informações da empresa foram atualizadas com sucesso no banco de dados.",
-        });
+        
       } else {
         throw new Error("Falha ao salvar configurações");
       }

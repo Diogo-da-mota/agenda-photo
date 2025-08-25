@@ -22,10 +22,7 @@ const CompanyLogo: React.FC<CompanyLogoProps> = ({ companyLogo, setCompanyLogo }
         }
       };
       reader.readAsDataURL(file);
-      toast({
-        title: "Logo da empresa atualizado",
-        description: "O logo da sua empresa foi alterado com sucesso.",
-      });
+      
     }
   };
 

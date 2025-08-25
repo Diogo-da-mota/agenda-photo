@@ -150,12 +150,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           }, user.id);
         }
       }
-      
-      toast({
-        title: transaction ? "Transação atualizada" : "Transação criada",
-        description: "As alterações foram salvas com sucesso."
-      });
-      
+
       onSuccess?.(novaTransacao);
       close();
     } catch (error) {

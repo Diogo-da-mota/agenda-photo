@@ -21,12 +21,7 @@ const ClientLoginModal = ({ isOpen, onOpenChange }: ClientLoginModalProps) => {
     try {
       // Simulate brief loading for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      toast({
-        title: "Acesso liberado",
-        description: "Redirecionando para a agenda do cliente...",
-      });
-      
+
       // Fechar modal e navegar diretamente para /agenda/cliente
       onOpenChange(false);
       navigate('/agenda/cliente');

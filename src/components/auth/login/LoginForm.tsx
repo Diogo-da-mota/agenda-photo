@@ -19,7 +19,6 @@ interface LoginFormProps {
 
 const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,8 +33,6 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const { validateToken } = useCSRF();
   const navigate = useNavigate();
   const location = useLocation();
-
-
 
   // Carregar credenciais salvas e tentar auto-login
   useEffect(() => {
@@ -64,10 +61,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           
           if (result.success) {
             // Auto-login bem-sucedido - logs removidos para produção
-            toast({
-              title: "Login automático realizado",
-              description: "Bem-vindo de volta!",
-            });
+            
           } else {
             // Auto-login falhou, limpando credenciais salvas - logs removidos para produção
             clearCredentials();
@@ -93,12 +87,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   useEffect(() => {
     if (session) {
       // Sessão detectada, redirecionando para o dashboard - logs removidos para produção
-      
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Redirecionando...",
-      });
-      
+
       setTimeout(() => {
         navigate('/dashboard');
         onSuccess();
@@ -220,8 +209,6 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       setError("Falha no login com Google. Tente novamente.");
     }
   };
-
-
 
   return (
     <>

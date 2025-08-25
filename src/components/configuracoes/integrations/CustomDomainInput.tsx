@@ -31,10 +31,7 @@ const CustomDomainInput: React.FC<CustomDomainInputProps> = ({ hasPaidPlan }) =>
     // Simulação de verificação
     setTimeout(() => {
       setIsVerifying(false);
-      toast({
-        title: "Solicitação recebida",
-        description: "Iremos verificar seu domínio e notificar quando estiver pronto.",
-      });
+      
     }, 1500);
   };
   

@@ -55,10 +55,7 @@ export const useEventCardLogic = (
       
       updateState({ isDeleteDialogOpen: false });
       
-      // toast({
-      //   title: "Evento excluído",
-      //   description: `O evento "${event.clientName}" foi excluído com sucesso.`,
-      // });
+      // 
     } catch (error) {
       logger.error(`Erro ao excluir evento ${event.id}`, error, 'EventCard');
       
@@ -81,10 +78,7 @@ export const useEventCardLogic = (
     if (onEventUpdate) {
       onEventUpdate(updatedEvent);
     } else {
-      // toast({
-      //   title: "Evento atualizado",
-      //   description: "O evento foi atualizado com sucesso."
-      // });
+      // 
     }
   };
 
@@ -130,9 +124,7 @@ export const useEventCardLogic = (
     }
 
     if (valorPagamento > event.remainingValue) {
-      toast({
-        title: "Valor muito alto",
-        description: `O valor não pode ser maior que o restante (R$ ${event.remainingValue.toFixed(2).replace('.', ',')}).`,
+      .`,
         variant: "destructive"
       });
       return;
@@ -160,10 +152,7 @@ export const useEventCardLogic = (
         onEventUpdate(eventoAtualizado);
       }
       
-      // toast({
-      //   title: "Pagamento registrado",
-      //   description: `Pagamento de R$ ${valorPagamento.toFixed(2).replace('.', ',')} foi registrado com sucesso.`
-      // });
+      // 
       
     } catch (error) {
       logger.error(`Erro ao registrar pagamento para evento ${event.id}`, error, 'EventCard');
@@ -223,10 +212,7 @@ export const useEventCardLogic = (
         }, 1000);
       }
       
-      // toast({
-      //   title: "Recibo gerado",
-      //   description: `Recibo do ${evento.eventType} para ${evento.clientName} foi gerado com sucesso.`
-      // });
+      // 
       
     } catch (error) {
       logger.error(`Erro ao gerar recibo para evento ${event.id}`, error, 'EventCard');

@@ -22,21 +22,11 @@ export const useCopyLink = () => {
     contractDataOrId: ContractUrlData | string | number, 
     contractTitle?: string
   ): void {
-    let link: string;
-    
-    if (typeof contractDataOrId === 'object' && contractDataOrId.id_amigavel && contractDataOrId.nome_cliente) {
-      // Usar novo formato com dados completos
-      link = `${window.location.origin}${generateContractUrl(contractDataOrId)}`;
-    } else {
-      // Fallback para formato antigo
-      link = `${window.location.origin}${generateContractUrl(contractDataOrId as string | number, contractTitle)}`;
-    }
+    // Usar a mesma URL do botão "Ver Site" - /agenda/cliente-login
+    const link = `${window.location.origin}/agenda/cliente-login`;
     
     navigator.clipboard.writeText(link).then(() => {
-      toast({
-        title: "Link copiado",
-        description: "O link do contrato foi copiado para a área de transferência.",
-      });
+      
     }).catch((error) => {
       console.error('Erro ao copiar link:', error);
       toast({

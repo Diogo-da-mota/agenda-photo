@@ -126,10 +126,7 @@ const Reports: React.FC = () => {
   // Funções de manipulação
   const handleExport = (format: 'pdf' | 'excel') => {
     setTimeout(() => {
-      toast({
-        title: "Exportação concluída",
-        description: `Relatório em ${format === 'pdf' ? 'PDF' : 'Excel'} exportado com sucesso.`,
-      });
+      
     }, 2000);
   };
 

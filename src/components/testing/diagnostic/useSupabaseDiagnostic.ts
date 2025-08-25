@@ -110,11 +110,7 @@ WITH CHECK (auth.uid() = user_id);`, "info");
       } else {
         addLog(`✅ Cliente salvo com sucesso!`, "success");
         addLog(`📄 Dados retornados: ${JSON.stringify(data, null, 2)}`, "success");
-        
-        toast({
-          title: "Sucesso",
-          description: "Cliente salvo com sucesso no Supabase!",
-        });
+
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';

@@ -138,12 +138,7 @@ const ClientQuote = () => {
       
       // Show success state
       setShowSuccess(true);
-      
-      toast({
-        title: "Solicitação enviada com sucesso!",
-        description: `Sua solicitação foi registrada com o número ${solicitacaoCriada.numero_referencia} e o evento foi adicionado à agenda.`,
-      });
-      
+
       // Reset form after 5 seconds
       setTimeout(() => {
         resetForm();

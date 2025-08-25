@@ -25,11 +25,7 @@ const ClientLayout: React.FC = () => {
       
       // Opção 2: Apenas redirecionar mantendo a sessão (recomendado)
       navigate('/dashboard');
-      
-      toast({
-        title: "Redirecionando para Dashboard",
-        description: "Você está sendo redirecionado para sua área administrativa.",
-      });
+
     } catch (error) {
       console.error('Erro ao redirecionar:', error);
       toast({

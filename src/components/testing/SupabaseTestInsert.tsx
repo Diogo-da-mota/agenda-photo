@@ -37,9 +37,6 @@ const SupabaseTestInsert = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "✅ Salvamento realizado com sucesso."
-      });
       setLogs(["✅ Dados inseridos com sucesso."]);
     } catch (error) {
       toast({

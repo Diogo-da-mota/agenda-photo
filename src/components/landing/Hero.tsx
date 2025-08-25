@@ -43,10 +43,7 @@ const Hero: React.FC<HeroProps> = ({ onRegisterClick }) => {
     const { outcome } = await installPrompt.userChoice;
 
     if (outcome === 'accepted') {
-      toast({
-        title: "Aplicativo instalado!",
-        description: "O AgendaPRO foi adicionado à sua tela inicial.",
-      });
+      
     }
     setInstallPrompt(null);
   };

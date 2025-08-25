@@ -88,11 +88,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         throw new Error('Falha ao salvar os metadados da imagem no banco de dados.');
       }
 
-      toast({
-        title: "Upload realizado com sucesso",
-        description: "A imagem foi carregada e registrada com sucesso."
-      });
-      
       if (onUploadComplete && metadataResult.imageId) {
         onUploadComplete(imageUrl, metadataResult.imageId);
       }

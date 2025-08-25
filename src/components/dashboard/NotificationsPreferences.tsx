@@ -43,10 +43,7 @@ const NotificationsPreferences = () => {
   
   const handleSavePreferences = () => {
     // Here you would save the preferences to your backend
-    toast({
-      title: "Preferências salvas",
-      description: "Suas preferências de notificação foram atualizadas com sucesso."
-    });
+    
   };
   
   return (
