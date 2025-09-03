@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { hybridStorage } from '@/utils/storageUtils';
 
 interface ClienteData {
   id: string;
@@ -38,44 +37,19 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
   const [cliente, setCliente] = useState<ClienteData | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Iniciar como true para evitar logout no refresh
 
-  // Carregar dados do storage ao inicializar
+  // Verificar se há dados do cliente no localStorage ao inicializar
   useEffect(() => {
-    const loadStoredAuth = async () => {
+    const savedCliente = localStorage.getItem('cliente_auth');
+    if (savedCliente) {
       try {
-        // 1. Aguardar inicialização completa do hybridStorage
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const storedCliente = hybridStorage.getItem('cliente_auth');
-        const storageInfo = hybridStorage.getStorageInfo();
-        
-        if (storedCliente) {
-          const rawData = JSON.parse(storedCliente);
-          
-          // Garantir que os dados tenham a estrutura correta
-          const clienteData: ClienteData = {
-            id: rawData.id || 'temp-id',
-            titulo: rawData.titulo || rawData.nome_completo || 'Cliente',
-            cpf_cliente: rawData.cpf_cliente || '',
-            telefone: rawData.telefone,
-            endereco_cliente: rawData.endereco_cliente,
-            nome_completo: rawData.nome_completo || rawData.titulo || 'Cliente'
-          };
-          
-          setCliente(clienteData);
-        } else {
-          setCliente(null);
-        }
+        setCliente(JSON.parse(savedCliente));
       } catch (error) {
-        console.error('[ClienteAuth] ❌ ERRO ao carregar dados do storage:', error);
-        hybridStorage.removeItem('cliente_auth');
-        setCliente(null);
-      } finally {
-        // 2. CRÍTICO: Só definir loading como false APÓS tentar carregar
-        setIsLoading(false);
+        console.error('Erro ao carregar dados do cliente:', error);
+        localStorage.removeItem('cliente_auth');
       }
-    };
-
-    loadStoredAuth();
+    }
+    // Definir loading como false após verificar o localStorage
+    setIsLoading(false);
   }, []);
 
   const login = async (nome: string, cpf: string): Promise<boolean> => {
@@ -105,16 +79,7 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       };
 
       setCliente(clienteData);
-      // Salvar no storage
-      hybridStorage.setItem('cliente_auth', JSON.stringify(clienteData));
-      hybridStorage.setItem('cliente_logado', 'true');
-      
-      console.log('[ClienteAuth] Login realizado com sucesso:', {
-        titulo: clienteData.titulo,
-        nome: clienteData.nome_completo,
-        strategy: hybridStorage.getStorageInfo().strategy,
-        isSafari: hybridStorage.getStorageInfo().isSafari
-      });
+      localStorage.setItem('cliente_auth', JSON.stringify(clienteData));
       toast.success('Login realizado com sucesso!');
       return true;
     } catch (error) {
@@ -128,20 +93,11 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   const logout = () => {
     setCliente(null);
-    // Limpar storage
-    hybridStorage.removeItem('cliente_auth');
-    hybridStorage.removeItem('cliente_logado');
-    
-    console.log('[ClienteAuth] Logout realizado:', {
-      strategy: hybridStorage.getStorageInfo().strategy,
-      isSafari: hybridStorage.getStorageInfo().isSafari
-    });
+    localStorage.removeItem('cliente_auth');
     toast.success('Logout realizado com sucesso!');
   };
 
   const isAuthenticated = !!cliente;
-
-
 
   const value: ClienteAuthContextType = {
     cliente,

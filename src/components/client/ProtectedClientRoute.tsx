@@ -8,10 +8,10 @@ interface ProtectedClientRouteProps {
 }
 
 const ProtectedClientRoute: React.FC<ProtectedClientRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, cliente } = useClienteAuth();
+  const { isAuthenticated, isLoading } = useClienteAuth();
 
-  // Mostrar loading enquanto verifica autenticação ou se autenticado mas sem dados do cliente
-  if (isLoading || (isAuthenticated && !cliente)) {
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
