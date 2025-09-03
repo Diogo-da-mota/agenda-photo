@@ -16,6 +16,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     flowType: 'pkce'
   },
+  global: {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    headers: {
+      'Accept': 'application/json'
+    }
+  }
 });
 
 // console.log('[DEBUG] Supabase cliente configurado com sucesso'); // Removido para produção
