@@ -16,36 +16,14 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
   const currentPath = location.pathname;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Tentar usar o contexto de autenticação, mas não falhar se não estiver disponível
-  let isAuthenticated = false;
-  let cliente = null;
-  let logout = null;
-  let authError = null;
+  // Usar o contexto de autenticação diretamente como no ClientWelcome
+  const { isAuthenticated, cliente, logout } = useClienteAuth();
   
-  try {
-    const { isAuthenticated: authStatus, cliente: clienteData, logout: logoutFn } = useClienteAuth();
-    isAuthenticated = authStatus;
-    cliente = clienteData;
-    logout = logoutFn;
-    console.log('[ClientTabLayout] Contexto de autenticação disponível:', { isAuthenticated, cliente: clienteData?.titulo });
-  } catch (error) {
-    // Contexto não disponível, usuário não está autenticado
-    authError = error;
-    isAuthenticated = false;
-    console.log('[ClientTabLayout] Contexto de autenticação não disponível:', error);
-    
-    // Verificar se há dados salvos no localStorage
-    try {
-      const savedCliente = localStorage.getItem('cliente_auth');
-      if (savedCliente) {
-        cliente = JSON.parse(savedCliente);
-        isAuthenticated = true;
-        console.log('[ClientTabLayout] Dados de autenticação recuperados do localStorage:', cliente?.titulo);
-      }
-    } catch (storageError) {
-      console.error('[ClientTabLayout] Erro ao recuperar dados do localStorage:', storageError);
-    }
-  }
+  // Debug logs para verificar dados do cliente
+  console.log('🏠 [DEBUG ClientTabLayout] Contexto de autenticação:');
+  console.log('🏠 [DEBUG ClientTabLayout] isAuthenticated:', isAuthenticated);
+  console.log('🏠 [DEBUG ClientTabLayout] clienteData completo:', cliente);
+  console.log('🏠 [DEBUG ClientTabLayout] campo titulo:', cliente?.titulo);
   
   const handleContratosClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,7 +130,12 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
               <User className="h-6 w-6 text-blue-400" />
               <div className="flex-1 min-w-0">
                 <h2 className="text-xs font-semibold text-white truncate">
-                  {cliente?.titulo || 'Portal do Cliente'}
+                  {(() => {
+                    const nomeExibido = cliente?.titulo || 'Portal do Cliente';
+                    console.log('🏠 [DEBUG ClientTabLayout] Nome a ser exibido na sidebar:', nomeExibido);
+                    console.log('🏠 [DEBUG ClientTabLayout] Objeto cliente atual:', cliente);
+                    return nomeExibido;
+                  })()}
                 </h2>
                 <p className="text-xs text-gray-400 truncate">
                   Área do Cliente

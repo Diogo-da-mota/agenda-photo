@@ -39,14 +39,22 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   // Verificar se há dados do cliente no localStorage ao inicializar
   useEffect(() => {
+    console.log('🔍 [DEBUG] Verificando localStorage ao inicializar...');
     const savedCliente = localStorage.getItem('cliente_auth');
+    console.log('🔍 [DEBUG] Dados salvos no localStorage:', savedCliente);
+    
     if (savedCliente) {
       try {
-        setCliente(JSON.parse(savedCliente));
+        const parsedCliente = JSON.parse(savedCliente);
+        console.log('🔍 [DEBUG] Dados parseados do localStorage:', parsedCliente);
+        console.log('🔍 [DEBUG] Campo titulo:', parsedCliente.titulo);
+        setCliente(parsedCliente);
       } catch (error) {
-        console.error('Erro ao carregar dados do cliente:', error);
+        console.error('❌ [DEBUG] Erro ao carregar dados do cliente:', error);
         localStorage.removeItem('cliente_auth');
       }
+    } else {
+      console.log('🔍 [DEBUG] Nenhum dado encontrado no localStorage');
     }
     // Definir loading como false após verificar o localStorage
     setIsLoading(false);
@@ -78,8 +86,18 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
         nome_completo: nome // Armazenar o nome completo para busca de contratos
       };
 
+      console.log('✅ [DEBUG] Dados do cliente criados:', clienteData);
+      console.log('✅ [DEBUG] Campo titulo no clienteData:', clienteData.titulo);
+      
       setCliente(clienteData);
-      localStorage.setItem('cliente_auth', JSON.stringify(clienteData));
+      const jsonString = JSON.stringify(clienteData);
+      console.log('✅ [DEBUG] JSON a ser salvo no localStorage:', jsonString);
+      localStorage.setItem('cliente_auth', jsonString);
+      
+      // Verificar se foi salvo corretamente
+      const verificacao = localStorage.getItem('cliente_auth');
+      console.log('✅ [DEBUG] Verificação após salvar:', verificacao);
+      
       toast.success('Login realizado com sucesso!');
       return true;
     } catch (error) {
