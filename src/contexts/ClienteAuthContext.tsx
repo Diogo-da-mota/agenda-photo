@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { hybridStorage } from '@/utils/storageUtils';
@@ -40,69 +40,42 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   // Carregar dados do storage ao inicializar
   useEffect(() => {
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
-
     const loadStoredAuth = async () => {
       try {
-        // ✅ CORREÇÃO: Detectar Safari/macOS e aguardar inicialização
-        const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
-        const isMacOS = navigator.platform.includes('Mac');
+        // 1. Aguardar inicialização completa do hybridStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // ✅ CORREÇÃO: Delay específico para Safari
-        if (isSafari || isMacOS) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
         const storedCliente = hybridStorage.getItem('cliente_auth');
-        const storedLogado = hybridStorage.getItem('cliente_logado');
-
-        if (storedCliente && storedLogado === 'true' && isMounted) {
-          const clienteData = JSON.parse(storedCliente);
+        const storageInfo = hybridStorage.getStorageInfo();
+        
+        if (storedCliente) {
+          const rawData = JSON.parse(storedCliente);
           
-          // ✅ CORREÇÃO: Validar dados antes de definir
-          if (clienteData.nome_completo && clienteData.cpf_cliente) {
-            setCliente(clienteData);
-          } else {
-            // Limpar dados inválidos
-            hybridStorage.removeItem('cliente_auth');
-            hybridStorage.removeItem('cliente_logado');
-          }
+          // Garantir que os dados tenham a estrutura correta
+          const clienteData: ClienteData = {
+            id: rawData.id || 'temp-id',
+            titulo: rawData.titulo || rawData.nome_completo || 'Cliente',
+            cpf_cliente: rawData.cpf_cliente || '',
+            telefone: rawData.telefone,
+            endereco_cliente: rawData.endereco_cliente,
+            nome_completo: rawData.nome_completo || rawData.titulo || 'Cliente'
+          };
+          
+          setCliente(clienteData);
+        } else {
+          setCliente(null);
         }
-
       } catch (error) {
-        console.error('[ClienteAuth] Erro ao carregar dados:', error);
+        console.error('[ClienteAuth] ❌ ERRO ao carregar dados do storage:', error);
         hybridStorage.removeItem('cliente_auth');
-        hybridStorage.removeItem('cliente_logado');
+        setCliente(null);
       } finally {
-        // ✅ CORREÇÃO CRÍTICA: Só definir loading false APÓS processamento completo
-        if (isMounted) {
-          const finalDelay = navigator.userAgent.includes('Safari') ? 50 : 0;
-          
-          setTimeout(() => {
-            if (isMounted) {
-              setIsLoading(false);
-            }
-          }, finalDelay);
-        }
+        // 2. CRÍTICO: Só definir loading como false APÓS tentar carregar
+        setIsLoading(false);
       }
     };
 
     loadStoredAuth();
-
-    // Debug específico para macOS
-    if (navigator.platform.includes('Mac')) {
-      console.log('[macOS Debug] Auth carregado:', {
-        cliente: !!cliente,
-        nome: cliente?.nome_completo,
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    return () => {
-      isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
   }, []);
 
   const login = async (nome: string, cpf: string): Promise<boolean> => {
@@ -136,11 +109,6 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       hybridStorage.setItem('cliente_auth', JSON.stringify(clienteData));
       hybridStorage.setItem('cliente_logado', 'true');
       
-      console.log('[DEBUG ClienteAuth] Cliente definido após login:', {
-        clienteData,
-        storageSet: true
-      });
-      
       console.log('[ClienteAuth] Login realizado com sucesso:', {
         titulo: clienteData.titulo,
         nome: clienteData.nome_completo,
@@ -171,17 +139,9 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
     toast.success('Logout realizado com sucesso!');
   };
 
-  // ✅ CORREÇÃO: Verificação direta sem useMemo para garantir reatividade
-  const isAuthenticated = !!cliente && !!cliente.nome_completo && !!cliente.cpf_cliente;
-  
-  // Debug temporário para verificar a correção
-  console.log('[DEBUG ClienteAuth] Estado de autenticação:', {
-    hasCliente: !!cliente,
-    nomeCompleto: cliente?.nome_completo,
-    cpfCliente: cliente?.cpf_cliente,
-    isAuthenticated,
-    timestamp: new Date().toISOString()
-  });
+  const isAuthenticated = !!cliente;
+
+
 
   const value: ClienteAuthContextType = {
     cliente,
