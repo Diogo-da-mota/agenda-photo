@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { hybridStorage } from '@/utils/storageUtils';
@@ -40,38 +40,69 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   // Carregar dados do storage ao inicializar
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
     const loadStoredAuth = async () => {
       try {
-        // 1. Aguardar inicialização completa do hybridStorage
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // ✅ CORREÇÃO: Detectar Safari/macOS e aguardar inicialização
+        const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+        const isMacOS = navigator.platform.includes('Mac');
         
-        const storedCliente = hybridStorage.getItem('cliente_auth');
-        console.log('[ClienteAuth] Tentando carregar dados do storage:', {
-          dadosEncontrados: storedCliente ? 'sim' : 'não',
-          storageInfo: hybridStorage.getStorageInfo()
-        });
-        
-        if (storedCliente) {
-          const clienteData = JSON.parse(storedCliente);
-          setCliente(clienteData);
-          console.log('[ClienteAuth] Dados carregados do storage:', {
-            titulo: clienteData.titulo,
-            nome: clienteData.nome_completo,
-            strategy: hybridStorage.getStorageInfo().strategy
-          });
-        } else {
-          console.log('[ClienteAuth] Nenhum dado encontrado no storage');
+        // ✅ CORREÇÃO: Delay específico para Safari
+        if (isSafari || isMacOS) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
+
+        const storedCliente = hybridStorage.getItem('cliente_auth');
+        const storedLogado = hybridStorage.getItem('cliente_logado');
+
+        if (storedCliente && storedLogado === 'true' && isMounted) {
+          const clienteData = JSON.parse(storedCliente);
+          
+          // ✅ CORREÇÃO: Validar dados antes de definir
+          if (clienteData.nome_completo && clienteData.cpf_cliente) {
+            setCliente(clienteData);
+          } else {
+            // Limpar dados inválidos
+            hybridStorage.removeItem('cliente_auth');
+            hybridStorage.removeItem('cliente_logado');
+          }
+        }
+
       } catch (error) {
-        console.error('[ClienteAuth] Erro ao carregar dados do storage:', error);
+        console.error('[ClienteAuth] Erro ao carregar dados:', error);
         hybridStorage.removeItem('cliente_auth');
+        hybridStorage.removeItem('cliente_logado');
       } finally {
-        // 2. CRÍTICO: Só definir loading como false APÓS tentar carregar
-        setIsLoading(false);
+        // ✅ CORREÇÃO CRÍTICA: Só definir loading false APÓS processamento completo
+        if (isMounted) {
+          const finalDelay = navigator.userAgent.includes('Safari') ? 50 : 0;
+          
+          setTimeout(() => {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+          }, finalDelay);
+        }
       }
     };
 
     loadStoredAuth();
+
+    // Debug específico para macOS
+    if (navigator.platform.includes('Mac')) {
+      console.log('[macOS Debug] Auth carregado:', {
+        cliente: !!cliente,
+        nome: cliente?.nome_completo,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const login = async (nome: string, cpf: string): Promise<boolean> => {
@@ -135,7 +166,12 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
     toast.success('Logout realizado com sucesso!');
   };
 
-  const isAuthenticated = !!cliente;
+  const isAuthenticated = useMemo(() => {
+    const loggedStatus = hybridStorage.getItem('cliente_logado');
+    const hasValidClient = cliente && cliente.nome_completo && cliente.cpf_cliente;
+    
+    return loggedStatus === 'true' && !!hasValidClient;
+  }, [cliente]);
 
   const value: ClienteAuthContextType = {
     cliente,
