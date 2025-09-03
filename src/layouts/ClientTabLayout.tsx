@@ -5,6 +5,8 @@ import { FileText, Calendar, Home, LogOut, User, Menu, X, Camera } from 'lucide-
 import { useClienteAuth } from '@/contexts/ClienteAuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import SafariDiagnostic from '@/components/SafariDiagnostic';
+import { hybridStorage } from '@/utils/storageUtils';
 
 interface ClientTabLayoutProps {
   children: React.ReactNode;
@@ -34,16 +36,20 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
     isAuthenticated = false;
     console.log('[ClientTabLayout] Contexto de autenticação não disponível:', error);
     
-    // Verificar se há dados salvos no localStorage
+    // Verificar se há dados salvos no storage
     try {
-      const savedCliente = localStorage.getItem('cliente_auth');
+      const savedCliente = hybridStorage.getItem('cliente_auth');
       if (savedCliente) {
         cliente = JSON.parse(savedCliente);
         isAuthenticated = true;
-        console.log('[ClientTabLayout] Dados de autenticação recuperados do localStorage:', cliente?.titulo);
+        console.log('[ClientTabLayout] Dados de autenticação recuperados do storage:', {
+          cliente: cliente?.titulo,
+          userAgent: navigator.userAgent,
+          isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+        });
       }
     } catch (storageError) {
-      console.error('[ClientTabLayout] Erro ao recuperar dados do localStorage:', storageError);
+      console.error('[ClientTabLayout] Erro ao recuperar dados do storage:', storageError);
     }
   }
   
@@ -72,8 +78,8 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
     if (logout) {
       logout();
     } else {
-      // Fallback: limpar localStorage se o contexto não estiver disponível
-      localStorage.removeItem('cliente_auth');
+      // Fallback: limpar storage se o contexto não estiver disponível
+      hybridStorage.removeItem('cliente_auth');
       toast.success('Logout realizado com sucesso!');
     }
     navigate('/agenda/cliente-login');
@@ -232,6 +238,7 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
       {/* Conteúdo da página com margem para a sidebar fixa */}
       <div className="flex-1 md:ml-44 overflow-auto" style={{backgroundColor: '#0B0F17'}}>
         <div className="p-6 md:pt-6 pt-20">
+          <SafariDiagnostic />
           {children}
         </div>
       </div>
