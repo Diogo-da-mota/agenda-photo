@@ -40,8 +40,11 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   // Carregar dados do storage ao inicializar
   useEffect(() => {
-    const loadStoredAuth = () => {
+    const loadStoredAuth = async () => {
       try {
+        // 1. Aguardar inicialização completa do hybridStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const storedCliente = hybridStorage.getItem('cliente_auth');
         console.log('[ClienteAuth] Tentando carregar dados do storage:', {
           dadosEncontrados: storedCliente ? 'sim' : 'não',
@@ -62,12 +65,13 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       } catch (error) {
         console.error('[ClienteAuth] Erro ao carregar dados do storage:', error);
         hybridStorage.removeItem('cliente_auth');
+      } finally {
+        // 2. CRÍTICO: Só definir loading como false APÓS tentar carregar
+        setIsLoading(false);
       }
     };
 
     loadStoredAuth();
-    // Definir loading como false após verificar o armazenamento
-    setIsLoading(false);
   }, []);
 
   const login = async (nome: string, cpf: string): Promise<boolean> => {
