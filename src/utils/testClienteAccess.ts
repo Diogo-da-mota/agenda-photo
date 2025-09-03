@@ -138,7 +138,7 @@ export async function verificarRotaAcessivel(): Promise<boolean> {
       const response = await fetch(rotaCompleta, {
         method: 'GET',
         headers: {
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          'Accept': 'application/json, text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
       });
       
