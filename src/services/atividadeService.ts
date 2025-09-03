@@ -472,6 +472,23 @@ export const registrarDespesaRegistrada = async (userId: string, valor: number, 
   );
 };
 
+export const registrarMudancaStatusContrato = async (
+  userId: string, 
+  contratoId: string, 
+  statusAntigo: string, 
+  statusNovo: string, 
+  clientName?: string
+) => {
+  await registrarAtividade(
+    'contratos',
+    'UPDATE',
+    userId,
+    { status: statusNovo, cliente: clientName },
+    { status: statusAntigo },
+    contratoId
+  );
+};
+
 // Função para criar atividades de exemplo/teste (apenas para desenvolvimento)
 export const criarAtividadesExemplo = async (userId: string): Promise<void> => {
   if (process.env.NODE_ENV !== 'development') {

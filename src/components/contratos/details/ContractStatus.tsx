@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { generateContractUrl } from '@/utils/slugify';
+import StatusSelector from '../StatusSelector';
+import { useContractDetailsStatusUpdate } from '@/hooks/useStatusUpdate';
 
 interface ContractStatusProps {
   status: string;
@@ -17,10 +19,12 @@ interface ContractStatusProps {
   contractId: string;
   onCopyContract?: () => void;
   contractTitle?: string;
+  clientName?: string;
 }
 
-const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCopyContract, contractTitle }: ContractStatusProps) => {
+const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCopyContract, contractTitle, clientName }: ContractStatusProps) => {
   const navigate = useNavigate();
+  const { handleStatusChange, isUpdating } = useContractDetailsStatusUpdate();
   
   // Status display helpers
   const getStatusBadge = () => {
@@ -65,6 +69,17 @@ const ContractStatus = ({ status, sentDate, onResend, onCancel, contractId, onCo
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium">Status do Contrato</h3>
         {getStatusBadge()}
+      </div>
+      
+      {/* Seletor de Status para Edição */}
+      <div className="mb-4">
+        <label className="text-sm font-medium mb-2 block">Alterar Status:</label>
+        <StatusSelector
+          currentStatus={status as 'pendente' | 'assinado' | 'expirado' | 'cancelado'}
+          onStatusChange={(newStatus) => handleStatusChange(contractId, newStatus, clientName || 'Cliente')}
+          disabled={isUpdating}
+          size="default"
+        />
       </div>
       
       <div className="space-y-3">

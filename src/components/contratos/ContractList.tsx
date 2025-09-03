@@ -36,6 +36,8 @@ import { useContracts } from '@/hooks/useContracts';
 import { deleteContract } from '@/services/contractService';
 import { useAuth } from '@/hooks/use-auth';
 import { generateContractUrl } from '@/utils/slugify';
+import StatusSelector from './StatusSelector';
+import { useContractStatusUpdate } from '@/hooks/useStatusUpdate';
 
 // Dados mockados removidos - usando apenas dados reais do Supabase
 
@@ -51,6 +53,7 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
   const { configuracoes } = useEmpresa();
   const nomeContratado = configuracoes?.nome_empresa || 'Agenda Pro';
   const { user } = useAuth();
+  const { handleStatusChange, isUpdating } = useContractStatusUpdate();
   
   // Estados para o modal de confirmação de exclusão
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -295,28 +298,40 @@ export const ContractList: React.FC<ContractListProps> = ({ filter, searchQuery 
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="gap-1"
-                        onClick={() => handleView(contract.id, contract.eventType)}
-                      >
-                        <Eye size={14} />
-                        <span className="hidden sm:inline">Visualizar</span>
-                      </Button>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 sm:mt-0">
+                      {/* Seletor de Status */}
+                      <div className="flex-shrink-0">
+                        <StatusSelector
+                          currentStatus={contract.status}
+                          onStatusChange={(newStatus) => handleStatusChange(contract.id, newStatus, contract.clientName)}
+                          disabled={isUpdating}
+                          size="sm"
+                        />
+                      </div>
                       
-                      {contract.status === 'pendente' && (
+                      <div className="flex items-center gap-2">
                         <Button 
                           size="sm" 
                           variant="outline" 
                           className="gap-1"
-                          onClick={() => handleResend(contract.id, contract.clientEmail)}
+                          onClick={() => handleView(contract.id, contract.eventType)}
                         >
-                          <Send size={14} />
-                          <span className="hidden sm:inline">Reenviar</span>
+                          <Eye size={14} />
+                          <span className="hidden sm:inline">Visualizar</span>
                         </Button>
-                      )}
+                        
+                        {contract.status === 'pendente' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="gap-1"
+                            onClick={() => handleResend(contract.id, contract.clientEmail)}
+                          >
+                            <Send size={14} />
+                            <span className="hidden sm:inline">Reenviar</span>
+                          </Button>
+                        )}
+                      </div>
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

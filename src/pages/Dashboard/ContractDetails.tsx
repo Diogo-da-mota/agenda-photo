@@ -749,6 +749,7 @@ const ContractDetails = () => {
                   contractId={contract.id_contrato}
                   onCopyContract={handleCopyContract}
                   contractTitle={(contract as any).tipo_evento || 'Contrato'}
+                  clientName={(contract as any).nome_cliente || contract.clientes?.nome || 'Cliente'}
                 />
               </CardContent>
             </Card>
