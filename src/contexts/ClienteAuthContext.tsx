@@ -136,6 +136,11 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       hybridStorage.setItem('cliente_auth', JSON.stringify(clienteData));
       hybridStorage.setItem('cliente_logado', 'true');
       
+      console.log('[DEBUG ClienteAuth] Cliente definido após login:', {
+        clienteData,
+        storageSet: true
+      });
+      
       console.log('[ClienteAuth] Login realizado com sucesso:', {
         titulo: clienteData.titulo,
         nome: clienteData.nome_completo,

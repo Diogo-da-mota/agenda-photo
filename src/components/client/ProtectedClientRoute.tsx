@@ -9,6 +9,14 @@ interface ProtectedClientRouteProps {
 
 const ProtectedClientRoute: React.FC<ProtectedClientRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading, cliente } = useClienteAuth();
+  
+  console.log('[DEBUG ProtectedClientRoute] Estado atual:', {
+    isLoading,
+    isAuthenticated,
+    hasCliente: !!cliente,
+    clienteNome: cliente?.nome_completo,
+    clienteTitulo: cliente?.titulo
+  });
 
   // ✅ CORREÇÃO: Aguardar carregamento completo
   if (isLoading) {

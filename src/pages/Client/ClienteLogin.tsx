@@ -50,9 +50,16 @@ const ClienteLogin: React.FC = () => {
     }
 
     // Passa o CPF formatado para a busca (como está armazenado no banco)
+    console.log('[DEBUG] Tentando login com:', { nome: nome.trim(), cpf });
     const success = await login(nome.trim(), cpf);
+    console.log('[DEBUG] Resultado do login:', success);
+    
     if (success) {
+      console.log('[DEBUG] Login bem-sucedido, redirecionando para /agenda/cliente');
       navigate('/agenda/cliente');
+      console.log('[DEBUG] Navigate executado');
+    } else {
+      console.log('[DEBUG] Login falhou');
     }
   };
 
