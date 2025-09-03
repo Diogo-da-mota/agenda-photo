@@ -1,2 +1,0 @@
-
-export { useDashboardLayout } from './useDashboardLayout';
