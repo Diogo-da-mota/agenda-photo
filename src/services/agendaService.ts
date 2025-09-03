@@ -26,6 +26,7 @@ interface EventoSupabase {
   criado_em: string;
   atualizado_em: string;
   descricao?: string;
+  data_nascimento?: string; // ✅ NOVO: Campo para data de nascimento
   // Campos financeiros (podem não existir fisicamente na tabela)
   valor_total?: number;
   valor_entrada?: number;
@@ -279,6 +280,10 @@ export const converterParaSupabase = (evento: Event, userId: string): Omit<Event
   // Garantir que o telefone é tratado corretamente
   const telefone = evento.phone ? evento.phone.replace(/\D/g, '') : null;
 
+  // Converter data de nascimento para formato DATE brasileiro (dd/mm/aaaa -> aaaa-mm-dd)
+  const dataNascimento = evento.birthday ? 
+    `${evento.birthday.getFullYear()}-${String(evento.birthday.getMonth() + 1).padStart(2, '0')}-${String(evento.birthday.getDate()).padStart(2, '0')}` : null;
+
   // Criar o objeto para o Supabase (sem incluir id gerado)
   const eventoSupabase = {
     titulo: evento.clientName,
@@ -295,7 +300,8 @@ export const converterParaSupabase = (evento: Event, userId: string): Omit<Event
     cliente_id: null, // Relacionamento com cliente se houver
     criado_em: agora,
     atualizado_em: agora,
-    descricao: evento.birthday ? `Aniversário: ${evento.birthday.toISOString().split('T')[0]}` : null,
+    data_nascimento: dataNascimento, // ✅ NOVO: Campo específico para data de nascimento
+    descricao: null, // ✅ REMOVIDO: Não mais usar descrição para data de nascimento
     valor_total: evento.totalValue,
     valor_entrada: evento.downPayment,
     valor_restante: evento.remainingValue,
@@ -338,12 +344,18 @@ export const converterDoSupabase = (evento: EventoSupabase): Event => {
     totalValue = downPayment + remainingValue;
   }
 
-  // Extrair data de aniversário da descrição
+  // ✅ NOVO: Ler data de nascimento da coluna específica
   let birthday: Date | null = null;
-  if (evento.descricao && evento.descricao.includes('Aniversário:')) {
+  if (evento.data_nascimento) {
+    // Corrigir problema de timezone: criar data local em vez de UTC
+    const [ano, mes, dia] = evento.data_nascimento.split('-').map(Number);
+    birthday = new Date(ano, mes - 1, dia); // mes - 1 porque Date usa 0-11 para meses
+  } else if (evento.descricao && evento.descricao.includes('Aniversário:')) {
+    // Fallback: manter compatibilidade com dados antigos na descrição
     const birthdayMatch = evento.descricao.match(/Aniversário: (\d{4}-\d{2}-\d{2})/);
     if (birthdayMatch) {
-      birthday = new Date(birthdayMatch[1]);
+      const [ano, mes, dia] = birthdayMatch[1].split('-').map(Number);
+      birthday = new Date(ano, mes - 1, dia);
     }
   }
 
@@ -608,13 +620,19 @@ export const criarEvento = async (evento: Event, userId: string): Promise<Event>
     
     // Sincronizar cliente automaticamente
     try {
+      // Converter data de nascimento para string no formato correto se existir
+      let dataNascimentoFormatada: string | null = null;
+      if (evento.birthday) {
+        dataNascimentoFormatada = `${evento.birthday.getFullYear()}-${String(evento.birthday.getMonth() + 1).padStart(2, '0')}-${String(evento.birthday.getDate()).padStart(2, '0')}`;
+      }
+      
       await clientService.syncCliente({
         nome: data.titulo,
         telefone: data.telefone,
         tipoEvento: data.tipo,
         valorServico: (data as any).valor_total || 0, // Cast para acessar campos financeiros
         dataEvento: data.data_inicio,
-        dataNascimento: extrairDataNascimento(data.descricao),
+        dataNascimento: dataNascimentoFormatada,
         userId: userId
       });
       logger.info('[criarEvento] Sincronização de cliente realizada com sucesso');
@@ -713,6 +731,12 @@ export const atualizarEvento = async (eventoId: string, evento: Partial<Event>, 
       camposAtualizados.data_fim = dataFim.toISOString();
     }
     
+    // ✅ NOVO: Processar data de nascimento se fornecida
+    if (evento.birthday !== undefined) {
+      camposAtualizados.data_nascimento = evento.birthday ? 
+        `${evento.birthday.getFullYear()}-${String(evento.birthday.getMonth() + 1).padStart(2, '0')}-${String(evento.birthday.getDate()).padStart(2, '0')}` : null;
+    }
+    
     // Atualizar timestamp
     camposAtualizados.atualizado_em = new Date().toISOString();
     
@@ -755,13 +779,20 @@ export const atualizarEvento = async (eventoId: string, evento: Partial<Event>, 
     
     // Sincronizar cliente automaticamente
     try {
+      // Converter data de nascimento para string no formato correto se existir
+      let dataNascimentoFormatada: string | null = null;
+      if (evento.birthday) {
+        // ✅ CORREÇÃO: Formatar data local sem conversão UTC para evitar problema de timezone
+        dataNascimentoFormatada = `${evento.birthday.getFullYear()}-${String(evento.birthday.getMonth() + 1).padStart(2, '0')}-${String(evento.birthday.getDate()).padStart(2, '0')}`;
+      }
+      
       await clientService.syncCliente({
         nome: data.titulo,
         telefone: data.telefone,
         tipoEvento: data.tipo,
         valorServico: (data as any).valor_total || 0, // Cast para acessar campos financeiros
         dataEvento: data.data_inicio,
-        dataNascimento: extrairDataNascimento(data.descricao),
+        dataNascimento: dataNascimentoFormatada,
         userId: userId
       });
       logger.info('[atualizarEvento] Sincronização de cliente realizada com sucesso');

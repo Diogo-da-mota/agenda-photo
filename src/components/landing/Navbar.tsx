@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Logo from "@/components/Logo";
 import LandingLogo from "./LandingLogo";
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { TubelightButton } from "@/components/ui/tubelight-button";
@@ -41,8 +40,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
       <ResponsiveContainer maxWidth="7xl" className="overflow-x-hidden">
         <div className="flex items-center justify-between w-full max-w-full">
           {/* Logo */}
-          <div className="flex-shrink-0 min-w-0">
-            {scrolled ? <Logo /> : <LandingLogo />}
+          <div className="flex-shrink-0 min-w-0 ml-4">
+            <LandingLogo />
           </div>
 
           {/* Links de navegação - apenas desktop */}
@@ -66,14 +65,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
           {/* Botões de autenticação - desktop e mobile */}
           <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-4">
             <TubelightButton 
-              className="text-[11px] xs:text-xs sm:text-sm py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
+              className="text-[11px] text-lg xs:text-base sm:text-lg py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
               onClick={handleLoginClick}
             >
               Login
             </TubelightButton>
             
             <TubelightButton 
-              className="text-[11px] xs:text-xs sm:text-sm py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
+              className="text-[11px] text-lg xs:text-base sm:text-lg py-1.5 xs:py-2 px-2 xs:px-3 sm:px-6"
               onClick={handleRegisterClick}
             >
               Criar Conta

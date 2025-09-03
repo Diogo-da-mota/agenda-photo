@@ -61,12 +61,14 @@ export const getClientes = async (): Promise<Cliente[]> => {
         id, 
         nome, 
         telefone, 
-        data_nascimento, 
         valor_evento,
         evento,
         data_evento,
         criado_em, 
-        user_id
+        user_id,
+        agenda_eventos!inner(
+          data_nascimento
+        )
       `)
       .order('nome', { ascending: true });
 
@@ -80,7 +82,7 @@ export const getClientes = async (): Promise<Cliente[]> => {
       id: cliente.id,
       nome: cliente.nome,
       telefone: cliente.telefone || null,
-      data_nascimento: cliente.data_nascimento || null,
+      data_nascimento: (cliente as any).agenda_eventos?.data_nascimento || null,
       evento: cliente.evento || null,
       data_evento: cliente.data_evento || null,
       valor_evento: cliente.valor_evento || null,
@@ -102,12 +104,14 @@ export const getClienteById = async (id: string): Promise<Cliente | null> => {
         id, 
         nome, 
         telefone, 
-        data_nascimento, 
         valor_evento,
         evento,
         data_evento,
         criado_em, 
-        user_id
+        user_id,
+        agenda_eventos!inner(
+          data_nascimento
+        )
       `)
       .eq('id', id)
       .single();
@@ -121,7 +125,7 @@ export const getClienteById = async (id: string): Promise<Cliente | null> => {
     const clienteProcessado = data ? {
       ...data,
       telefone: data.telefone || null,
-      data_nascimento: data.data_nascimento || null,
+      data_nascimento: (data as any).agenda_eventos?.data_nascimento || null,
       evento: data.evento || null,
       data_evento: data.data_evento || null,
       valor_evento: data.valor_evento || null

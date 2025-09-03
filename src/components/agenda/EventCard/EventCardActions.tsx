@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Bell, DollarSign, Receipt, Share2 } from 'lucide-react';
+import { Bell, DollarSign, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { Event, EventStatus } from '@/components/agenda/types';
 import { formatarTelefoneExibicao } from '@/utils/formatters';
@@ -79,37 +79,6 @@ const EventCardActions: React.FC<EventCardActionsProps> = React.memo(({
   onStatusChange
 }) => {
   const { isAdmin } = useUserRole(); // Usar o hook para obter a role
-  const [canShare, setCanShare] = useState(false);
-
-  useEffect(() => {
-    // A verificação navigator.share deve estar dentro de um useEffect
-    // para garantir que o código do lado do cliente seja executado.
-    if (typeof window !== 'undefined' && navigator.share) {
-      setCanShare(true);
-    }
-  }, []);
-
-  const handleShare = async () => {
-    if (!navigator.share) {
-      console.error("A API de compartilhamento não é suportada neste navegador.");
-      return;
-    }
-
-    const shareData = {
-      title: `Evento: ${event.eventType} - ${event.clientName}`,
-      text: `Detalhes do evento de ${event.clientName} (${event.eventType}) no dia ${format(event.date, 'dd/MM/yyyy')} às ${event.time}. Local: ${event.location || 'A definir'}.`,
-      url: window.location.href, // Idealmente, esta seria uma URL pública para o evento
-    };
-
-    try {
-      await navigator.share(shareData);
-    } catch (err) {
-      // O erro AbortError é comum se o usuário fechar a caixa de diálogo de compartilhamento
-      if ((err as Error).name !== 'AbortError') {
-        console.error('Erro ao compartilhar:', err);
-      }
-    }
-  };
 
   return (
     <div className="mt-0 pt-0 sm:mt-3 sm:pt-3 border-t event-card-actions">
@@ -144,17 +113,7 @@ const EventCardActions: React.FC<EventCardActionsProps> = React.memo(({
           <Receipt className="mr-1 h-4 w-4" /> Gerar Recibo
         </Button>
 
-        {/* Botão de compartilhar */}
-        {canShare && (
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={handleShare} 
-            className="action-button w-full sm:w-auto"
-          >
-            <Share2 className="mr-1 h-4 w-4" /> Compartilhar
-          </Button>
-        )}
+
 
         {/* Botão de adicionar ao Google Agenda */}
         <a 

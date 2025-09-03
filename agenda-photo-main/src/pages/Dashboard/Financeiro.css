@@ -1,0 +1,210 @@
+/* Financeiro Page Responsividade Mobile */
+
+/* Correções específicas para dispositivos móveis */
+@media (max-width: 768px) {
+  /* Prevenir overflow horizontal */
+  body, html {
+    overflow-x: hidden !important;
+  }
+  
+  /* Container principal responsivo - ESPECÍFICO */
+  .financeiro-container .space-y-6, 
+  .financeiro-container .space-y-4,
+  [data-page="financeiro"] .space-y-6,
+  [data-page="financeiro"] .space-y-4 {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Cards de resumo financeiro responsivos - ESPECÍFICO */
+  .financeiro-container .grid,
+  [data-page="financeiro"] .grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+  
+  /* Header financeiro responsivo - APENAS dentro do container financeiro */
+  .financeiro-container .flex,
+  [data-page="financeiro"] .flex {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+  }
+  
+  /* Botões do header financeiro - APENAS dentro da página financeiro */
+  .financeiro-container .flex.gap-2,
+  .financeiro-container .flex.gap-3,
+  .financeiro-container .flex.gap-4,
+  [data-page="financeiro"] .flex.gap-2,
+  [data-page="financeiro"] .flex.gap-3,
+  [data-page="financeiro"] .flex.gap-4 {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Input de busca */
+  input[type="search"],
+  .input {
+    width: 100% !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Select e dropdown responsivos */
+  .select-trigger,
+  .dropdown-trigger {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Cards de transações */
+  .card {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Conteúdo dos cards */
+  .card-content {
+    padding: 0.75rem !important;
+  }
+  
+  /* Grupos de transações */
+  .transaction-group {
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  /* Tabelas responsivas */
+  table {
+    width: 100% !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Células da tabela */
+  td, th {
+    padding: 0.5rem !important;
+    min-width: auto !important;
+  }
+  
+  /* Botões de ação */
+  button {
+    min-width: auto !important;
+    max-width: 100% !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Dialog/Modal responsivo */
+  .dialog-content {
+    max-width: 95vw !important;
+    margin: 1rem !important;
+  }
+  
+  /* Filtros avançados */
+  .advanced-filters {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Dropdown menu */
+  .dropdown-content {
+    max-width: 90vw !important;
+  }
+}
+
+/* Smartphones pequenos */
+@media (max-width: 480px) {
+  /* Padding reduzido */
+  .space-y-6 > *,
+  .space-y-4 > * {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Cards mais compactos */
+  .card {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .card-content {
+    padding: 0.5rem !important;
+  }
+  
+  /* Texto menor */
+  h1, h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  h3, h4 {
+    font-size: 1rem !important;
+  }
+  
+  /* Botões compactos */
+  button {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* Inputs compactos */
+  input, select {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Tabela responsiva para mobile muito pequeno */
+  table {
+    font-size: 0.75rem !important;
+  }
+  
+  td, th {
+    padding: 0.25rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Grid de 2 colunas para tablets */
+  .grid[class*="grid-cols-"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Botões um pouco maiores que mobile */
+  button {
+    min-width: 110px !important;
+  }
+}
+
+/* Garantir scroll suave nos containers */
+.transaction-group,
+.advanced-filters,
+.dropdown-content {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Ocultar scrollbars desnecessárias */
+.transaction-group::-webkit-scrollbar,
+.advanced-filters::-webkit-scrollbar {
+  height: 3px;
+}
+
+.transaction-group::-webkit-scrollbar-thumb,
+.advanced-filters::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Animações suaves para mobile */
+@media (max-width: 768px) {
+  .card,
+  button,
+  .dialog-content {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  
+  button:active {
+    transform: scale(0.98);
+  }
+}

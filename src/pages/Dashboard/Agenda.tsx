@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Search, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
@@ -173,21 +176,34 @@ const Agenda = () => {
 
   return (
     <div className="container mx-auto p-4 mt-2">
-      <AgendaHeader
-        localSearchQuery={localSearchQuery}
-        onSearchChange={setLocalSearchQuery}
-        onNewEventClick={() => setIsModalOpen(true)}
-      />
+      <div className="flex flex-col space-y-4 mb-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div className="flex items-center justify-center md:justify-start">
+          <h1 className="text-4xl font-bold">Agenda</h1>
+        </div>
+        <div className="flex flex-col space-y-2 md:flex-row md:items-center md:space-y-0 md:gap-2">
+          <AgendaFilters
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            dateFilter={dateFilter}
+            onClearDateFilter={clearDateFilter}
+          />
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-2.5 top-3 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Buscar eventos..."
+              value={localSearchQuery}
+              onChange={(e) => setLocalSearchQuery(e.target.value)}
+              className="pl-8 w-full h-10"
+            />
+          </div>
+          <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-auto h-10">
+            <Plus className="h-4 w-4 mr-1" /> Novo Evento
+          </Button>
+        </div>
+      </div>
 
-      <AgendaFilters
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-        dateFilter={dateFilter}
-        onClearDateFilter={clearDateFilter}
-      />
-
-      <div className="space-y-6 mt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="space-y-6 mt-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Coluna do Calendário */}
           <div className="lg:col-span-1">
             <AgendaCalendar
@@ -201,7 +217,7 @@ const Agenda = () => {
           </div>
           
           {/* Coluna dos Eventos */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <EventsList
               filteredEvents={filteredEvents}
               isLoading={isLoading}

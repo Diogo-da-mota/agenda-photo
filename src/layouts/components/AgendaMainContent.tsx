@@ -14,7 +14,7 @@ const AgendaMainContent: React.FC<AgendaMainContentProps> = ({
   children
 }) => {
   return (
-    <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>      
+    <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'md:ml-44' : 'md:ml-12'}`}>      
       {/* Header */}
       <DashboardHeader toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       
@@ -28,4 +28,4 @@ const AgendaMainContent: React.FC<AgendaMainContentProps> = ({
   );
 };
 
-export default AgendaMainContent; 
+export default AgendaMainContent;

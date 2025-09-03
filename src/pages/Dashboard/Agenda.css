@@ -114,4 +114,14 @@
   .event-card-actions .action-button {
     justify-content: center;
   }
+  
+  /* Ocultar seção "Eventos Agendados" em dispositivos móveis */
+  .eventos-agendados-header {
+    display: none !important;
+  }
+  
+  /* Ajustar padding do campo de busca em dispositivos móveis */
+  .relative input[placeholder="Buscar eventos..."] {
+    padding-left: 2.5rem !important;
+  }
 }

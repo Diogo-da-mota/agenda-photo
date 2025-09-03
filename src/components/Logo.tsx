@@ -15,18 +15,19 @@ const Logo: React.FC = () => {
     >
       <div className="relative">
         <Camera 
-          className="h-6 w-6 text-blue-600 dark:text-blue-400" 
-          strokeWidth={2} 
+          className="h-6 w-6" 
+          strokeWidth={2}
+          style={{ color: '#a142f4' }}
         />
         <span className="absolute -top-1 -right-1 flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#a142f4' }} />
+          <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: '#a142f4' }} />
         </span>
       </div>
       
       <div className="font-display text-xl flex items-center">
-        <span className="text-slate-900 dark:text-white">Agenda</span>
-        <span className="font-bold text-purple-600 dark:text-purple-400">PRO</span>
+        <span className="text-white">Agenda</span>
+        <span className="font-bold" style={{ color: '#a142f4' }}>PRO</span>
       </div>
     </Link>
   );

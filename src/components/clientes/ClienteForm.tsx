@@ -229,7 +229,9 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
                       selected={field.value ? new Date(field.value) : undefined}
                       onSelect={(date) => {
                         if (date) {
-                          field.onChange(date.toISOString().split('T')[0]);
+                          // ✅ CORREÇÃO: Formatar data local sem conversão UTC
+                          const dataFormatada = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                          field.onChange(dataFormatada);
                         }
                       }}
                       initialFocus

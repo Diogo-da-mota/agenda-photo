@@ -32,10 +32,39 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
   const [cpfCliente, setCpfCliente] = useState(event ? event.cpf_cliente || '' : '');
   const [enderecoCliente, setEnderecoCliente] = useState(event ? event.endereco_cliente || '' : '');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Estados para data de pagamento
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [paymentDateString, setPaymentDateString] = useState<string>(format(new Date(), 'dd/MM/yyyy'));
 
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Inicializar dados se estiver editando um evento
+  useEffect(() => {
+    if (event) {
+      setClientName(event.clientName);
+      setPhone(formatarTelefone(event.phone));
+      setBirthday(event.birthday || null);
+      setBirthdayText(event.birthday ? formatarDataBrasileira(event.birthday) : '');
+      setEventType(event.eventType);
+      setEventDate(event.date);
+      setEventDateText(formatarDataBrasileira(event.date));
+      setLocation(event.location);
+      setTotalValueString(formatarNumero(event.totalValue.toString()));
+      setDownPaymentString(formatarNumero(event.downPayment.toString()));
+      setNotes(event.notes || '');
+      setSendReminder(event.reminderSent || false);
+      setCpfCliente(event.cpf_cliente || '');
+      setEnderecoCliente(event.endereco_cliente || '');
+      
+      // Inicializar data de pagamento (usar data_pagamento_entrada se existir, senão usar data atual)
+      const dataExistente = event.data_pagamento_entrada ? new Date(event.data_pagamento_entrada) : new Date();
+      setPaymentDate(dataExistente);
+      setPaymentDateString(format(dataExistente, 'dd/MM/yyyy'));
+    }
+  }, [event]);
 
   // Registrar callback para atualização financeira
   useEffect(() => {
@@ -146,7 +175,8 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
         status: (event?.status || 'pending') as "upcoming" | "confirmed" | "pending" | "completed" | "canceled",
         reminderSent: event?.reminderSent || false,
         cpf_cliente: cpfCliente,
-        endereco_cliente: enderecoCliente
+        endereco_cliente: enderecoCliente,
+        data_pagamento_entrada: paymentDate
       };
       
       console.log('Dados do evento a serem salvos:', dadosEvento);
@@ -289,6 +319,10 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
     downPaymentString,
     setDownPaymentString,
     remainingValueString,
+    paymentDate,
+    setPaymentDate,
+    paymentDateString,
+    setPaymentDateString,
     notes,
     setNotes,
     sendReminder,

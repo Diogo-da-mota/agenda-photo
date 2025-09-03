@@ -37,18 +37,33 @@ export const getClientesSecure = async (): Promise<Cliente[]> => {
       throw new Error('Usuário não autenticado');
     }
 
-    // Usar consulta segura em vez de query builder direto
-    const result = await executeSecureSelect<Cliente>('clientes', '*', {
-      user_id: user.id
-    });
+    // Usar query builder direto para fazer JOIN com agenda_eventos
+    const { data, error } = await supabase
+      .from('clientes')
+      .select(`
+        id,
+        nome,
+        telefone,
+        criado_em,
+        user_id,
+        evento,
+        data_evento,
+        valor_evento,
+        agenda_eventos!inner(
+          data_nascimento
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('nome', { ascending: true });
 
-    if (result.error) {
-      throw result.error;
+    if (error) {
+      throw error;
     }
 
-    return result.data?.map(cliente => ({
+    return data?.map(cliente => ({
       ...cliente,
-      telefone: cliente.telefone || null
+      telefone: cliente.telefone || null,
+      data_nascimento: (cliente as any).agenda_eventos?.data_nascimento || null
     })) || [];
 
   } catch (error) {
@@ -65,15 +80,35 @@ export const searchClientesSecure = async (searchTerm: string): Promise<Cliente[
       throw new Error('Usuário não autenticado');
     }
 
-    // Usar busca segura que escapa caracteres especiais
-    const result = await secureSearch<Cliente>('clientes', 'nome', searchTerm);
+    // Usar query builder direto para fazer JOIN com agenda_eventos e busca
+    const { data, error } = await supabase
+      .from('clientes')
+      .select(`
+        id,
+        nome,
+        telefone,
+        criado_em,
+        user_id,
+        evento,
+        data_evento,
+        valor_evento,
+        agenda_eventos!inner(
+          data_nascimento
+        )
+      `)
+      .eq('user_id', user.id)
+      .ilike('nome', `%${searchTerm}%`)
+      .order('nome', { ascending: true });
 
-    if (result.error) {
-      throw result.error;
+    if (error) {
+      throw error;
     }
 
-    // Filtrar apenas clientes do usuário autenticado
-    return result.data?.filter(cliente => cliente.user_id === user.id) || [];
+    return data?.map(cliente => ({
+      ...cliente,
+      telefone: cliente.telefone || null,
+      data_nascimento: (cliente as any).agenda_eventos?.data_nascimento || null
+    })) || [];
 
   } catch (error) {
     console.error('Erro ao buscar clientes:', error);

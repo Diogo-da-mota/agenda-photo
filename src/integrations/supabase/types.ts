@@ -23,6 +23,7 @@ export type Database = {
           criado_em: string | null
           data_fim: string
           data_inicio: string
+          data_nascimento: string | null
           descricao: string | null
           endereco_cliente: string | null
           id: string
@@ -46,6 +47,7 @@ export type Database = {
           criado_em?: string | null
           data_fim: string
           data_inicio: string
+          data_nascimento?: string | null
           descricao?: string | null
           endereco_cliente?: string | null
           id?: string
@@ -69,6 +71,7 @@ export type Database = {
           criado_em?: string | null
           data_fim?: string
           data_inicio?: string
+          data_nascimento?: string | null
           descricao?: string | null
           endereco_cliente?: string | null
           id?: string
@@ -236,7 +239,6 @@ export type Database = {
           ativo: boolean | null
           criado_em: string | null
           data_evento: string | null
-          data_nascimento: string | null
           email: string | null
           evento: string | null
           id: string
@@ -249,7 +251,6 @@ export type Database = {
           ativo?: boolean | null
           criado_em?: string | null
           data_evento?: string | null
-          data_nascimento?: string | null
           email?: string | null
           evento?: string | null
           id?: string
@@ -262,7 +263,6 @@ export type Database = {
           ativo?: boolean | null
           criado_em?: string | null
           data_evento?: string | null
-          data_nascimento?: string | null
           email?: string | null
           evento?: string | null
           id?: string

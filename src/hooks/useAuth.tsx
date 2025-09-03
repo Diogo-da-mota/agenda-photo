@@ -58,6 +58,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     authState.initializingRef.current = true;
     let isMounted = true;
+    let sessionCheckInterval: NodeJS.Timeout;
+
+    // Função para verificar e renovar sessão se necessário
+    const checkAndRefreshSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          SecureLogger.warn('[AUTH] Erro ao verificar sessão:', error);
+          return;
+        }
+
+        if (session && session.expires_at) {
+          const expiresAt = session.expires_at * 1000;
+          const now = Date.now();
+          const timeUntilExpiry = expiresAt - now;
+          const fiveMinutes = 5 * 60 * 1000;
+
+          // Se a sessão expira em menos de 5 minutos, renovar
+          if (timeUntilExpiry <= fiveMinutes && timeUntilExpiry > 0) {
+            SecureLogger.info('[AUTH] Renovando sessão próxima do vencimento.');
+            const { error: refreshError } = await supabase.auth.refreshSession();
+            
+            if (refreshError) {
+              SecureLogger.error('[AUTH] Erro ao renovar sessão:', refreshError);
+              // Se não conseguir renovar, fazer logout
+              await supabase.auth.signOut();
+            } else {
+              SecureLogger.info('[AUTH] Sessão renovada com sucesso.');
+            }
+          }
+        }
+      } catch (error) {
+        SecureLogger.error('[AUTH] Erro crítico na verificação de sessão:', error);
+      }
+    };
 
     // Configurar listener PRIMEIRO
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -74,8 +110,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           if (event === 'SIGNED_IN' && session?.user) {
             SecureLogger.info('[AUTH] Usuário logado.', { userId: session.user.id });
+            // Iniciar verificação periódica da sessão
+            sessionCheckInterval = setInterval(checkAndRefreshSession, 60000); // A cada minuto
           } else if (event === 'SIGNED_OUT') {
             SecureLogger.info('[AUTH] Usuário deslogado.');
+            // Parar verificação da sessão
+            if (sessionCheckInterval) {
+              clearInterval(sessionCheckInterval);
+            }
             try {
               localStorage.removeItem('redirectAfterAuth');
             } catch (e) {
@@ -106,6 +148,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           if (currentUser) {
             SecureLogger.info('[AUTH] Sessão inicial obtida: Usuário autenticado.', { userId: currentUser.id });
+            
+            // Iniciar verificação periódica da sessão para usuários já logados
+            sessionCheckInterval = setInterval(checkAndRefreshSession, 60000);
+            // Verificar imediatamente se a sessão precisa ser renovada
+            checkAndRefreshSession();
             
             if (navigationAvailable && navigate && currentLocation === '/login') {
               try {
@@ -139,6 +186,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       isMounted = false;
       authState.initializingRef.current = false;
+      if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+      }
       authListener.subscription.unsubscribe();
     };
   }, [navigationAvailable]);
