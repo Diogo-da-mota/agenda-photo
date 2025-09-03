@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { FileText, Calendar, Home, LogOut, User, Menu, X, Camera } from 'lucide-react';
@@ -16,25 +16,36 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
   const currentPath = location.pathname;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Usar o contexto de autenticação diretamente como no ClientWelcome
-  const { isAuthenticated, cliente, logout } = useClienteAuth();
+  // Tentar usar o contexto de autenticação, mas não falhar se não estiver disponível
+  let isAuthenticated = false;
+  let cliente = null;
+  let logout = null;
+  let authError = null;
   
-  // DEBUG: Log do estado do cliente no ClientTabLayout
-  useEffect(() => {
-    console.log('🔍 [ClientTabLayout] DEBUG - Estado do contexto:', {
-      isAuthenticated,
-      cliente: cliente,
-      titulo: cliente?.titulo,
-      nome_completo: cliente?.nome_completo,
-      hasCliente: !!cliente,
-      clienteKeys: cliente ? Object.keys(cliente) : [],
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      currentPath: location.pathname
-    });
-  }, [isAuthenticated, cliente, location.pathname]);
-
+  try {
+    const { isAuthenticated: authStatus, cliente: clienteData, logout: logoutFn } = useClienteAuth();
+    isAuthenticated = authStatus;
+    cliente = clienteData;
+    logout = logoutFn;
+    console.log('[ClientTabLayout] Contexto de autenticação disponível:', { isAuthenticated, cliente: clienteData?.titulo });
+  } catch (error) {
+    // Contexto não disponível, usuário não está autenticado
+    authError = error;
+    isAuthenticated = false;
+    console.log('[ClientTabLayout] Contexto de autenticação não disponível:', error);
+    
+    // Verificar se há dados salvos no localStorage
+    try {
+      const savedCliente = localStorage.getItem('cliente_auth');
+      if (savedCliente) {
+        cliente = JSON.parse(savedCliente);
+        isAuthenticated = true;
+        console.log('[ClientTabLayout] Dados de autenticação recuperados do localStorage:', cliente?.titulo);
+      }
+    } catch (storageError) {
+      console.error('[ClientTabLayout] Erro ao recuperar dados do localStorage:', storageError);
+    }
+  }
   
   const handleContratosClick = (e: React.MouseEvent) => {
     e.preventDefault();

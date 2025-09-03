@@ -39,58 +39,17 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
 
   // Verificar se há dados do cliente no localStorage ao inicializar
   useEffect(() => {
-    console.log('🔍 [DEBUG-AUTH] Iniciando verificação do localStorage');
-    console.log('🔍 [DEBUG-AUTH] Platform:', navigator.platform);
-    console.log('🔍 [DEBUG-AUTH] UserAgent:', navigator.userAgent);
-    console.log('🔍 [DEBUG-AUTH] isMac:', navigator.platform.toLowerCase().includes('mac'));
-    
     const savedCliente = localStorage.getItem('cliente_auth');
-    console.log('🔍 [DEBUG-AUTH] localStorage raw data:', savedCliente);
-    console.log('🔍 [DEBUG-AUTH] localStorage length:', savedCliente?.length || 0);
-    console.log('🔍 [DEBUG-AUTH] localStorage type:', typeof savedCliente);
-    
-    // Verificações adicionais de integridade
     if (savedCliente) {
-      console.log('🔍 [DEBUG-AUTH] Data exists - running integrity checks');
-      console.log('🔍 [DEBUG-AUTH] First 50 chars:', savedCliente.substring(0, 50));
-      console.log('🔍 [DEBUG-AUTH] Last 50 chars:', savedCliente.substring(Math.max(0, savedCliente.length - 50)));
-      console.log('🔍 [DEBUG-AUTH] Contains null bytes:', savedCliente.includes('\0'));
-      console.log('🔍 [DEBUG-AUTH] Contains BOM:', savedCliente.charCodeAt(0) === 0xFEFF);
-      
       try {
-        const parsedCliente = JSON.parse(savedCliente);
-        console.log('🔍 [DEBUG-AUTH] JSON parse successful');
-        console.log('🔍 [DEBUG-AUTH] Parsed cliente data:', parsedCliente);
-        console.log('🔍 [DEBUG-AUTH] Data type after parse:', typeof parsedCliente);
-        console.log('🔍 [DEBUG-AUTH] Is object:', typeof parsedCliente === 'object' && parsedCliente !== null);
-        console.log('🔍 [DEBUG-AUTH] Has titulo property:', 'titulo' in parsedCliente);
-        console.log('🔍 [DEBUG-AUTH] Cliente titulo:', parsedCliente?.titulo);
-        console.log('🔍 [DEBUG-AUTH] Cliente nome_completo:', parsedCliente?.nome_completo);
-        console.log('🔍 [DEBUG-AUTH] All keys:', Object.keys(parsedCliente));
-        
-        // Verificar se os dados são válidos
-        if (parsedCliente && typeof parsedCliente === 'object' && parsedCliente.titulo) {
-          setCliente(parsedCliente);
-          console.log('✅ [DEBUG-AUTH] Cliente state set successfully');
-        } else {
-          console.error('❌ [DEBUG-AUTH] Invalid cliente data structure');
-          localStorage.removeItem('cliente_auth');
-        }
+        setCliente(JSON.parse(savedCliente));
       } catch (error) {
-        console.error('❌ [DEBUG-AUTH] JSON parse error:', error);
-        console.error('❌ [DEBUG-AUTH] Error name:', error.name);
-        console.error('❌ [DEBUG-AUTH] Error message:', error.message);
-        console.error('❌ [DEBUG-AUTH] Raw data that failed to parse:', savedCliente);
-        console.error('❌ [DEBUG-AUTH] Raw data as array:', Array.from(savedCliente).map(c => c.charCodeAt(0)));
+        console.error('Erro ao carregar dados do cliente:', error);
         localStorage.removeItem('cliente_auth');
       }
-    } else {
-      console.log('⚠️ [DEBUG-AUTH] Nenhum dado encontrado no localStorage');
-      console.log('⚠️ [DEBUG-AUTH] localStorage keys:', Object.keys(localStorage));
     }
     // Definir loading como false após verificar o localStorage
     setIsLoading(false);
-    console.log('🔍 [DEBUG-AUTH] Loading set to false');
   }, []);
 
   const login = async (nome: string, cpf: string): Promise<boolean> => {
@@ -120,14 +79,7 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
       };
 
       setCliente(clienteData);
-      const jsonData = JSON.stringify(clienteData);
-      localStorage.setItem('cliente_auth', jsonData);
-      
-      console.log('✅ [DEBUG-AUTH] Login successful - Data saved to localStorage');
-      console.log('✅ [DEBUG-AUTH] Cliente data:', clienteData);
-      console.log('✅ [DEBUG-AUTH] JSON stringified:', jsonData);
-      console.log('✅ [DEBUG-AUTH] Verification - localStorage get:', localStorage.getItem('cliente_auth'));
-      
+      localStorage.setItem('cliente_auth', JSON.stringify(clienteData));
       toast.success('Login realizado com sucesso!');
       return true;
     } catch (error) {
@@ -140,12 +92,8 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
   };
 
   const logout = () => {
-    console.log('🚪 [DEBUG-AUTH] Logout initiated');
-    console.log('🚪 [DEBUG-AUTH] Current cliente before logout:', cliente);
     setCliente(null);
     localStorage.removeItem('cliente_auth');
-    console.log('🚪 [DEBUG-AUTH] localStorage cleared');
-    console.log('🚪 [DEBUG-AUTH] Verification - localStorage after removal:', localStorage.getItem('cliente_auth'));
     toast.success('Logout realizado com sucesso!');
   };
 
