@@ -44,16 +44,38 @@ const ClienteContratos: React.FC = () => {
   const { copyContractLink } = useCopyLink();
 
   useEffect(() => {
+    console.log('🔍 [DEBUG-CONTRATOS] useEffect triggered');
+    console.log('🔍 [DEBUG-CONTRATOS] Cliente object:', cliente);
+    console.log('🔍 [DEBUG-CONTRATOS] Cliente nome_completo:', cliente?.nome_completo);
+    console.log('🔍 [DEBUG-CONTRATOS] Cliente titulo:', cliente?.titulo);
+    
     if (cliente) {
+      console.log('✅ [DEBUG-CONTRATOS] Cliente exists, calling fetchContratos');
       fetchContratos();
+    } else {
+      console.log('❌ [DEBUG-CONTRATOS] No cliente found, skipping fetchContratos');
     }
   }, [cliente]);
 
   const fetchContratos = async () => {
-    if (!cliente) return;
+    console.log('🔍 [DEBUG-CONTRATOS] fetchContratos called');
+    
+    if (!cliente) {
+      console.log('❌ [DEBUG-CONTRATOS] No cliente available, returning early');
+      return;
+    }
+
+    console.log('🔍 [DEBUG-CONTRATOS] Cliente data for query:', {
+      id: cliente.id,
+      titulo: cliente.titulo,
+      nome_completo: cliente.nome_completo,
+      cpf_cliente: cliente.cpf_cliente
+    });
 
     try {
       setIsLoading(true);
+      console.log('🔍 [DEBUG-CONTRATOS] Starting Supabase query');
+      console.log('🔍 [DEBUG-CONTRATOS] Query filter - nome_cliente:', cliente.nome_completo);
       
       // Buscar contratos na tabela 'contratos' pelo nome EXATO do cliente
       const { data, error } = await supabase
@@ -62,18 +84,45 @@ const ClienteContratos: React.FC = () => {
         .eq('nome_cliente', cliente.nome_completo)
         .order('criado_em', { ascending: false });
 
+      console.log('🔍 [DEBUG-CONTRATOS] Supabase response:');
+      console.log('🔍 [DEBUG-CONTRATOS] - Error:', error);
+      console.log('🔍 [DEBUG-CONTRATOS] - Data:', data);
+      console.log('🔍 [DEBUG-CONTRATOS] - Data length:', data?.length || 0);
+
       if (error) {
-        console.error('Erro ao buscar contratos:', error);
+        console.error('❌ [DEBUG-CONTRATOS] Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         toast.error('Erro ao carregar seus contratos.');
         return;
       }
 
+      console.log('✅ [DEBUG-CONTRATOS] Setting contratos state with:', data?.length || 0, 'items');
       setContratos(data || []);
+      
+      // Log individual contracts for debugging
+      if (data && data.length > 0) {
+        data.forEach((contrato, index) => {
+          console.log(`🔍 [DEBUG-CONTRATOS] Contract ${index + 1}:`, {
+            id: contrato.id,
+            titulo: contrato.titulo,
+            nome_cliente: contrato.nome_cliente,
+            status: contrato.status,
+            valor_total: contrato.valor_total
+          });
+        });
+      }
+      
     } catch (error) {
-      console.error('Erro ao buscar contratos:', error);
+      console.error('❌ [DEBUG-CONTRATOS] Catch block error:', error);
+      console.error('❌ [DEBUG-CONTRATOS] Error stack:', error.stack);
       toast.error('Erro ao carregar seus contratos.');
     } finally {
       setIsLoading(false);
+      console.log('🔍 [DEBUG-CONTRATOS] Loading set to false');
     }
   };
 

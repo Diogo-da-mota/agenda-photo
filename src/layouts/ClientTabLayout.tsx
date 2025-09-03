@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { FileText, Calendar, Home, LogOut, User, Menu, X, Camera } from 'lucide-react';
@@ -19,11 +19,22 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
   // Usar o contexto de autenticação diretamente como no ClientWelcome
   const { isAuthenticated, cliente, logout } = useClienteAuth();
   
-  // Debug logs para verificar dados do cliente
-  console.log('🏠 [DEBUG ClientTabLayout] Contexto de autenticação:');
-  console.log('🏠 [DEBUG ClientTabLayout] isAuthenticated:', isAuthenticated);
-  console.log('🏠 [DEBUG ClientTabLayout] clienteData completo:', cliente);
-  console.log('🏠 [DEBUG ClientTabLayout] campo titulo:', cliente?.titulo);
+  // DEBUG: Log do estado do cliente no ClientTabLayout
+  useEffect(() => {
+    console.log('🔍 [ClientTabLayout] DEBUG - Estado do contexto:', {
+      isAuthenticated,
+      cliente: cliente,
+      titulo: cliente?.titulo,
+      nome_completo: cliente?.nome_completo,
+      hasCliente: !!cliente,
+      clienteKeys: cliente ? Object.keys(cliente) : [],
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      currentPath: location.pathname
+    });
+  }, [isAuthenticated, cliente, location.pathname]);
+
   
   const handleContratosClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -130,12 +141,7 @@ const ClientTabLayout: React.FC<ClientTabLayoutProps> = ({ children }) => {
               <User className="h-6 w-6 text-blue-400" />
               <div className="flex-1 min-w-0">
                 <h2 className="text-xs font-semibold text-white truncate">
-                  {(() => {
-                    const nomeExibido = cliente?.titulo || 'Portal do Cliente';
-                    console.log('🏠 [DEBUG ClientTabLayout] Nome a ser exibido na sidebar:', nomeExibido);
-                    console.log('🏠 [DEBUG ClientTabLayout] Objeto cliente atual:', cliente);
-                    return nomeExibido;
-                  })()}
+                  {cliente?.titulo || 'Portal do Cliente'}
                 </h2>
                 <p className="text-xs text-gray-400 truncate">
                   Área do Cliente
