@@ -9,6 +9,36 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase credentials missing');
 }
 
+// Interceptador de fetch para forçar headers corretos
+const originalFetch = window.fetch;
+window.fetch = function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  // Verifica se é uma requisição para o Supabase
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  
+  if (url && url.includes('adxwgpfkvizpqdvortpu.supabase.co')) {
+    // Força headers corretos para requisições Supabase
+    const headers = new Headers(init?.headers || {});
+    headers.set('Accept', 'application/json');
+    headers.set('Content-Type', 'application/json');
+    
+    const newInit: RequestInit = {
+      ...init,
+      headers: headers
+    };
+    
+    console.log('[SUPABASE INTERCEPTOR] Forçando headers:', {
+      url: url,
+      accept: headers.get('Accept'),
+      contentType: headers.get('Content-Type')
+    });
+    
+    return originalFetch(input, newInit);
+  }
+  
+  // Para outras requisições, usa fetch original
+  return originalFetch(input, init);
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -20,6 +50,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
+    },
+    fetch: (url, options = {}) => {
+      // Dupla garantia: interceptador customizado para Supabase
+      const headers = new Headers(options.headers || {});
+      headers.set('Accept', 'application/json');
+      headers.set('Content-Type', 'application/json');
+      
+      return fetch(url, {
+        ...options,
+        headers: headers
+      });
     }
   },
   db: {
