@@ -171,12 +171,17 @@ export const ClienteAuthProvider: React.FC<ClienteAuthProviderProps> = ({ childr
     toast.success('Logout realizado com sucesso!');
   };
 
-  const isAuthenticated = useMemo(() => {
-    const loggedStatus = hybridStorage.getItem('cliente_logado');
-    const hasValidClient = cliente && cliente.nome_completo && cliente.cpf_cliente;
-    
-    return loggedStatus === 'true' && !!hasValidClient;
-  }, [cliente]);
+  // ✅ CORREÇÃO: Verificação direta sem useMemo para garantir reatividade
+  const isAuthenticated = !!cliente && !!cliente.nome_completo && !!cliente.cpf_cliente;
+  
+  // Debug temporário para verificar a correção
+  console.log('[DEBUG ClienteAuth] Estado de autenticação:', {
+    hasCliente: !!cliente,
+    nomeCompleto: cliente?.nome_completo,
+    cpfCliente: cliente?.cpf_cliente,
+    isAuthenticated,
+    timestamp: new Date().toISOString()
+  });
 
   const value: ClienteAuthContextType = {
     cliente,
