@@ -46,9 +46,9 @@ export const MultipleDownloadActionBar: React.FC<MultipleDownloadActionBarProps>
   const {
     showSelectAll = true,
     showDownloadAll = true,
-    showProgress = true,
-    showStats = true,
-    position = 'bottom'
+    showDeselectAll = true,
+    showDownloadSelected = true,
+    showCancel = true
   } = config;
 
   const isAllSelected = selectedCount === totalImages;
@@ -56,7 +56,7 @@ export const MultipleDownloadActionBar: React.FC<MultipleDownloadActionBarProps>
 
   // Renderizar progresso do download
   const renderDownloadProgress = () => {
-    if (!isDownloading || !showProgress) return null;
+    if (!isDownloading) return null;
 
     return (
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -75,7 +75,7 @@ export const MultipleDownloadActionBar: React.FC<MultipleDownloadActionBarProps>
               value={overallProgress} 
               className="h-1.5 sm:h-2"
             />
-            {showStats && (
+            {(
               <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 mt-1">
                 <span className="hidden sm:inline">Concluídas: {completedImages}</span>
                 <span className="sm:hidden">{completedImages}/{totalImages}</span>
@@ -181,7 +181,7 @@ export const MultipleDownloadActionBar: React.FC<MultipleDownloadActionBarProps>
       className={cn(
         "fixed left-0 right-0 z-50 bg-white border-t shadow-lg",
         "transition-all duration-300 ease-in-out",
-        position === 'top' ? 'top-0 border-b border-t-0' : 'bottom-0',
+        'bottom-0',
         className
       )}
     >

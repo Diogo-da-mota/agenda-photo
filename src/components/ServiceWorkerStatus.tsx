@@ -20,7 +20,7 @@ const ServiceWorkerStatus: React.FC<ServiceWorkerStatusProps> = ({ className }) 
     isRegistered, 
     updateAvailable, 
     clearCache, 
-    updateApp 
+    update: updateApp
   } = useServiceWorker();
   
   const { toast } = useToast();

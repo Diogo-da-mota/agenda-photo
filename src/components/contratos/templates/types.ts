@@ -1,29 +1,15 @@
+export interface CreateTemplateDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onTemplateCreated?: (template: any) => void;
+}
 
-export interface TemplateOption {
+export interface ContractTemplate {
   id: string;
-  name: string;
-  content: string;
-}
-
-export interface TemplateSelectProps {
-  selectedTemplate: string;
-  templates: TemplateOption[];
-  onTemplateChange: (templateId: string) => void;
-  onEdit?: () => void;
-  onSave?: (templateName: string) => void;
-  onRename?: (templateId: string, newName: string) => void;
-  isEditing?: boolean;
-}
-
-
-
-export interface ContractTemplateSelectorProps {
-  selectedTemplate: string;
-  onTemplateChange: (templateId: string) => void;
-  onTemplateContentChange: (content: string) => void;
-  currentContent?: string;
-  onEdit?: () => void;
-  onSave?: (templateName: string) => void;
-  onRename?: (templateId: string, newName: string) => void;
-  isEditing?: boolean;
+  nome: string;
+  conteudo: string;
+  padrao?: boolean;
+  id_fotografo: string;
+  criado_em?: string;
+  atualizado_em?: string;
 }

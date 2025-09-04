@@ -26,8 +26,7 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = memo(({
     isRegistered,
     updateAvailable,
     cacheStats,
-    updateServiceWorker,
-    refreshCacheStats,
+    update: updateServiceWorker,
     clearCache
   } = useServiceWorker();
 
@@ -129,7 +128,7 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = memo(({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={refreshCacheStats}
+                  onClick={() => {}}
                   className="text-xs"
                 >
                   <RefreshCw className="w-3 h-3 mr-1" />
