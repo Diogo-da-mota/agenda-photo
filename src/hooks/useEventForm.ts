@@ -59,8 +59,8 @@ export const useEventForm = ({ event, onClose, onEventCreated }: UseEventFormPro
       setCpfCliente(event.cpf_cliente || '');
       setEnderecoCliente(event.endereco_cliente || '');
       
-      // Inicializar data de pagamento (verificar se existe antes)
-      const dataExistente = (event as any)?.data_pagamento_entrada ? new Date((event as any).data_pagamento_entrada) : new Date();
+      // Inicializar data de pagamento (usar data_pagamento_entrada se existir, senão usar data atual)
+      const dataExistente = event.data_pagamento_entrada ? new Date(event.data_pagamento_entrada) : new Date();
       setPaymentDate(dataExistente);
       setPaymentDateString(format(dataExistente, 'dd/MM/yyyy'));
     }

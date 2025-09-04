@@ -178,7 +178,7 @@ export const useBulkDownload = ({
       if (retryCount < (defaultConfig.retryAttempts || 2) && !signal?.aborted) {
         const delay = (defaultConfig.retryDelay || 1000) * Math.pow(2, retryCount); // Exponential backoff
         
-        progress.status = 'error';
+        progress.status = 'retrying';
         progress.error = `Tentativa ${retryCount + 1}/${defaultConfig.retryAttempts || 2}`;
         
         setDownloadState(prev => ({

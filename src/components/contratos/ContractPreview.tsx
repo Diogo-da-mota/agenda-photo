@@ -4,177 +4,188 @@ import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, MapPin, User, Phone, Mail, FileText, DollarSign, Paperclip } from "lucide-react";
+import type { ContractData } from "@/types/contract";
 import { sanitizeHtml } from "@/utils/sanitize";
 import { useEmpresa } from "@/hooks/useEmpresa";
 
-interface ContractPreviewData {
-  clientName?: string;
-  clientEmail?: string;
-  phoneNumber?: string;
-  eventType?: string;
-  eventDate?: Date;
+interface ContractData {
+  clientName: string;
+  clientEmail: string;
+  phoneNumber: string;
+  eventType: string;
+  eventDate: Date;
   eventLocation?: string;
-  price?: number;
+  price: number;
   downPayment?: number;
-  termsAndConditions?: string;
-  cpfCliente?: string;
-  enderecoCliente?: string;
-  eventTime?: string;
+  termsAndConditions: string;
 }
 
 interface ContractPreviewProps {
-  contractData: ContractPreviewData;
-  className?: string;
+  contract: Partial<ContractData>;
+  attachments: File[];
 }
 
-const ContractPreview = ({ contractData, className }: ContractPreviewProps) => {
-  const { configuracoes: empresa } = useEmpresa();
-
-  const statusOptions = {
-    draft: { label: "Rascunho", color: "bg-gray-500" },
-    pending: { label: "Pendente", color: "bg-yellow-500" },
-    signed: { label: "Assinado", color: "bg-green-500" },
-    cancelled: { label: "Cancelado", color: "bg-red-500" }
+export const ContractPreview: React.FC<ContractPreviewProps> = ({ contract, attachments }) => {
+  // Hook para buscar configurações da empresa
+  const { configuracoes } = useEmpresa();
+  
+  // Nome do fotógrafo vem das configurações da empresa com fallback
+  const nomeFotografo = configuracoes?.nome_empresa || '[Nome do Fotógrafo]';
+  
+  const eventTypeMap: Record<string, string> = {
+    'casamento': 'Casamento',
+    'aniversario': 'Aniversário',
+    'ensaio': 'Ensaio Fotográfico',
+    'evento_corporativo': 'Evento Corporativo',
+    'outro': 'Outro'
   };
 
-  return (
-    <div className={`space-y-6 ${className || ''}`}>
-      {/* Contract Header */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold">Contrato de Serviços Fotográficos</h2>
-              <p className="text-muted-foreground">
-                Gerado em {format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </p>
+  const formattedEventDate = contract.eventDate 
+    ? format(contract.eventDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    : '';
+  const formattedPrice = contract.price 
+    ? contract.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    : '0';
+  const formattedDownPayment = contract.downPayment 
+    ? contract.downPayment.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+    : '0';
+  const todayDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    return (
+    <div className="border rounded-lg p-6 bg-contract-bg shadow-sm text-white">
+      <div className="max-h-[60vh] overflow-y-auto px-4 py-2">
+          <div className="space-y-6">
+            <section>
+            <div className="whitespace-pre-wrap text-sm text-gray-200">
+              <style dangerouslySetInnerHTML={{
+                __html: `
+                  .contract-content {
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                  }
+                  /* Centralizar título do contrato */
+                  .contract-content::first-line {
+                    text-align: center;
+                    font-weight: bold;
+                    display: block;
+                    margin-bottom: 1rem;
+                  }
+                  /* Centralizar qualquer linha que contenha "CONTRATO" em maiúsculas */
+                  .contract-content {
+                    text-align: left;
+                  }
+                  .contract-title {
+                    text-align: center !important;
+                    font-weight: bold;
+                    margin: 1rem 0;
+                    display: block;
+                  }
+                  .contract-signatures {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center !important;
+                    margin: 3rem auto 0 auto; /* Reduzida a margem inferior para 0 */
+                    padding: 2rem 0 0 0; /* Removido o padding inferior */
+                    width: 100%;
+                    max-width: 600px;
+                  }
+                  .signature-block {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    margin: 2.5rem 0; /* Aumentado de 1.5rem para 2.5rem para mais espaço */
+                    width: 100%;
+                  }
+                  .signature-line {
+                    border-bottom: 1px solid #9CA3AF;
+                    width: 350px;
+                    margin: 0 auto 0.5rem auto;
+                    height: 1px;
+                  }
+                  .signature-name {
+                    font-weight: 500;
+                    margin: 0.5rem 0 0.25rem 0;
+                    text-align: center;
+                  }
+                  .signature-role {
+                    font-size: 0.875rem;
+                    color: #D1D5DB;
+                    margin: 0;
+                    text-align: center;
+                  }
+                `
+              }} />
+              
+              {(() => {
+                const contractText = contract.termsAndConditions || '[Termos e Condições]';
+                
+                // Regex para capturar as assinaturas (últimas 6 linhas do padrão)
+                const signatureRegex = /\n\n______________________________________________________\n([^\n]+)\n([^\n]+)\n\n______________________________________________________\n([^\n]+)\n([^\n]+)$/;
+                const match = contractText.match(signatureRegex);
+                
+                // Usar função segura de sanitização
+                const processContractTitle = (text: string) => sanitizeHtml(text);
+                
+                if (match) {
+                  // Separar o conteúdo principal das assinaturas
+                  const mainContent = contractText.replace(signatureRegex, '');
+                  const [, clientName, clientRole, photographerName, photographerRole] = match;
+                  
+                  return (
+                    <>
+                      <div 
+                        className="contract-content"
+                        dangerouslySetInnerHTML={{ 
+                          __html: sanitizeHtml(processContractTitle(mainContent))
+                        }}
+                      />
+                      
+                      <div className="contract-signatures">
+                        <div className="signature-block">
+                          <div className="signature-line"></div>
+                          <div className="signature-name">{clientName}</div>
+                          <div className="signature-role">{clientRole}</div>
+                        </div>
+                        
+                        <div className="signature-block">
+                          <div className="signature-line"></div>
+                          <div className="signature-name">{photographerName}</div>
+                          <div className="signature-role">{photographerRole}</div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                } else {
+                  // Fallback se não encontrar o padrão de assinaturas
+                  return (
+                    <div 
+                      className="contract-content"
+                      dangerouslySetInnerHTML={{ 
+                        __html: sanitizeHtml(processContractTitle(contractText))
+                      }}
+                    />
+                  );
+                }
+              })()}
             </div>
-            <Badge className={`${statusOptions.draft.color} text-white`}>
-              {statusOptions.draft.label}
-            </Badge>
-          </div>
-
-          <Separator className="my-4" />
-
-          {/* Company Info */}
-          {empresa && (
-            <div className="mb-6">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Dados da Empresa
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p><strong>Nome:</strong> {empresa.nome_empresa}</p>
-                  <p><strong>E-mail:</strong> {empresa.email_empresa}</p>
-                </div>
-                <div>
-                  <p><strong>Telefone:</strong> {empresa.telefone}</p>
-                  <p><strong>CNPJ:</strong> {empresa.cnpj}</p>
-                </div>
-              </div>
-            </div>
+          </section>
+          
+          {attachments.length > 0 && (
+            <section>
+              <h3 className="text-lg font-semibold border-b border-gray-400 pb-2 mb-3 text-white">ANEXOS</h3>
+              <ul className="space-y-1">
+                {attachments.map((file, index) => (
+                  <li key={index} className="flex items-center gap-2 text-gray-200">
+                    <Paperclip size={14} className="text-gray-300" />
+                    <span>{file.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
-
-          {/* Client Info */}
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Dados do Cliente
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p><strong>Nome:</strong> {contractData.clientName}</p>
-                <p><strong>E-mail:</strong> {contractData.clientEmail}</p>
-                <p><strong>Telefone:</strong> {contractData.phoneNumber}</p>
-              </div>
-              <div>
-                {contractData.cpfCliente && (
-                  <p><strong>CPF:</strong> {contractData.cpfCliente}</p>
-                )}
-                {contractData.enderecoCliente && (
-                  <p><strong>Endereço:</strong> {contractData.enderecoCliente}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Event Info */}
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Dados do Evento
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p><strong>Tipo:</strong> {contractData.eventType}</p>
-                <p><strong>Data:</strong> {format(contractData.eventDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
-                {contractData.eventTime && (
-                  <p><strong>Horário:</strong> {contractData.eventTime}</p>
-                )}
-              </div>
-              <div>
-                <p className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span><strong>Local:</strong> {contractData.eventLocation}</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Financial Info */}
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Informações Financeiras
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p><strong>Valor Total:</strong></p>
-                <p className="text-lg font-bold text-green-600">
-                  {new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
-                  }).format(contractData.price)}
-                </p>
-              </div>
-              <div>
-                <p><strong>Entrada:</strong></p>
-                <p className="text-lg font-semibold">
-                  {new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
-                  }).format(contractData.downPayment)}
-                </p>
-              </div>
-              <div>
-                <p><strong>Restante:</strong></p>
-                <p className="text-lg font-semibold">
-                  {new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
-                  }).format(contractData.price - contractData.downPayment)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Contract Content */}
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="font-semibold mb-4">Termos e Condições</h3>
-          <div 
-            className="prose prose-sm max-w-none border rounded-lg p-4 bg-muted/20 max-h-96 overflow-y-auto"
-            dangerouslySetInnerHTML={{ 
-              __html: sanitizeHtml(contractData.termsAndConditions) 
-            }}
-          />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
-
-export default ContractPreview;

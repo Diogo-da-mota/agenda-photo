@@ -45,33 +45,6 @@ export const useAuth = () => {
   return context;
 };
 
-// Função para limpar tokens inválidos
-const clearInvalidTokens = async () => {
-  try {
-    // Limpar localStorage que pode conter tokens corrompidos
-    const keysToRemove = [
-      'supabase.auth.token',
-      'sb-adxwgpfkvizpqdvortpu-auth-token',
-      'sb-auth-token'
-    ];
-    
-    keysToRemove.forEach(key => {
-      try {
-        localStorage.removeItem(key);
-      } catch (e) {
-        // Ignora erros de localStorage
-      }
-    });
-
-    // Forçar logout completo no Supabase
-    await supabase.auth.signOut({ scope: 'global' });
-    
-    SecureLogger.info('[AUTH] Tokens inválidos limpos com sucesso');
-  } catch (error) {
-    SecureLogger.warn('[AUTH] Erro ao limpar tokens inválidos:', error);
-  }
-};
-
 // Componente AuthProvider
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthState();
@@ -93,12 +66,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          // Se houver erro de token inválido, limpar e tentar novamente
-          if (error.message.includes('Invalid Refresh Token') || error.message.includes('refresh_token_not_found')) {
-            SecureLogger.warn('[AUTH] Token de refresh inválido detectado, limpando tokens');
-            await clearInvalidTokens();
-            return;
-          }
           SecureLogger.warn('[AUTH] Erro ao verificar sessão:', error);
           return;
         }
@@ -117,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (refreshError) {
               SecureLogger.error('[AUTH] Erro ao renovar sessão:', refreshError);
               // Se não conseguir renovar, fazer logout
-              await clearInvalidTokens();
+              await supabase.auth.signOut();
             } else {
               SecureLogger.info('[AUTH] Sessão renovada com sucesso.');
             }
@@ -125,24 +92,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         SecureLogger.error('[AUTH] Erro crítico na verificação de sessão:', error);
-        // Em caso de erro crítico, limpar tokens
-        await clearInvalidTokens();
       }
     };
 
     // Configurar listener PRIMEIRO
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (isMounted) {
-          // Se houver erro de token inválido nos eventos de auth
-          if (event === 'TOKEN_REFRESHED' && !session) {
-            SecureLogger.warn('[AUTH] Falha no refresh do token, limpando sessão');
-            await clearInvalidTokens();
-            authState.setSession(null);
-            authState.setUser(null);
-            return;
-          }
-
           authState.setSession(session);
           authState.setUser(session?.user || null);
           
@@ -173,31 +129,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // DEPOIS obter sessão inicial
-    const initSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        
+    const initSession = () => {
+      supabase.auth.getSession().then(({ data, error }) => {
         if (error) {
-          // Se houver erro de token inválido, limpar e continuar sem sessão
-          if (error.message.includes('Invalid Refresh Token') || error.message.includes('refresh_token_not_found')) {
-            SecureLogger.warn('[AUTH] Token de refresh inválido na inicialização, limpando tokens');
-            await clearInvalidTokens();
-            
-            if (isMounted) {
-              authState.setSession(null);
-              authState.setUser(null);
-              authState.setInitialSessionChecked(true);
-              authState.initializedRef.current = true;
-              authState.setLoading(false);
-              authState.initializingRef.current = false;
-            }
-            return;
-          }
           SecureLogger.error('[AUTH] Erro ao obter sessão:', error);
         }
 
         if (isMounted) {
-          const currentSession = data?.session || null;
+          const currentSession = data.session;
           const currentUser = currentSession?.user || null;
           
           authState.setSession(currentSession);
@@ -224,26 +163,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   navigate(redirectTo);
                 }
               } catch (storageError: unknown) {
-                SecureLogger.warn('[AUTH] localStorage não disponível para redirecionamento', storageError);
-              }
+              SecureLogger.warn('[AUTH] localStorage não disponível para redirecionamento', storageError);
+            }
             }
           } else {
             SecureLogger.debug('[AUTH] Sessão inicial obtida: Não autenticado');
           }
         }
-      } catch (error: unknown) {
+      }).catch((error: unknown) => {
         SecureLogger.error('[AUTH] Erro crítico ao obter sessão inicial:', error);
-        await clearInvalidTokens();
-        
         if (isMounted) {
-          authState.setSession(null);
-          authState.setUser(null);
           authState.setInitialSessionChecked(true);
           authState.initializedRef.current = true;
           authState.setLoading(false);
           authState.initializingRef.current = false;
         }
-      }
+      });
     };
 
     initSession();
