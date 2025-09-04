@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useEmpresa } from '@/hooks/useEmpresa';
-import { ContractPreview } from './ContractPreview';
+import ContractPreview from './ContractPreview';
 // import { ContractTemplateSelector } from './ContractTemplateSelector'; // Removido
 import { eventTypes } from '@/components/agenda/types';
 import { createContract } from '@/services/contractService';
@@ -387,8 +387,8 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
       // Corrigir nomes vindos do evento para camelCase esperado pelo formulário
       const updatedValues = {
         ...initialData,
-        cpfCliente: initialData.cpfCliente || initialData.cpf_cliente || '',
-        enderecoCliente: initialData.enderecoCliente || initialData.endereco_cliente || '',
+        cpfCliente: initialData.cpfCliente || (initialData as any).cpf_cliente || '',
+        enderecoCliente: initialData.enderecoCliente || (initialData as any).endereco_cliente || '',
         termsAndConditions: initialData?.termsAndConditions || getCurrentTemplate()
       };
       // Os dados já são processados dinamicamente na função generateContractTemplate
@@ -1013,8 +1013,7 @@ export const ContractForm = ({ initialData, onSuccess }: ContractFormProps) => {
       ) : (
         <div className="space-y-6">
           <ContractPreview 
-            contract={formValues} 
-            attachments={attachments}
+            contractData={formValues} 
           />
           
           <div className="flex justify-between">

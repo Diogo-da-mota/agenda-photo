@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FileText, Download, Printer, Eye, Copy, Check } from "lucide-react";
-import { ContractsService } from "@/services/contractsService";
+import { contractsService } from "@/services/contractsService";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 import type { ContractData } from "@/types/contract";
